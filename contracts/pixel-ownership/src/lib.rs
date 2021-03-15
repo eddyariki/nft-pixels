@@ -14,8 +14,8 @@ use dimensions::*;
 pub trait PixelOwnership {
 	#[init]
 	fn init(&self){
-		let my_address: Address = self.get_caller();
-		self.set_owner(&my_address);
+		// let my_address: Address = self.get_caller();
+		// self.set_owner(&my_address);
 	}
 
 	

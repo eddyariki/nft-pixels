@@ -4,6 +4,8 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import CanvasContract from 'src/app/contract-interface/canvas-contract';
 
 
 @Component({
@@ -12,6 +14,13 @@ import {
     styleUrls: ['./dashboard.component.less'],
 })
 export class DashboardComponent implements OnInit {
+    public image:SafeUrl;
+    constructor(private sanitizer: DomSanitizer){
 
-    ngOnInit(): void {}
+    }
+    async ngOnInit(): Promise<void> {
+        const canvasContract = new CanvasContract();
+        const rgbArray = await canvasContract.getCanvas();
+        this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
+    }
 }

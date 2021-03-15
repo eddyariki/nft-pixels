@@ -4,6 +4,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
+import CanvasContract from 'src/app/contract-interface/canvas-contract';
 
 
 @Component({
@@ -13,5 +14,9 @@ import {
 })
 export class DashboardComponent implements OnInit {
 
-    ngOnInit(): void {}
+    async ngOnInit(): Promise<void> {
+        const canvasContract = new CanvasContract();
+        const rgbArray = await canvasContract.getCanvas();
+        console.log(rgbArray);
+    }
 }

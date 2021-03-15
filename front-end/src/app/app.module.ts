@@ -1,12 +1,19 @@
 // Modules
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AppRoutesModule } from './app.routes.module';
+import { EntityStoreModule } from './model/store/store.module';
+import { RouterModule } from '@angular/router';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 // Components
 import { AppComponent } from './app.component';
 
+// Others
+import { AppEffects } from './app.effects';
 
 
 @NgModule({
@@ -16,7 +23,13 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     AppRoutesModule,
+    StoreModule.forRoot({}),
+    EffectsModule.forRoot([AppEffects]),
+    StoreDevtoolsModule.instrument({
+      maxAge: 100,
+    }),
     DashboardModule,
+    EntityStoreModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

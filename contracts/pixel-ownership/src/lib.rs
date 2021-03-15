@@ -1,30 +1,22 @@
 #![no_std]
+#![allow(non_snake_case)]
 
-imports!();
+elrond_wasm::imports!();
+elrond_wasm::derive_imports!();
 
-/// One of the simplest smart contracts possible,
-/// it holds a single variable in storage, which anyone can increment.
-#[elrond_wasm_derive::contract(AdderImpl)]
-pub trait Adder {
-	#[view(getSum)]
-	#[storage_get("sum")]
-	fn get_sum(&self) -> BigInt;
+mod color;
+mod dimensions;
 
-	#[storage_set("sum")]
-	fn set_sum(&self, sum: &BigInt);
+use color::*;
+use dimensions::*;
 
+#[elrond_wasm_derive::contract(PixelOwnershipImpl)]
+pub trait PixelOwnership {
 	#[init]
-	fn init(&self, initial_value: &BigInt) {
-		self.set_sum(initial_value);
+	fn init(&self){
+		// let my_address: Address = self.get_caller();
+		// self.set_owner(&my_address);
 	}
 
-	/// Add desired amount to the storage variable.
-	#[endpoint]
-	fn add(&self, value: &BigInt) -> SCResult<()> {
-		let mut sum = self.get_sum();
-		sum += value;
-		self.set_sum(&sum);
-
-		Ok(())
-	}
+	
 }

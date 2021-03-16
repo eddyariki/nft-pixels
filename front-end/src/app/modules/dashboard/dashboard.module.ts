@@ -6,6 +6,7 @@ import { StoreModule } from '@ngrx/store';
 
 // Components
 import { DashboardComponent } from './dashboard.component';
+import { HeaderComponent } from './header/header.component';
 
 @NgModule({
     imports: [
@@ -14,6 +15,7 @@ import { DashboardComponent } from './dashboard.component';
     ],
     declarations: [
     DashboardComponent,
+    HeaderComponent
     ],
     exports: [],
     providers: [],

@@ -9,8 +9,7 @@ import { Observable, map} from 'src/app/lib/rxjs';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import CanvasContract from 'src/app/contract-interface/canvas-contract';
 
-// import { State } from '../../model/store/reducers';
-// import { Actions, Store } from 'src/app/lib/ngrx';
+import { LoginOrLogout, LoginOrLogoutEnum, LoginOrLogoutEnum_En } from './header/log';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Test } from 'src/app/model/entity';
@@ -33,11 +32,17 @@ export class DashboardComponent implements OnInit {
         const canvasContract = new CanvasContract();
         const rgbArray = await canvasContract.getCanvas();
         this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
-        this.store$.select(getUser).subscribe(hasloaded => {
-            if (hasloaded === undefined) {
-                console.log('hey');
-            }
-        });
+    }
+
+    onLogin(loggedInOrNot: string): void {
+        switch (loggedInOrNot) {
+            case 'login':
+                return null;
+            case 'logout':
+                return null;
+            default:
+                return null;
+        }
     }
 
     constructor(private actions$: Actions, private store$: Store<any>, private sanitizer: DomSanitizer) {}

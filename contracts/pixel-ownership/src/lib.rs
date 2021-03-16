@@ -22,16 +22,16 @@ pub trait PixelOwnership {
 	#[endpoint(createCanvas)]
 	fn create_canvas(&self, width:u32, height: u32)->SCResult<u32>{
 		let caller = self.get_caller();
-		require!(&caller == self.get_owner(), "Only owners can create new canvases!");
+		require!(caller == self.get_owner(), "Only owners can create new canvases!");
 		require!(width<=10000u32, "Width is too large!");
 		require!(height<=10000u32, "Height is too large!");
 
-		let total_supply = &width * &height;
-
-		if(self.is_empty_last_valid_canvas_id()){
-			let canvas_id = 1u32;
+		let total_supply = u64::from(&width * &height);
+		let canvas_id;
+		if self.is_empty_last_valid_canvas_id(){
+			canvas_id = 1u32;
 		}else{
-			let canvas_id = self.get_last_valid_canvas_id() + 1u32;
+			canvas_id = self.get_last_valid_canvas_id() + 1u32;
 		}
 
 		self.set_canvas_creator(&canvas_id, &caller);
@@ -42,9 +42,9 @@ pub trait PixelOwnership {
 		};
 		self.set_canvas_dimensions(&canvas_id,&dimensions);
 		self.set_total_pixel_supply_of_canvas(&canvas_id, &total_supply);
-		self.set_last_valid_pixel_id(&canvas_id, &1u32);
+		self.set_last_valid_pixel_id(&canvas_id, &1u64);
 
-		Ok(canvas_id);
+		Ok(canvas_id)
 	}	
 
 
@@ -59,9 +59,7 @@ pub trait PixelOwnership {
 		&self,
 		canvas_id: &u32,
 	)->MultiResultVec<Color>{
-		let dimensions = self.get_canvas_dimensions(&canvas_id);
-
-		let total_pixels = &dimensions.width * &dimensions.height;
+		let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
 
 		let mut pixel_id = 1u64;
 
@@ -102,10 +100,10 @@ pub trait PixelOwnership {
 
 	#[view(getTotalPixelSupplyOfCanvas)]
 	#[storage_get("totalPixelSupplyOfCanvas")]
-	fn get_total_pixel_supply_of_canvas(&self, &canvas_id) -> u64;
+	fn get_total_pixel_supply_of_canvas(&self, canvas_id: &u32) -> u64;
 
 	#[storage_is_empty("lastCanvasId")]
-	fn is_empty_last_canvas_id(&self)->bool;
+	fn is_empty_last_valid_canvas_id(&self)->bool;
 
 
 
@@ -130,7 +128,7 @@ pub trait PixelOwnership {
 	fn set_last_valid_pixel_id(&self, canvas_id: &u32, last_valid_pixel_id: &u64);
 
 	#[storage_set("totalPixelSupplyOfCanvas")]
-	fn set_total_pixel_supply_of_canvas(&self, &canvas_id:&u32, total_pixel_supply: &u64);
+	fn set_total_pixel_supply_of_canvas(&self, canvas_id:&u32, total_pixel_supply: &u64);
 
 	#[storage_set("lastValidCanvasId")]
 	fn set_last_valid_canvas_id(&self, last_canvas_id:&u32);

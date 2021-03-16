@@ -28,6 +28,7 @@
     "rxjs": "^6.6.6",
     "tslib": "^2.0.0",
     "typescript-fsa": "^3.0.0",
+    "typescript-fsa-reducers": "^1.2.2",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

@@ -7,5 +7,5 @@ export const upsert = createAction('[USER] UPSERT', props<{ user: User }>());
 
 export const update = createAction('[USER] UPDATE', props<{ update: Update<User> }>());
 
-export const remove = createAction('[USER] REMOVE', props<{ address: string }>());
+export const remove = createAction('[USER] REMOVE', props<{ id: string }>());
 

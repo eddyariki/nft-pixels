@@ -59,6 +59,8 @@ pub trait PixelOwnership {
 		&self,
 		canvas_id: &u32,
 	)->MultiResultVec<Color>{
+		let dimensions = self.get_canvas_dimensions(&canvas_id);
+		
 		let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
 
 		let mut pixel_id = 1u64;

@@ -49,9 +49,13 @@ pub trait PixelOwnership {
 	}	
 
 	#[endpoint(mintPixels)]
-	fn mint_pixels(&self, canvas_id: u32, amount: u64) -> SCResult<MultiResultVec<u64>>{
+	fn mint_pixels(&self, canvas_id: u32, amount: u64) -> SCResult<Vec<u64>>{
 		let caller = self.get_caller();
 		require!(caller == self.get_owner(), "Only owners can mint pixels");
+
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+
 		let total_pixel_supply = self.get_total_pixel_supply_of_canvas(&canvas_id);
 		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
 		require!(last_valid_pixel_id < total_pixel_supply, "Cannot print beyond total pixel supply of this canvas!");
@@ -68,11 +72,36 @@ pub trait PixelOwnership {
 
 		for pixel_id in start..end{
 			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);
-			self.set_pixel_color(&canvas_id,&pixel_id, Color::default());
+			self.set_pixel_color(&canvas_id,&pixel_id, &Color::default());
 			result.push(pixel_id);
 		}
 		self.set_last_valid_pixel_id(&canvas_id,&end);
 		Ok(result.into())
+	}
+	//Pixel Owner Only
+	#[endpoint(changePixelColor)]
+	fn change_pixel_color(&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8) -> SCResult<Color>{
+
+		let last_valid_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+
+		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		
+		let caller = self.get_caller();
+		require!(caller == self.get_pixel_owner(&canvas_id, &pixel_id), "Only pixel owners can change the color!");
+		
+		let new_color = Color {
+			r,
+			g,
+			b
+		};
+
+
+		self.set_pixel_color(&canvas_id, &pixel_id, &new_color);
+		
+		Ok(new_color)
+
 	}
 
 
@@ -86,7 +115,7 @@ pub trait PixelOwnership {
 	fn getCanvas(
 		&self,
 		canvas_id: &u32,
-	)->MultiResultVec<Color>{
+	)->Vec<Color>{
 		
 		let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
 
@@ -134,6 +163,7 @@ pub trait PixelOwnership {
 	#[storage_is_empty("lastCanvasId")]
 	fn is_empty_last_valid_canvas_id(&self)->bool;
 
+	
 
 
 	//Setters
@@ -148,7 +178,7 @@ pub trait PixelOwnership {
 	fn set_canvas_creator(&self, canvas_id: &u32, creator: &Address);
 
 	#[storage_set("pixelColor")]
-	fn set_pixel_color(&self, canvas_id: &u32, pixel_id: &u64, color: Color);
+	fn set_pixel_color(&self, canvas_id: &u32, pixel_id: &u64, color: &Color);
 
 	#[storage_set("pixelOwner")]
 	fn set_pixel_owner(&self, canvas_id: &u32, pixel_id: &u64, owner: &Address);

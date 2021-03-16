@@ -4,11 +4,13 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-// import { State } from '../../model/store/reducers';
-// import { Actions, Store } from 'src/app/lib/ngrx';
+import { Observable, map} from 'src/app/lib/rxjs';
 import { Actions } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-
+import { select, Store } from '@ngrx/store';
+import { Test } from 'src/app/model/entity';
+import * as testActions from 'src/app/model/store/test/actions';
+import { getState, getById } from 'src/app/model/store/test/selectors';
+import { dispatch } from 'rxjs/internal/observable/pairs';
 
 @Component({
     selector: 'app-dashboard',
@@ -16,6 +18,9 @@ import { Store } from '@ngrx/store';
     styleUrls: ['./dashboard.component.less'],
 })
 export class DashboardComponent implements OnInit {
+
+    public test$: Observable<Test>;
+    public a: string;
 
     ngOnInit(): void {}
 

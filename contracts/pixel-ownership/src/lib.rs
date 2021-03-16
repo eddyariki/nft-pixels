@@ -125,7 +125,7 @@ pub trait PixelOwnership {
 		);
 		self.set_pixel_owner(&canvas_id, &pixel_id, &self.get_sc_address());
 
-		self.set_auction(canvas_id, pixel_id, &auction);
+		self.set_auction(&canvas_id, &pixel_id, &auction);
 
 		Ok(auction)
 	}
@@ -141,23 +141,69 @@ pub trait PixelOwnership {
 		require!(!self.is_empty_auction(&canvas_id, &pixel_id), "Auction does not exist!");
 
 		let caller = self.get_caller();
-		require!(caller == self._get_auction_owner(&canvas_id, &pixel_id), "Only auction owners can auction their pixel");
+		require!(caller == self._get_auction_pixel_owner(&canvas_id, &pixel_id), "Only auction pixel owners can auction their pixel");
 
 		let auction = self.get_auction(&canvas_id, &pixel_id);
 		let _current_winner = auction.current_winner;
 		let current_bid = auction.current_bid;
 		let _pixel_owner = auction.pixel_owner;
-		if _current_winner != Address::zero(){
-			self._end_auction(canvas_id, pixel_id, _current_winner,current_bid);
-		}else{
-			self._end_auction(canvas_id, pixel_id, _pixel_owner, current_bid);
-		}
+
+		self._end_auction(canvas_id, pixel_id, _current_winner,current_bid, _pixel_owner);
+
+
+
 		Ok(())
 	}
+	//Payable
+	#[payable("EGLD")]
+	#[endpoint]
+	fn bid(&self, canvas_id: u32, pixel_id: u64, #[payment] payment: BigUint) -> SCResult<()>{
+		let last_valid_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+
+		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		
+		require!(!self.is_empty_auction(&canvas_id, &pixel_id), "Auction does not exist!");
+		
+		let caller = self.get_caller();
+		require!(caller != self._get_auction_pixel_owner(&canvas_id, &pixel_id), "Auction pixel owners cannot bid!");
+
+		let mut auction = self.get_auction(&canvas_id, &pixel_id);
+
+		require!(self.get_block_timestamp() < auction.deadline, "Auction ended already!");
+
+		require!(payment >= auction.starting_price,"Bid amount must be higher than or equal to starting price!");
+
+		require!(payment > auction.current_bid,"Bid amount must be higher than current winning bid!");
+
+		require!(payment <= auction.ending_price,"Bid amount must be less than or equal to ending price!");
+
+		// refund losing bid
+		if auction.current_winner != Address::zero() {
+			self.send()
+				.direct_egld(&auction.current_winner, &auction.current_bid, b"bid refund");
+		}
+
+		if auction.ending_price == payment{
+			//Payment is exact ending_price -> Ends auction
+			let prev_pixel_owner = self._get_auction_pixel_owner(&canvas_id, &pixel_id);
+			//transfers ownership, ends auction, and pays to previous pixel owner
+			self._end_auction(canvas_id,pixel_id, caller, payment, prev_pixel_owner);
+		}else{
+			//Payment is bigger than bid but lower than ending_price
+			auction.current_bid = payment;
+			auction.current_winner = caller;
+
+			self.set_auction(&canvas_id, &pixel_id, &auction);
+		}
+		Ok(())
+	} 
+
 
 	//Private 
 
-	fn _get_auction_owner(&self, canvas_id: &u32, pixel_id:&u64)->Address{
+	fn _get_auction_pixel_owner(&self, canvas_id: &u32, pixel_id:&u64)->Address{
 		let auction = self.get_auction(&canvas_id, &pixel_id);
 		auction.pixel_owner
 	}
@@ -168,15 +214,15 @@ pub trait PixelOwnership {
 	}
 
 
-	fn _end_auction(&self, canvas_id:u32, pixel_id:u64, current_winner: Address, current_bid: BigUint){
-		if current_bid == BigUint::zero(){
+	fn _end_auction(&self, canvas_id:u32, pixel_id:u64, current_winner: Address, current_bid: BigUint, prev_pixel_owner: Address){
+		if current_bid == BigUint::zero() || current_winner  == Address::zero(){
 			//No bids, pixel transfered back to owner
 			self.clear_auction(&canvas_id, &pixel_id);
-			self.set_pixel_owner(&canvas_id, &pixel_id, &current_winner);
+			self.set_pixel_owner(&canvas_id, &pixel_id, &prev_pixel_owner);
 		}else{
 			//Bidder, current bid sent to winner, pixel ownership transferred, and auction cleared
 			self.send().direct_egld(
-				&current_winner,
+				&prev_pixel_owner,
 				&current_bid,
 				b"sold pixel"
 			)	;
@@ -276,7 +322,7 @@ pub trait PixelOwnership {
 	fn set_last_valid_canvas_id(&self, last_canvas_id:&u32);
 
 	#[storage_set("auction")]
-	fn set_auction(&self, canvas_id: u32, pixel_id:u64, auction: &Auction<BigUint>);
+	fn set_auction(&self, canvas_id: &u32, pixel_id: &u64, auction: &Auction<BigUint>);
 
 	#[storage_clear("auction")]
 	fn clear_auction(&self, canvas_id: &u32, pixel_id: &u64);

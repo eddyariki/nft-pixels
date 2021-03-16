@@ -10,7 +10,7 @@ import {
 } from "@elrondnetwork/erdjs";
 import BigNumber from "bignumber.js";
 import { LOCAL_PROXY } from "./config";
-const address = "erd1qqqqqqqqqqqqqpgqlrc2xeqt2a0f9vy5y0xdkvkuds3enmkgd8ssjfgpuj"
+const address = "erd1qqqqqqqqqqqqqpgqfzydqmdw7m2vazsp6u5p95yxz76t2p9rd8ss0zp9ts"
 // #[view(getListBigUint)]
 // 	fn get_list_biguint(&self)->SCResult<[BigUint;2]>{
 // 		let one = BigUint::from(1u32);

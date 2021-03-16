@@ -2,6 +2,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardRoutingModule } from './dashboard.routing.module';
+import { StoreModule } from '@ngrx/store';
 
 // Components
 import { DashboardComponent } from './dashboard.component';
@@ -13,7 +14,6 @@ import { DashboardComponent } from './dashboard.component';
     ],
     declarations: [
     DashboardComponent,
-
     ],
     exports: [],
     providers: [],

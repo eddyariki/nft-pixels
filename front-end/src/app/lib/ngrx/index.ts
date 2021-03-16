@@ -4,6 +4,23 @@ export {
     ActionReducerMap,
     MetaReducer,
     ActionCreator,
-    Creator
+    Creator,
+    StoreModule,
+    StoreFeatureModule,
+    on,
+    createAction,
+    props,
+    createReducer,
+    createFeatureSelector,
+    createSelector,
 } from '@ngrx/store';
-export { Actions } from '@ngrx/effects';
+export { Actions, EffectsModule } from '@ngrx/effects';
+export {
+    createEntityAdapter,
+    EntityAdapter,
+    EntityState,
+    Update,
+    EntityMap,
+    EntityMapOne,
+    Predicate,
+} from '@ngrx/entity';

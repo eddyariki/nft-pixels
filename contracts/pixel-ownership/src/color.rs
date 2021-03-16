@@ -12,11 +12,9 @@ pub struct Color {
 
 impl Default for Color {
     fn default() -> Self {
-        Color {
-            r: 120,
-            g: 0,
-            b: 89
-        }
+        Color {r: 120,g: 0,b: 89}
     }
 }
+
+
 

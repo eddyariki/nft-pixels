@@ -6,9 +6,11 @@ elrond_wasm::derive_imports!();
 
 mod color;
 mod dimensions;
+mod auction;
 
 use color::*;
 use dimensions::*;
+use auction::*;
 
 #[elrond_wasm_derive::contract(PixelOwnershipImpl)]
 pub trait PixelOwnership {
@@ -91,12 +93,7 @@ pub trait PixelOwnership {
 		let caller = self.get_caller();
 		require!(caller == self.get_pixel_owner(&canvas_id, &pixel_id), "Only pixel owners can change the color!");
 		
-		let new_color = Color {
-			r,
-			g,
-			b
-		};
-
+		let new_color = Color{r,g,b};
 
 		self.set_pixel_color(&canvas_id, &pixel_id, &new_color);
 		
@@ -104,6 +101,34 @@ pub trait PixelOwnership {
 
 	}
 
+	#[endpoint(auctionPixel)]
+	fn auction_pixel(&self, canvas_id:u32, pixel_id:u64, starting_price:BigUint, ending_price:BigUint, deadline:u64)->SCResult<Auction<BigUint>>{
+
+		let last_valid_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+
+		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		
+		let caller = self.get_caller();
+		require!(caller == self.get_pixel_owner(&canvas_id, &pixel_id), "Only pixel owners can auction their pixel");
+
+		require!(starting_price<ending_price, "End Price must be smaller than Start Price");
+
+		require!(deadline>=self.get_block_timestamp(), "Deadline must be in the future, not the past");
+
+		let auction = Auction::new(
+			&starting_price,
+			&ending_price,
+			deadline,
+			&caller,
+		);
+		self.set_pixel_owner(&canvas_id, &pixel_id, &self.get_sc_address());
+
+		self.set_auction(canvas_id, pixel_id, &auction);
+
+		Ok(auction)
+	}
 
 	//Views
 
@@ -191,5 +216,8 @@ pub trait PixelOwnership {
 
 	#[storage_set("lastValidCanvasId")]
 	fn set_last_valid_canvas_id(&self, last_canvas_id:&u32);
+
+	#[storage_set("auction")]
+	fn set_auction(&self, canvas_id: u32, pixel_id:u64, auction: &Auction<BigUint>);
 
 }

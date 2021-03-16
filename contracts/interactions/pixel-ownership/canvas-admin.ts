@@ -13,7 +13,6 @@ import {
     Account,
     NetworkConfig,
     GasPrice,
-    Query
 } from "@elrondnetwork/erdjs";
 
 import {BasicWallet} from "elrondjs";
@@ -27,7 +26,6 @@ const address = SMART_CONTRACT_ADDRESS
 const readJSON = async (file: string):Promise<Buffer>=>{
     const jsonString = await fs.readFileSync(`../users/${file}`);
     return JSON.parse(jsonString);
-
 }
 
 const admin = async () =>{

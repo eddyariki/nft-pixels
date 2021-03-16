@@ -18,6 +18,7 @@ pub trait PixelOwnership {
 		self.set_owner(&my_address);
 	}
 
+	//Admin only
 
 	#[endpoint(createCanvas)]
 	fn create_canvas(&self, width:u32, height: u32)->SCResult<u32>{
@@ -47,6 +48,33 @@ pub trait PixelOwnership {
 		Ok(canvas_id)
 	}	
 
+	#[endpoint(mintPixels)]
+	fn mint_pixels(&self, canvas_id: u32, amount: u64) -> SCResult<MultiResultVec<u64>>{
+		let caller = self.get_caller();
+		require!(caller == self.get_owner(), "Only owners can mint pixels");
+		let total_pixel_supply = self.get_total_pixel_supply_of_canvas(&canvas_id);
+		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
+		require!(last_valid_pixel_id < total_pixel_supply, "Cannot print beyond total pixel supply of this canvas!");
+
+		let start = &last_valid_pixel_id + 1;
+
+		let mut end = &last_valid_pixel_id + amount;
+
+		if end>=total_pixel_supply{
+			end = total_pixel_supply;
+		}
+
+		let mut result = Vec::new();
+
+		for pixel_id in start..end{
+			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);
+			self.set_pixel_color(&canvas_id,&pixel_id, Color::default());
+			result.push(pixel_id);
+		}
+		self.set_last_valid_pixel_id(&canvas_id,&end);
+		Ok(result.into())
+	}
+
 
 	//Views
 
@@ -59,7 +87,6 @@ pub trait PixelOwnership {
 		&self,
 		canvas_id: &u32,
 	)->MultiResultVec<Color>{
-		let dimensions = self.get_canvas_dimensions(&canvas_id);
 		
 		let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
 

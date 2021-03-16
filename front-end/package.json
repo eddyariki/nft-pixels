@@ -27,6 +27,7 @@
     "crypto-js": "^4.0.0",
     "rxjs": "^6.6.6",
     "tslib": "^2.0.0",
+    "typescript-fsa": "^3.0.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

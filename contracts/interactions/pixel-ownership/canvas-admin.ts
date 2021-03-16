@@ -49,7 +49,7 @@ const admin = async () =>{
     const aliceAddress = new Address(aliceSecret.generatePublicKey().toAddress());
     const alice = new Account(aliceAddress);
     const aliceSigner = UserSigner.fromWallet(aliceJSON, "password");
-
+    
 
     const createCanvas = async ()=>{
         const func = new ContractFunction("getOwner");

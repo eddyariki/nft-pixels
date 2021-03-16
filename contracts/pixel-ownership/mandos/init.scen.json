@@ -1,0 +1,46 @@
+{
+    "name": "deploy pixel ownership",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "0",
+                    "balance": "100,000,000,000",
+                    "storage": {}
+                },
+                "address:bidder": {
+                    "nonce": "0",
+                    "balance": "100,000,000",
+                    "storage": {},
+                    "code": ""
+                }
+            },
+            "newAddresses": [
+                {
+                    "creatorAddress": "address:owner",
+                    "creatorNonce": "0",
+                    "newAddress": "address:contract_address"
+                }
+            ]
+        },
+        {
+            "step": "scDeploy",
+            "txId": "-deploy-",
+            "tx": {
+                "from": "address:owner",
+                "value": "0",
+                "contractCode": "file:../output/pixel-ownership.wasm",
+                "arguments": [],
+                "gasLimit": "100,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "message" :"",
+                "status": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        }
+    ]
+}

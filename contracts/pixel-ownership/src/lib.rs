@@ -51,18 +51,17 @@ pub trait PixelOwnership {
 	}	
 
 	#[endpoint(mintPixels)]
-	fn mint_pixels(&self, canvas_id: u32, amount: u64) -> SCResult<Vec<u64>>{
+	fn mint_pixels(&self, canvas_id: u32, amount: u64) -> SCResult<MultiResultVec<u64>>{
 		let caller = self.get_caller();
 		require!(caller == self.get_owner(), "Only owners can mint pixels");
 
 		let last_canvas_id = self.get_last_valid_canvas_id();
-		require!(canvas_id<=last_canvas_id && canvas_id>0, "Canvas Id does not exist!");
-
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
 		let total_pixel_supply = self.get_total_pixel_supply_of_canvas(&canvas_id);
-		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
 		require!(last_valid_pixel_id < total_pixel_supply, "Cannot print beyond total pixel supply of this canvas!");
 
-		let start = &last_valid_pixel_id + 1;
 
 		let mut end = &last_valid_pixel_id + amount;
 
@@ -72,12 +71,22 @@ pub trait PixelOwnership {
 
 		let mut result = Vec::new();
 
-		for pixel_id in start..end{
+		// for pixel_id in start..end{
+		// 	self.set_pixel_owner(&canvas_id, &pixel_id, &caller);
+		// 	self.set_pixel_color(&canvas_id,&pixel_id, &Color::default());
+		// 	result.push(pixel_id);
+		// }
+
+		let mut pixel_id = &last_valid_pixel_id + 1u64;
+		while &pixel_id < &end {
 			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);
-			self.set_pixel_color(&canvas_id,&pixel_id, &Color::default());
+			self.set_pixel_color(&canvas_id, &pixel_id, &Color::default());
+			pixel_id += 1u64;
 			result.push(pixel_id);
 		}
-		self.set_last_valid_pixel_id(&canvas_id,&end);
+
+		self.set_last_valid_pixel_id(&canvas_id,&pixel_id);
+
 		Ok(result.into())
 	}
 	//Pixel Owner Only
@@ -230,6 +239,14 @@ pub trait PixelOwnership {
 			self.set_pixel_owner(&canvas_id, &pixel_id, &current_winner);
 		}
 	}
+
+	fn _get_last_valid_pixel_id(&self,canvas_id: &u32)->u64{
+		if self.is_empty_last_valid_pixel_id(&canvas_id){
+			return 0u64
+		}else{
+			return self.get_last_valid_pixel_id(&canvas_id);
+		}
+	}	
 	//Views
 
 	#[view(getOwner)]
@@ -257,7 +274,14 @@ pub trait PixelOwnership {
 	}
 
 
-	#[view(getCanvasDimensions)]
+	#[view(getCanvasDimensionsTopEncoded)]
+	fn get_canvas_dimensions_topencoded(&self, canvas_id:u32)->MultiResultVec<u32>{
+		let dimensions = self.get_canvas_dimensions(&canvas_id);
+		let mut v = Vec::new();
+		v.push(dimensions.width);
+		v.push(dimensions.height);
+		v.into()
+	}
 	#[storage_get("canvasDimensions")]
 	fn get_canvas_dimensions(&self, canvas_id: &u32) -> Dimensions;
 
@@ -287,6 +311,9 @@ pub trait PixelOwnership {
 
 	#[storage_is_empty("lastCanvasId")]
 	fn is_empty_last_valid_canvas_id(&self)->bool;
+
+	#[storage_is_empty("lastValidPixelId")]
+	fn is_empty_last_valid_pixel_id(&self, canvas_id: &u32)->bool;
 
 	#[storage_is_empty("auction")]
 	fn is_empty_auction(&self, canvas_id: &u32, pixel_id: &u64)->bool;

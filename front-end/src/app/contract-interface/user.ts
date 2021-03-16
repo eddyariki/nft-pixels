@@ -18,7 +18,7 @@ export class User {
         }
     }
 
-    static Login(keystoreFile: Buffer, password: string): User | null {
+    static Login(keystoreFile: Buffer, password: string): User {
         try {
             const accountSecret = UserWallet.decryptSecretKey(keystoreFile, password);
             const accountAddress = new Address(accountSecret.generatePublicKey().toAddress());

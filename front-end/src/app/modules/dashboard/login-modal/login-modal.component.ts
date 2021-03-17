@@ -26,18 +26,17 @@ export class LoginModalComponent implements OnInit {
   }
 
   onKey(event: any) {
-    if (event.keyCode === 13) {
-    } else {
-      this.password = event.target.value;
-      this.wrongPassword = false;
+    this.password = event.target.value;
+    if(event.keyCode!==13){
+      if(this.wrongPassword){
+        this.wrongPassword = true;
+      }
     }
+    
   }
 
   login(event: any) {
     event.preventDefault();
-    if(event.keyCode===13){
-      return
-    }
     let fileReader = new FileReader();
     fileReader.readAsText(this.file);
     fileReader.onload = (e) => {

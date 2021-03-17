@@ -64,7 +64,7 @@ const admin = async () =>{
 
         let callTransaction = smartContract.call({
             func: new ContractFunction("createCanvas"),
-            args: [Argument.fromNumber(50),Argument.fromNumber(50)],
+            args: [Argument.fromNumber(5),Argument.fromNumber(5)],
             gasLimit: new GasLimit(20000000)
         });
 
@@ -97,12 +97,31 @@ const admin = async () =>{
             });
         qResponse.assertSuccess();
         console.log("Size: ", qResponse.returnData.length);
-        console.log(qResponse.returnData);
+        // console.log(qResponse.returnData);
         const returnData = qResponse.returnData;
         for(let i=0; i<returnData.length; i++){
             console.log(returnData[i].asNumber); //.asHex/Bool/etc 
         }
     }
+
+
+    const getLastValidPixelId = async()=>{
+        const func = new ContractFunction("getLastValidPixelId");
+        const qResponse = await smartContract.runQuery(
+            proxyProvider, 
+            {
+                func,
+                args:[Argument.fromNumber(1)]
+            });
+        qResponse.assertSuccess();
+        console.log("Size: ", qResponse.returnData.length);
+        // console.log(qResponse.returnData);
+        const returnData = qResponse.returnData;
+        for(let i=0; i<returnData.length; i++){
+            console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+        }
+    }
+
     const getCanvasTotalSupply = async() =>{
         const func = new ContractFunction("getTotalPixelSupplyOfCanvas");
         const qResponse = await smartContract.runQuery(
@@ -113,7 +132,7 @@ const admin = async () =>{
             });
         qResponse.assertSuccess();
         console.log("Size: ", qResponse.returnData.length);
-        console.log(qResponse.returnData);
+        // console.log(qResponse.returnData);
         const returnData = qResponse.returnData;
         for(let i=0; i<returnData.length; i++){
             console.log(returnData[i].asNumber); //.asHex/Bool/etc 
@@ -123,7 +142,7 @@ const admin = async () =>{
     const mint = async ()=>{
         let callTransaction = smartContract.call({
             func: new ContractFunction("mintPixels"),
-            args: [Argument.fromNumber(1),Argument.fromNumber(20)],
+            args: [Argument.fromNumber(1),Argument.fromNumber(7)],
             gasLimit: new GasLimit(100000000)
         });
 
@@ -133,17 +152,20 @@ const admin = async () =>{
         aliceSigner.sign(callTransaction);
 
         alice.incrementNonce();
-        console.log("Computed fee: ", callTransaction.computeFee(await NetworkConfig.getDefault()))
+
+        const gas = callTransaction.computeFee(await NetworkConfig.getDefault());
+
         let hashOne = await callTransaction.send(proxyProvider);
 
         await callTransaction.awaitExecuted(proxyProvider);
 
         await alice.sync(proxyProvider);
 
-        const txResult = await proxyProvider.getTransaction(hashOne);
-        
-
-        
+        const txResult:any = await proxyProvider.getTransaction(hashOne);
+        const executed = await proxyProvider.getTransactionStatus(hashOne);
+        // console.log(txResult);
+        console.log(txResult.data.data.toString());        
+        console.log(executed);
     }
 
     const getCanvas = async()=>{
@@ -155,10 +177,11 @@ const admin = async () =>{
                 args:[Argument.fromNumber(1)]
             });
 
-        qResponse.assertSuccess();
+        // qResponse.assertSuccess();
         console.log("Size: ", qResponse.returnData.length);
-        console.log(qResponse.returnData);
+        // console.log(qResponse.returnData);
         const returnData = qResponse.returnData;
+
         for(let i=0; i<returnData.length; i++){
             console.log(returnData[i].asNumber); //.asHex/Bool/etc 
         }
@@ -166,7 +189,10 @@ const admin = async () =>{
     // await createCanvas();
     // await getCanvasDimensions();
     // await getCanvasTotalSupply();
+    // await getLastValidPixelId();
     await mint();
+    await getLastValidPixelId();
+    // await getCanvas();
     
 }
 

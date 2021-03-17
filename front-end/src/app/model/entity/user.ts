@@ -1,7 +1,8 @@
 import { Account, UserSigner } from '@elrondnetwork/erdjs';
 
 export interface User {
-    address: string;
+    id: string;
     account?: Account;
-    signer: UserSigner;
+    signer?: UserSigner;
+    loggedI?: boolean;
 }

@@ -1,33 +1,28 @@
 import { InjectionToken } from '@angular/core';
-import { ActionReducerMap, MetaReducer } from 'src/app/lib/ngrx';
-
-// Reducers
 import {
-initialState as testInitialState,
-reducer as testReducer,
-State as testState
-} from './test/reducer';
+  Action,
+  ActionReducer,
+  ActionReducerMap,
+  MetaReducer,
+} from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import {
-initialState as userInitialState,
-reducer as userReducer,
-State as userState
-} from './user/reducer';
-
+    initialState as payloadInitalState,
+    reducer as payloadReducer,
+    State as payloadState,
+} from './payload.reducer';
 
 export interface State {
-    user: userState;
-    test: testState;
+    payload: payloadState;
 }
 
 export const reducers: ActionReducerMap<State> = {
-    user: userReducer,
-    test: testReducer,
+    payload: payloadReducer,
 };
 
 export function getInitialState(): State {
     return {
-        user: userInitialState,
-        test: testInitialState,
+        payload: payloadInitalState
     };
 }
 
@@ -38,4 +33,3 @@ export const getReducers = () => reducers;
 export const reducersProvider = [
   { provide: reducersToken, useFactory: getReducers },
 ];
-

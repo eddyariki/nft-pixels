@@ -20,7 +20,7 @@ export const initialState: State = adapter.getInitialState({
 });
 
 export function selectId(user: User): string {
-    return user.address;
+    return user.id;
 }
 
 const userReducer = createReducer(
@@ -34,8 +34,8 @@ const userReducer = createReducer(
     on(actions.update, (state, { update }) => {
         return adapter.updateOne(update, state);
     }),
-    on(actions.remove, (state, { address }) => {
-        return adapter.removeOne(address, state);
+    on(actions.remove, (state, { id }) => {
+        return adapter.removeOne(id, state);
     })
 );
 

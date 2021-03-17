@@ -18,6 +18,7 @@ import { getState, getById } from 'src/app/model/store/test/selectors';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser } from '../payload';
 import { User } from 'src/app/contract-interface/user';
+import { NetworkConfig, ProxyProvider } from '@elrondnetwork/erdjs/out';
 
 
 @Component({
@@ -30,9 +31,14 @@ export class DashboardComponent implements OnInit {
     public loggedIn: boolean;
     public LoginModalIsVisible: boolean;
     async ngOnInit(): Promise<void> {
-        // const canvasContract = new CanvasContract();
-        // const rgbArray = await canvasContract.getCanvas(1);
-        // this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
+        const proxyProvider = new ProxyProvider('http://localhost:7950');
+        await NetworkConfig.getDefault().sync(proxyProvider);
+        const canvasContract = new CanvasContract(
+            'erd1qqqqqqqqqqqqqpgq5xygkyct2vmg9y8c0ahskxe69jfc0wnzd8ss75nv8l',
+            proxyProvider
+            );
+        const rgbArray = await canvasContract.getCanvas(1);
+        this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
     }
 
     onLogin(loggedInOrNot: string): void {

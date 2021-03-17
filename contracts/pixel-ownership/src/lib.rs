@@ -72,11 +72,19 @@ pub trait PixelOwnership {
 		}
 
 		let mut pixel_id = last_valid_pixel_id.clone() + 1u64.clone(); //1
-		
+
 		while &pixel_id <= &end{
 
 			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);//5
-			self.set_pixel_color(&canvas_id,&pixel_id, &Color::default());//5
+			let r64 = pixel_id.clone()/total_pixel_supply.clone();
+			let b64 = pixel_id.clone()/total_pixel_supply.clone();
+			let g64 = pixel_id.clone()/total_pixel_supply.clone();
+
+			let r = r64 as u8 * 255;
+			let g = g64 as u8 * 255;
+			let b = b64 as u8 * 255;
+			let color = Color{r,g,b};
+			self.set_pixel_color(&canvas_id,&pixel_id, &color);//5
 			pixel_id+=1u64.clone();
 		}//6
 

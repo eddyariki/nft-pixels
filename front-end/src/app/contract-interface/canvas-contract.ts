@@ -36,7 +36,6 @@ export default class CanvasContract {
         this.contract = new SmartContract({ address });
         this.proxyProvider = provider || null;
         this.user = usr||null;
-
     }
 
 
@@ -150,7 +149,6 @@ export default class CanvasContract {
                 count++;
             }
         }
-        console.log(rgbaArray.slice(0, 8));
         return rgbaArray;
     }
 }

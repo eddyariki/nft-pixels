@@ -13,6 +13,8 @@ import {
     Account,
     NetworkConfig,
     GasPrice,
+    Transaction,
+    TransactionHash,
 } from "@elrondnetwork/erdjs";
 
 import {BasicWallet} from "elrondjs";
@@ -29,7 +31,7 @@ const readJSON = async (file: string):Promise<Buffer>=>{
 }
 
 const admin = async () =>{
-    const proxyProvider = new ProxyProvider(LOCAL_PROXY);
+    const proxyProvider = new ProxyProvider(LOCAL_PROXY, 10000000);
     await NetworkConfig.getDefault().sync(proxyProvider);
 
     const smartContractAddress:Address = new Address(address);
@@ -64,7 +66,7 @@ const admin = async () =>{
 
         let callTransaction = smartContract.call({
             func: new ContractFunction("createCanvas"),
-            args: [Argument.fromNumber(5),Argument.fromNumber(5)],
+            args: [Argument.fromNumber(500),Argument.fromNumber(500)],
             gasLimit: new GasLimit(20000000)
         });
 
@@ -139,33 +141,43 @@ const admin = async () =>{
         }
     }
     
-    const mint = async ()=>{
-        let callTransaction = smartContract.call({
-            func: new ContractFunction("mintPixels"),
-            args: [Argument.fromNumber(1),Argument.fromNumber(7)],
-            gasLimit: new GasLimit(100000000)
-        });
+    const mintPixels = async ()=>{
+        let callTransactions: Transaction[] = [];
 
-        await alice.sync(proxyProvider);
-        callTransaction.setNonce(alice.nonce);
+        for(let i=0;i<40;i++){
+            let callTransaction = smartContract.call({
+                func: new ContractFunction("mintPixels"),
+                args: [Argument.fromNumber(1),Argument.fromNumber(20)],
+                gasLimit: new GasLimit(100000000)
+            });
+            callTransactions[i] = callTransaction;
+        }
         
-        aliceSigner.sign(callTransaction);
-
-        alice.incrementNonce();
-
-        const gas = callTransaction.computeFee(await NetworkConfig.getDefault());
-
-        let hashOne = await callTransaction.send(proxyProvider);
-
-        await callTransaction.awaitExecuted(proxyProvider);
-
         await alice.sync(proxyProvider);
+        const sync_then_sign=async(txs:Transaction[])=>{
+            for(let i=0;i<40;i++){
+                txs[i].setNonce(alice.nonce);
+                aliceSigner.sign(txs[i]);
+                alice.incrementNonce();
+            }
+        }
 
-        const txResult:any = await proxyProvider.getTransaction(hashOne);
-        const executed = await proxyProvider.getTransactionStatus(hashOne);
-        // console.log(txResult);
-        console.log(txResult.data.data.toString());        
-        console.log(executed);
+        await sync_then_sign(callTransactions);
+
+        let hashes: TransactionHash[] = [];
+        for(let i=0;i<40;i++){
+            hashes[i] = await callTransactions[i].send(proxyProvider);
+        }
+
+        for(let i=0;i<40;i++){
+            await callTransactions[i].awaitExecuted(proxyProvider);
+        }
+
+        for(let i=0;i<40;i++){
+            const executed = await proxyProvider.getTransactionStatus(hashes[i]);       
+            // console.log(executed);
+        }
+    
     }
 
     const getCanvas = async()=>{
@@ -180,19 +192,32 @@ const admin = async () =>{
         // qResponse.assertSuccess();
         console.log("Size: ", qResponse.returnData.length);
         // console.log(qResponse.returnData);
-        const returnData = qResponse.returnData;
+        // const returnData = qResponse.returnData;
+        
+        // for(let i=0; i<returnData.length; i++){
 
-        for(let i=0; i<returnData.length; i++){
-            console.log(returnData[i].asNumber); //.asHex/Bool/etc 
-        }
+        //     // console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+        // }
     }
+
+
+
+
+
     // await createCanvas();
     // await getCanvasDimensions();
     // await getCanvasTotalSupply();
     // await getLastValidPixelId();
-    await mint();
-    await getLastValidPixelId();
-    // await getCanvas();
+    // await mintPixels();
+    // await mintPixels();
+    // await mintPixels();
+    // await mintPixels();
+    // for(let i=0;i<200;i++){
+    //     await mintPixels();
+    //     await getLastValidPixelId();
+    // }
+    // await getLastValidPixelId();
+    await getCanvas();
     
 }
 

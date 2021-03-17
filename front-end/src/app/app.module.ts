@@ -8,6 +8,7 @@ import { AppRoutesModule } from './app.routes.module';
 import { EntityStoreModule } from './model/store/store.module';
 import { RouterModule } from '@angular/router';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { PayloadModule } from 'src/app/modules/payload/payload.module';
 
 // Components
 import { AppComponent } from './app.component';
@@ -29,6 +30,7 @@ import { AppEffects } from './app.effects';
       maxAge: 100,
     }),
     DashboardModule,
+    PayloadModule,
     EntityStoreModule,
   ],
   providers: [],

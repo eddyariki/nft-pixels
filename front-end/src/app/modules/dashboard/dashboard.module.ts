@@ -6,14 +6,20 @@ import { StoreModule } from '@ngrx/store';
 
 // Components
 import { DashboardComponent } from './dashboard.component';
+import { HeaderComponent } from './header/header.component';
+import { LoginModalComponent } from './login-modal/login-modal.component';
+
 
 @NgModule({
     imports: [
     CommonModule,
-    DashboardRoutingModule
+    DashboardRoutingModule,
+
     ],
     declarations: [
     DashboardComponent,
+    HeaderComponent,
+    LoginModalComponent
     ],
     exports: [],
     providers: [],

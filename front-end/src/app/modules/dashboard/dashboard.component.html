@@ -1,4 +1,12 @@
-dashboard works
-<div>
-    <img [src]="image" alt="">
-</div>
+<section>
+    <app-header
+    (login)="onLogin($event)"
+    ></app-header>
+    
+    <div *ngIf="LoginModalIsVisible">
+        <app-login-modal 
+        (cancelEmitter)="showLoginModal(false)"
+        (loginEmitter)="userLoggedIn($event)"
+        ></app-login-modal>
+    </div>
+</section>

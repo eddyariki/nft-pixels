@@ -24,10 +24,11 @@ export class LoginModalComponent implements OnInit {
     this.password = event.target.value;
   }
 
-  async login(event:any) {
+  login(event:any) {
     event.preventDefault();
     let fileReader = new FileReader();
     fileReader.readAsText(this.file);
+    
     fileReader.onload=(e)=>{
       const JSONBuffer = JSON.parse(fileReader.result.toString());
       console.log(JSONBuffer);

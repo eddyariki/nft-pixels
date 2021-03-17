@@ -8,9 +8,9 @@ export class User {
     isLoggedIn: boolean;
 
     constructor(acc?: Account, accSigner?: ISigner){
-        this.account = acc;
-        this.address = acc.address.toString();
-        this.signer = accSigner;
+        this.account = acc || null;
+        this.address = acc?.address.toString() || null;
+        this.signer = accSigner || null;
         if(!acc || !accSigner){
             this.isLoggedIn = false;
         }else{

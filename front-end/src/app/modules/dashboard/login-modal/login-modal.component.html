@@ -1,0 +1,27 @@
+<div>
+    <h2>Unlock Wallet</h2>
+    <p></p>
+
+    <div class="form-container">
+        <form class="form-login" (submit)="login($event)">
+            <label for="file">Open keystore JSON file</label>
+            <input type="file"
+                id="file"
+                (change)="handleFileInput($event.target.files)"
+            >
+            <label for="password">Password</label>
+            <input 
+            type="password" 
+            id="password"  
+            (keypress)="onKey($event)" 
+            [(value)]="password" 
+            placeholder=""
+            required
+            >
+            <button type="submit">Unlock</button>
+        </form>
+    </div>
+
+
+
+</div>

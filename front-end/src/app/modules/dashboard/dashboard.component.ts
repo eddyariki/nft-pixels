@@ -29,9 +29,9 @@ export class DashboardComponent implements OnInit {
     public loggedIn: boolean;
 
     async ngOnInit(): Promise<void> {
-        const canvasContract = new CanvasContract();
-        const rgbArray = await canvasContract.getCanvas();
-        this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
+        // const canvasContract = new CanvasContract();
+        // const rgbArray = await canvasContract.getCanvas(1);
+        // this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
     }
 
     onLogin(loggedInOrNot: string): void {

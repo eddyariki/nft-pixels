@@ -2,5 +2,11 @@
     <app-header
     (login)="onLogin($event)"
     ></app-header>
-    <app-login-modal></app-login-modal>
+    
+    <div *ngIf="LoginModalIsVisible">
+        <app-login-modal 
+        (cancelEmitter)="showLoginModal(false)"
+        (loginEmitter)="userLoggedIn($event)"
+        ></app-login-modal>
+    </div>
 </section>

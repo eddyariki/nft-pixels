@@ -34,8 +34,9 @@ export default class CanvasContract {
     constructor(contractAddress = '', provider?: ProxyProvider, usr?: User) {
         const address = new Address(contractAddress);
         this.contract = new SmartContract({ address });
-        this.proxyProvider = provider;
-        this.user = usr;
+        this.proxyProvider = provider || null;
+        this.user = usr||null;
+
     }
 
 

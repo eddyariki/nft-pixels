@@ -32,7 +32,6 @@ export class LoginModalComponent implements OnInit {
         this.wrongPassword = true;
       }
     }
-    
   }
 
   login(event: any) {

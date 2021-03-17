@@ -9,17 +9,17 @@
         </div>
 
 
-        <form class="form-login" (submit)="login($event)">
+        <form class="form-login" (submit)="login($event)" > 
             <div class="file-container">
-                <label for="file">Open keystore JSON file</label>
-                <input type="file" id="file" (change)="handleFileInput($event.target.files)">
-
+                <label for="file">Open keystore JSON file </label>
+                <input type="file" id="file" (change)="handleFileInput($event.target.files)" required>
             </div>
             <div class="password-container">
                 <label for="password">Password </label>
                 <input type="password" id="password" (keyup)="onKey($event)" [(value)]="password" placeholder=""
                     required>
-                <button type="submit">Unlock</button>
+                <button type="submit" class="unlock-button">Unlock</button>
+                <div *ngIf="wrongPassword" for="password" class="wrong-passwod"> Wrong Password</div>
             </div>
         </form>
     </div>

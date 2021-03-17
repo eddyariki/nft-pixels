@@ -12,39 +12,47 @@ export class LoginModalComponent implements OnInit {
   @Output() loginEmitter = new EventEmitter<User>();
   public password: string;
   public file: File;
+  public wrongPassword: boolean;
   constructor() { }
 
   ngOnInit(): void {
   }
-  cancel(){
+  cancel() {
     this.cancelEmitter.emit(true);
   }
-  handleFileInput(files: FileList){
+  handleFileInput(files: FileList) {
     const file = files[0];
     this.file = file;
   }
 
-  onKey(event:any){
-    this.password = event.target.value;
+  onKey(event: any) {
+    if (event.keyCode === 13) {
+    } else {
+      this.password = event.target.value;
+      this.wrongPassword = false;
+    }
   }
 
-  login(event:any) {
+  login(event: any) {
     event.preventDefault();
+    if(event.keyCode===13){
+      return
+    }
     let fileReader = new FileReader();
     fileReader.readAsText(this.file);
-
-    fileReader.onload=(e)=>{
+    fileReader.onload = (e) => {
       const JSONBuffer = JSON.parse(fileReader.result.toString());
-      console.log(JSONBuffer);
-      console.log(this.password)
       const user = User.Login(JSONBuffer, this.password);
-      this.loginEmitter.emit(user);
+      if (!user.isLoggedIn) {
+        console.log("wrong password")
+        this.password = "";
+        this.wrongPassword = true;
+      } else {
+        this.password = "";
+        this.wrongPassword = false;
+        this.loginEmitter.emit(user);
+      }
     }
-   
-    
-
-
-    // const user = User.Login(this.file, this.password);
-    // console.log(user)
   }
+
 }

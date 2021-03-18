@@ -11,18 +11,26 @@ import {
     reducer as payloadReducer,
     State as payloadState,
 } from './payload.reducer';
+import {
+    initialState as loginVisibleInitialState,
+    reducer as loginVisibleReducer,
+    State as loginVisibleState,
+} from './login/login-visible.reducer';
 
 export interface State {
     payload: payloadState;
+    loginVisible: loginVisibleState;
 }
 
 export const reducers: ActionReducerMap<State> = {
     payload: payloadReducer,
+    loginVisible: loginVisibleReducer
 };
 
 export function getInitialState(): State {
     return {
-        payload: payloadInitalState
+        payload: payloadInitalState,
+        loginVisible: loginVisibleInitialState,
     };
 }
 

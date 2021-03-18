@@ -106,6 +106,8 @@ export default class CanvasContract {
         return c;
     }
 
+    
+
     private async _runQuery(funcString: string, argument: Argument[]): Promise<QueryResponse> {
         const func = new ContractFunction(funcString);
         const qResponse = await this.contract.runQuery(
@@ -116,7 +118,7 @@ export default class CanvasContract {
             });
         return qResponse;
     }
-
+    private async _getOwnedPixes(){}
 
     private async _queryGetCanvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
         const qResponse = await this._runQuery("getCanvas",

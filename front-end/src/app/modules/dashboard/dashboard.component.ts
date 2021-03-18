@@ -29,34 +29,11 @@ import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 })
 export class DashboardComponent implements OnInit {
     public user$ = this.store$.select(getUser);
-    public image: SafeUrl;
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
-    public gettingCanvas: boolean;
-    public foundContract: boolean;
-    async ngOnInit(): Promise<void> {
-        const proxyProvider = new ProxyProvider('http://localhost:7950', 1000000);
-        await NetworkConfig.getDefault().sync(proxyProvider);
-        let canvasContract: CanvasContract;
-        try {
-            canvasContract = new CanvasContract(
-                'erd1qqqqqqqqqqqqqpgqd4kel97fslldfrfv2jce5u76qwa8w48pd8ss7zyjft',
-                proxyProvider
-            );
-        }catch (e){
-            canvasContract = new CanvasContract();
 
-        }
-        if (canvasContract.proxyProvider){
-            this.foundContract = true;
-        }else{
-            this.foundContract = false;
-        }
-        this.gettingCanvas = true;
-        const rgbArray = await canvasContract.getCanvas(1);
-        this.gettingCanvas = false;
-        this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
-    }
+    ngOnInit(): void {}
+
 
     onLogin(loggedInOrNot: string): void {
 

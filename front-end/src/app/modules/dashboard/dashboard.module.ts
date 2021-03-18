@@ -8,6 +8,7 @@ import { StoreModule } from '@ngrx/store';
 import { DashboardComponent } from './dashboard.component';
 import { HeaderComponent } from './header/header.component';
 import { LoginModalComponent } from './login-modal/login-modal.component';
+import { HomeComponent } from './home/home.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { LoginModalComponent } from './login-modal/login-modal.component';
     declarations: [
     DashboardComponent,
     HeaderComponent,
-    LoginModalComponent
+    LoginModalComponent,
+    HomeComponent
     ],
     exports: [],
     providers: [],

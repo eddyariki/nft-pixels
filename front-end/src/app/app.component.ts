@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -6,7 +7,9 @@ import {  map } from 'rxjs/operators';
 import * as userActions from 'src/app/model/store/user/actions';
 import * as testActions from 'src/app/model/store/test/actions';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
+import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
 import { getUser } from 'src/app/modules/payload/payload.selectors';
+import { User } from './model/entity';
 
 @Component({
   selector: 'app-root',
@@ -20,12 +23,16 @@ export class AppComponent implements OnInit {
   public user$: Observable<any>;
 
 
-  ngOnInit(): void {
-    this.store$.dispatch(userActions.add({user: { id: 'test'}}));
-    this.store$.dispatch(testActions.add({test: {id: 'hey', name: 'hey'}}));
-    this.user$ = this.store$.select(getUser);
-  }
+  ngOnInit(): void {}
 
-  constructor(private actions$: Actions, private store$: Store<any>) {}
+  constructor(private actions$: Actions, private store$: Store<any>, private router: Router) {
+    const user: User = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      this.store$.dispatch(userActions.add({user}));
+      this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
+    } else {
+        this.router.navigate(['']);
+    }
+  }
 
 }

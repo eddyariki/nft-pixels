@@ -31,6 +31,7 @@ export class DashboardComponent implements OnInit {
     public loggedIn: boolean;
     public LoginModalIsVisible: boolean;
     public gettingCanvas: boolean;
+    public foundContract: boolean;
     async ngOnInit(): Promise<void> {
         const proxyProvider = new ProxyProvider('http://localhost:7950', 1000000);
         await NetworkConfig.getDefault().sync(proxyProvider);
@@ -42,8 +43,13 @@ export class DashboardComponent implements OnInit {
             );
         }catch(e){
             canvasContract = new CanvasContract();
+            
         }
-       
+        if(canvasContract.proxyProvider){
+            this.foundContract=true;
+        }else{
+            this.foundContract=false;
+        }
         this.gettingCanvas = true;
         const rgbArray = await canvasContract.getCanvas(1);
         this.gettingCanvas = false;

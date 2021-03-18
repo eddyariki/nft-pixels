@@ -33,7 +33,6 @@ export class LoginModalComponent implements OnInit {
       this.password = event.target.value;
       this.wrongPassword = false;
     }
-    
   }
 
   login(event: any): void{

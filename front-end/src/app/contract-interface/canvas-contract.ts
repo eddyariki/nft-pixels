@@ -4,6 +4,7 @@ import {
     SmartContract, Address, ProxyProvider, ContractFunction,
     Transaction, TransactionPayload, Balance, GasLimit, WalletProvider, IDappProvider, Argument
 } from '@elrondnetwork/erdjs';
+import { QueryResponse } from '@elrondnetwork/erdjs/out/smartcontracts/query';
 import { environment } from 'src/environments/environment';
 import { User } from './user';
 
@@ -55,7 +56,7 @@ export default class CanvasContract {
                 if (!buffer) {
                     buffer = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                 } else {
-                    const b = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                    const b = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                     buffer = this._concatTypedArrays(buffer, b);
                 }
 
@@ -101,16 +102,27 @@ export default class CanvasContract {
         return c;
     }
 
+    
 
-
-    private async _query_get_canvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
-        const func = new ContractFunction('getCanvas');
+    private async _runQuery(funcString: string, argument: Argument[]): Promise<QueryResponse> {
+        const func = new ContractFunction(funcString);
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
             {
                 func,
-                args: [Argument.fromNumber(canvasId), Argument.fromNumber(from), Argument.fromNumber(upTo)]
+                args: argument
             });
+        return qResponse;
+    }
+    private async _getOwnedPixes(){}
+
+    private async _queryGetCanvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
+        const qResponse = await this._runQuery("getCanvas",
+            [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(from),
+                Argument.fromNumber(upTo)
+            ])
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
         const rgbArrayRaw = new Uint8Array(qResponse.returnData.length);
@@ -121,15 +133,8 @@ export default class CanvasContract {
     }
 
 
-    private async _query_get_canvas_dimensions(canvasId: number): Promise<number[]> {
-        const func = new ContractFunction('getCanvasDimensionsTopEncoded');
-
-        const qResponse = await this.contract.runQuery(
-            this.proxyProvider,
-            {
-                func,
-                args: [Argument.fromNumber(canvasId)]
-            });
+    private async _queryGetCanvasDimensions(canvasId: number): Promise<number[]> {
+        const qResponse = await this._runQuery('getCanvasDimensionsTopEncoded',[Argument.fromNumber(canvasId)]);
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
         const dimensions = [];
@@ -140,13 +145,7 @@ export default class CanvasContract {
     }
 
     private async _queryGetCanvasTotalPixelSupply(canvasId: number): Promise<number[]> {
-        const func = new ContractFunction('getCanvasDimensionsTopEncoded');
-        const qResponse = await this.contract.runQuery(
-            this.proxyProvider,
-            {
-                func,
-                args: [Argument.fromNumber(canvasId)]
-            });
+        const qResponse = await this._runQuery('getCanvasTotalPixelSupply',[Argument.fromNumber(canvasId)]);
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
         const dimensions = [];

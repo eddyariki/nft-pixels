@@ -10,7 +10,8 @@ import { HeaderComponent } from './header/header.component';
 import { LoginModalComponent } from './login-modal/login-modal.component';
 import { HomeComponent } from './home/home.component';
 import { TransactionModalComponent } from './transaction-modal/transaction-modal.component';
-
+import { AuctionComponent } from './auction/auction.component';
+import { ChangeColorComponent } from './change-color/change-color.component';
 
 @NgModule({
     imports: [
@@ -23,7 +24,9 @@ import { TransactionModalComponent } from './transaction-modal/transaction-modal
     HeaderComponent,
     LoginModalComponent,
     HomeComponent,
-    TransactionModalComponent
+    TransactionModalComponent,
+    AuctionComponent,
+    ChangeColorComponent
     ],
     exports: [],
     providers: [],

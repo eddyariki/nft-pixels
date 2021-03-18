@@ -1,0 +1,18 @@
+{
+    "emitted_tx": {
+        "tx": {
+            "nonce": 40,
+            "value": "0",
+            "receiver": "erd1qqqqqqqqqqqqqpgqr3yt02u59g2hwptpeawd5z8vt8qete0sd8ss6x8cnu",
+            "sender": "erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th",
+            "gasPrice": 1000000000,
+            "gasLimit": 100000000,
+            "data": "bWludFBpeGVsc0AwMUAwNQ==",
+            "chainID": "local-testnet",
+            "version": 1,
+            "signature": "0f932fda6a1d3138a867585ea85ccc453e1194ae46b71ab9fd6ccf5b7d012056da2fd99f8b72f04340bc39083269fcec688b487f645dcddcb366f6b07dc79e05"
+        },
+        "hash": "",
+        "data": "mintPixels@01@05"
+    }
+}

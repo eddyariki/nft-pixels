@@ -26,8 +26,6 @@ export class AppComponent implements OnInit {
     this.user$ = this.store$.select(getUser);
   }
 
-  constructor(private actions$: Actions, private store$: Store<any>) {
-    this.store$.dispatch(payloadActions.payload({userAddress: 'test', isLoggedIn: false, key: null}));
-  }
+  constructor(private actions$: Actions, private store$: Store<any>) {}
 
 }

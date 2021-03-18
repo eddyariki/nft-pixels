@@ -37,7 +37,7 @@ const deploy = async () => {
             signer: aliceWallet,
             sender: aliceWallet.address(),
             // gasPrice: 80000000,
-            gasLimit: 85680618
+            gasLimit: 105680618
         })
     console.log(`Contract has been deployed at: ${contract.address}`);
 

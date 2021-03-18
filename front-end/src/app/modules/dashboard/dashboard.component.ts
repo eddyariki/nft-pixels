@@ -31,7 +31,9 @@ export class DashboardComponent implements OnInit {
     public user$ = this.store$.select(getUser);
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
+
     ngOnInit(): void {}
+
 
     onLogin(loggedInOrNot: string): void {
 

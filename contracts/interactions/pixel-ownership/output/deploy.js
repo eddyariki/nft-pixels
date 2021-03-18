@@ -63,7 +63,7 @@ var deploy = function () { return __awaiter(void 0, void 0, void 0, function () 
                         signer: aliceWallet,
                         sender: aliceWallet.address(),
                         // gasPrice: 80000000,
-                        gasLimit: 85680618
+                        gasLimit: 105680618
                     })];
             case 3:
                 contract = (_a.sent()).contract;

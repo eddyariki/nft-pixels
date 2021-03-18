@@ -53,9 +53,9 @@ export default class CanvasContract {
             let buffer;
             for (let i = 0; i < 10; i++) {
                 if (!buffer) {
-                    buffer = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                    buffer = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                 } else {
-                    let b = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                    let b = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                     buffer = this._concatTypedArrays(buffer, b);
                 }
 
@@ -66,7 +66,7 @@ export default class CanvasContract {
         const rgbArray = await stream();
         console.log(rgbArray.length);
         console.log(rgbArray.slice(0, 24));
-        const dimensions = await this._query_get_canvas_dimensions(canvasId);
+        const dimensions = await this._queryGetCanvasDimensions(canvasId);
         const rgbaArray = await this._generateRGBAArray(dimensions[0], dimensions[1], rgbArray);
         const canvas: Canvas = new Canvas(dimensions, rgbaArray);
         return canvas;
@@ -78,7 +78,7 @@ export default class CanvasContract {
             const a = await [500, 500];
             return a;
         }
-        const dimensions = await this._query_get_canvas_dimensions(canvasId);
+        const dimensions = await this._queryGetCanvasDimensions(canvasId);
         return dimensions;
     }
 
@@ -106,7 +106,7 @@ export default class CanvasContract {
     }
 
 
-    private async _query_get_canvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
+    private async _queryGetCanvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
         const func = new ContractFunction("getCanvas");
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
@@ -123,7 +123,7 @@ export default class CanvasContract {
         return rgbArrayRaw;
     }
 
-    private async _query_get_canvas_dimensions(canvasId: number): Promise<number[]> {
+    private async _queryGetCanvasDimensions(canvasId: number): Promise<number[]> {
         const func = new ContractFunction("getCanvasDimensionsTopEncoded");
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,

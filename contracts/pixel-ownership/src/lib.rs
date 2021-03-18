@@ -75,7 +75,9 @@ pub trait PixelOwnership {
 
 		while &pixel_id <= &end{
 
-			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);//5
+			// self.set_pixel_owner(&canvas_id, &pixel_id, &caller);//5
+			//owner: &Address, canvas_id: &u32, pixel_id: &u64, owned: &bool) {
+			self._set_pixel_ownership(&self.get_sc_address(), &canvas_id, &pixel_id, &true);
 			let mut r = 0u8;
 			let mut g = 0u8;
 			let mut b = 0u8;
@@ -109,14 +111,18 @@ pub trait PixelOwnership {
 	#[endpoint(changePixelColor)]
 	fn change_pixel_color(&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8) -> SCResult<Color>{
 
-		let last_valid_canvas_id = self.get_last_valid_canvas_id();
-		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
 
-		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
-		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id, "Pixel does not exist! ");
+		require!(pixel_id>0, "Pixel does not exist!");
 		
 		let caller = self.get_caller();
-		require!(caller == self.get_pixel_owner(&canvas_id, &pixel_id), "Only pixel owners can change the color!");
+		let pixel_ownership_mapper = self.get_pixel_ownership_mapper(&caller, &canvas_id);
+
+		require!(pixel_ownership_mapper.get(&pixel_id).unwrap_or_else(||false), "Only pixel owners can change the color!");
 		
 		let new_color = Color{r,g,b};
 
@@ -238,7 +244,6 @@ pub trait PixelOwnership {
 		auction.current_winner
 	}
 
-
 	fn _end_auction(&self, canvas_id:u32, pixel_id:u64, current_winner: Address, current_bid: BigUint, prev_pixel_owner: Address){
 		if current_bid == BigUint::zero() || current_winner  == Address::zero(){
 			//No bids, pixel transfered back to owner
@@ -263,7 +268,47 @@ pub trait PixelOwnership {
 			return self.get_last_valid_pixel_id(&canvas_id)
 		}
 	}
+
+	// address -> canvas_id -> pixel -> bool
+	// #[view(balanceOf)]
+	// fn balance_of(&self, owner: &Address, type_id: &u32, pixel_id: &u64) -> bool {
+	// 	let pixel_ownership = self.get_balance_mapper(&owner, &canvas_id);
+	// 	return pixel_ownership
+	// }
+
+	// returns id of pixels address owns
+	#[view(getOwnedPixels)]
+	fn get_owned_pixels(
+		&self,
+		owner: &Address,
+		canvas_id: &u32,
+	) -> MultiResultVec<u64> {
+
+		let mut owned_pixel_vec = Vec::new();
+
+		let pixel_ownership_mapper = self.get_pixel_ownership_mapper(&owner, &canvas_id);
+
+		for (pixel_id, is_owner) in pixel_ownership_mapper.iter(){
+			if is_owner{
+				owned_pixel_vec.push(pixel_id);
+			}
+		}
+
+		owned_pixel_vec.into()
+	}
+
+	//pixel_id is unique so it is 0 or 1
+
+	fn _set_pixel_ownership(&self, owner: &Address, canvas_id: &u32, pixel_id: &u64, owned: &bool) {
+		let mut pixel_ownership_mapper = self.get_pixel_ownership_mapper(owner, &canvas_id);
+		pixel_ownership_mapper.insert(pixel_id.clone(), owned.clone());
+	}
+
+
 	//Views
+
+	#[storage_mapper("pixelOwnership")]
+	fn get_pixel_ownership_mapper(&self, owner: &Address, canvas_id: &u32) -> MapMapper<Self::Storage, u64, bool>;
 
 	#[view(getOwner)]
 	#[storage_get("owner")]
@@ -306,6 +351,10 @@ pub trait PixelOwnership {
 		v.push(dimensions.height);
 		v.into()
 	}
+
+
+
+
 	#[storage_get("canvasDimensions")]
 	fn get_canvas_dimensions(&self, canvas_id: &u32) -> Dimensions;
 

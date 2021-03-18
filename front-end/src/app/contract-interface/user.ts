@@ -2,14 +2,14 @@ import { Account, Address, UserSigner, UserWallet } from "@elrondnetwork/erdjs/o
 import { ISigner } from "@elrondnetwork/erdjs/out/interface";
 
 export class User {
-    address: string;
+    id: string;
     account: Account;
     signer: ISigner;
     isLoggedIn: boolean;
 
     constructor(acc?: Account, accSigner?: ISigner){
         this.account = acc || null;
-        this.address = acc?.address.toString() || null;
+        this.id = acc?.address.toString() || null;
         this.signer = accSigner || null;
         if(!acc || !accSigner){
             this.isLoggedIn = false;

@@ -26,16 +26,19 @@ export class LoginModalComponent implements OnInit {
     this.file = file;
   }
 
+
   onKey(event: any): void {
     if (event.keyCode === 13) {
     } else {
       this.password = event.target.value;
       this.wrongPassword = false;
     }
+    
   }
 
   login(event: any): void{
     event.preventDefault();
+
     if (event.keyCode === 13){
       return;
     }

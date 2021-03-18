@@ -3,11 +3,16 @@
     (login)="onLogin($event)"
     [loggedIn]=" loggedIn$ | async"
     ></app-header>
-    
     <div *ngIf="LoginModalIsVisible">
-        <app-login-modal 
-        (cancelEmitter)="showLoginModal(false)"
-        (loginEmitter)="userLoggedIn($event)"
-        ></app-login-modal>
+        <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
+        </app-login-modal>
+    </div>
+    <div class="blockchain-image">
+        <div>
+            <img *ngIf="!gettingCanvas" [src]="image" alt="">
+            <div *ngIf="gettingCanvas">Getting Canvas From Blockchain...</div>
+            <div *ngIf="!foundContract">Could not get image. Showing mock image.</div>
+            <div *ngIf="foundContract && !gettingCanvas">Showing Image from Smart Contract</div>
+        </div>
     </div>
 </section>

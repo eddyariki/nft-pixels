@@ -51,7 +51,7 @@ const admin = async () =>{
     const aliceSigner = UserSigner.fromWallet(aliceJSON, "password");
     
 
-    const createCanvas = async ()=>{
+    const createCanvas = async (w:number, h:number)=>{
         const func = new ContractFunction("getOwner");
         const qResponse = await smartContract.runQuery(
             proxyProvider, 
@@ -66,7 +66,7 @@ const admin = async () =>{
 
         let callTransaction = smartContract.call({
             func: new ContractFunction("createCanvas"),
-            args: [Argument.fromNumber(500),Argument.fromNumber(500)],
+            args: [Argument.fromNumber(w),Argument.fromNumber(h)],
             gasLimit: new GasLimit(20000000)
         });
 
@@ -144,7 +144,7 @@ const admin = async () =>{
     const mintPixels = async ()=>{
         let callTransactions: Transaction[] = [];
 
-        for(let i=0;i<40;i++){
+        for(let i=0;i<500;i++){
             let callTransaction = smartContract.call({
                 func: new ContractFunction("mintPixels"),
                 args: [Argument.fromNumber(1),Argument.fromNumber(20)],
@@ -155,7 +155,7 @@ const admin = async () =>{
         
         await alice.sync(proxyProvider);
         const sync_then_sign=async(txs:Transaction[])=>{
-            for(let i=0;i<40;i++){
+            for(let i=0;i<500;i++){
                 txs[i].setNonce(alice.nonce);
                 aliceSigner.sign(txs[i]);
                 alice.incrementNonce();
@@ -165,28 +165,28 @@ const admin = async () =>{
         await sync_then_sign(callTransactions);
 
         let hashes: TransactionHash[] = [];
-        for(let i=0;i<40;i++){
+        for(let i=0;i<500;i++){
             hashes[i] = await callTransactions[i].send(proxyProvider);
         }
 
-        for(let i=0;i<40;i++){
+        for(let i=0;i<500;i++){
             await callTransactions[i].awaitExecuted(proxyProvider);
         }
 
-        for(let i=0;i<40;i++){
+        for(let i=0;i<500;i++){
             const executed = await proxyProvider.getTransactionStatus(hashes[i]);       
             // console.log(executed);
         }
     
     }
 
-    const getCanvas = async()=>{
+    const getCanvas = async(from:number, upTo:number)=>{
         const func = new ContractFunction("getCanvas");
         const qResponse = await smartContract.runQuery(
             proxyProvider, 
             {
                 func,
-                args:[Argument.fromNumber(1)]
+                args:[Argument.fromNumber(1),Argument.fromNumber(from), Argument.fromNumber(upTo)]
             });
 
         // qResponse.assertSuccess();
@@ -204,21 +204,22 @@ const admin = async () =>{
 
 
 
-    // await createCanvas();
+    // await createCanvas(100,100);
     // await getCanvasDimensions();
     // await getCanvasTotalSupply();
     // await getLastValidPixelId();
-    // await mintPixels();
-    // await mintPixels();
-    // await mintPixels();
-    // await mintPixels();
-    // for(let i=0;i<200;i++){
-    //     await mintPixels();
-    //     await getLastValidPixelId();
+    // for(let i=0;i<10;i++){
+        // await mintPixels();
+        // await getLastValidPixelId();
     // }
     // await getLastValidPixelId();
-    await getCanvas();
-    
+
+    // const stream =async()=>{
+    //     for(let i=0;i<10;i++){
+    //         await getCanvas(i*1000+1,(i+1)*1000);
+    //     }
+    // } 
+    // await stream();
 }
 
 

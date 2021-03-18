@@ -76,13 +76,26 @@ pub trait PixelOwnership {
 		while &pixel_id <= &end{
 
 			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);//5
-			let r64 = pixel_id.clone()/total_pixel_supply.clone();
-			let b64 = pixel_id.clone()/total_pixel_supply.clone();
-			let g64 = pixel_id.clone()/total_pixel_supply.clone();
-
-			let r = r64 as u8 * 255;
-			let g = g64 as u8 * 255;
-			let b = b64 as u8 * 255;
+			let mut r = 0u8;
+			let mut g = 0u8;
+			let mut b = 0u8;
+			if &pixel_id<=&2500u64{
+				r = 25u8;
+				g = 255u8;
+				b = 55u8;
+			}else if &pixel_id<=&5000u64{
+				r = 255u8;
+				g = 55u8;
+				b = 55u8;
+			}else if &pixel_id<=&7500u64{
+				r = 55u8;
+				g = 55u8;
+				b = 255u8;
+			}else{
+				r = 5u8;
+				g = 255u8;
+				b = 255u8;
+			}
 			let color = Color{r,g,b};
 			self.set_pixel_color(&canvas_id,&pixel_id, &color);//5
 			pixel_id+=1u64.clone();
@@ -260,15 +273,21 @@ pub trait PixelOwnership {
 	fn getCanvas(
 		&self,
 		canvas_id: &u32,
+		from:&u64,
+		up_to: &u64
 	)->MultiResultVec<u8>{
 		
 		// let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
 		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
-		let mut pixel_id = 1u64.clone();
+		let mut end = last_valid_pixel_id.clone();
+		if up_to < &last_valid_pixel_id{
+			end = up_to.clone();
+		}
+		let mut pixel_id = from.clone();
 
 		let mut pixels = Vec::new();
 
-		while &pixel_id <= &last_valid_pixel_id {
+		while &pixel_id <= &end {
 			let color = self.get_pixel_color(&canvas_id, &pixel_id);
 			pixels.push(color.r);
 			pixels.push(color.g);

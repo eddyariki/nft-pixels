@@ -70,7 +70,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                 aliceAddress = new erdjs_1.Address(aliceSecret.generatePublicKey().toAddress());
                 alice = new erdjs_1.Account(aliceAddress);
                 aliceSigner = erdjs_1.UserSigner.fromWallet(aliceJSON, "password");
-                createCanvas = function () { return __awaiter(void 0, void 0, void 0, function () {
+                createCanvas = function (w, h) { return __awaiter(void 0, void 0, void 0, function () {
                     var func, qResponse, qAddress, callTransaction, hashOne, txResult;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
@@ -85,7 +85,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 console.log(aliceAddress.toString());
                                 callTransaction = smartContract.call({
                                     func: new erdjs_1.ContractFunction("createCanvas"),
-                                    args: [erdjs_1.Argument.fromNumber(500), erdjs_1.Argument.fromNumber(500)],
+                                    args: [erdjs_1.Argument.fromNumber(w), erdjs_1.Argument.fromNumber(h)],
                                     gasLimit: new erdjs_1.GasLimit(20000000)
                                 });
                                 return [4 /*yield*/, alice.sync(proxyProvider)];
@@ -183,7 +183,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         switch (_c.label) {
                             case 0:
                                 callTransactions = [];
-                                for (i = 0; i < 40; i++) {
+                                for (i = 0; i < 500; i++) {
                                     callTransaction = smartContract.call({
                                         func: new erdjs_1.ContractFunction("mintPixels"),
                                         args: [erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(20)],
@@ -197,7 +197,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 sync_then_sign = function (txs) { return __awaiter(void 0, void 0, void 0, function () {
                                     var i;
                                     return __generator(this, function (_a) {
-                                        for (i = 0; i < 40; i++) {
+                                        for (i = 0; i < 500; i++) {
                                             txs[i].setNonce(alice.nonce);
                                             aliceSigner.sign(txs[i]);
                                             alice.incrementNonce();
@@ -212,7 +212,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 3;
                             case 3:
-                                if (!(i < 40)) return [3 /*break*/, 6];
+                                if (!(i < 500)) return [3 /*break*/, 6];
                                 _a = hashes;
                                 _b = i;
                                 return [4 /*yield*/, callTransactions[i].send(proxyProvider)];
@@ -226,7 +226,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 7;
                             case 7:
-                                if (!(i < 40)) return [3 /*break*/, 10];
+                                if (!(i < 500)) return [3 /*break*/, 10];
                                 return [4 /*yield*/, callTransactions[i].awaitExecuted(proxyProvider)];
                             case 8:
                                 _c.sent();
@@ -238,7 +238,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 11;
                             case 11:
-                                if (!(i < 40)) return [3 /*break*/, 14];
+                                if (!(i < 500)) return [3 /*break*/, 14];
                                 return [4 /*yield*/, proxyProvider.getTransactionStatus(hashes[i])];
                             case 12:
                                 executed = _c.sent();
@@ -250,7 +250,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                getCanvas = function () { return __awaiter(void 0, void 0, void 0, function () {
+                getCanvas = function (from, upTo) { return __awaiter(void 0, void 0, void 0, function () {
                     var func, qResponse;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
@@ -258,7 +258,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 func = new erdjs_1.ContractFunction("getCanvas");
                                 return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
                                         func: func,
-                                        args: [erdjs_1.Argument.fromNumber(1)]
+                                        args: [erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(from), erdjs_1.Argument.fromNumber(upTo)]
                                     })];
                             case 1:
                                 qResponse = _a.sent();
@@ -268,34 +268,25 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                // await createCanvas();
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // await getLastValidPixelId();
-                // await mintPixels();
-                // await mintPixels();
-                // await mintPixels();
-                // await mintPixels();
-                // for(let i=0;i<200;i++){
-                //     await mintPixels();
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
-                return [4 /*yield*/, getCanvas()];
+                return [4 /*yield*/, createCanvas(100, 100)];
             case 3:
-                // await createCanvas();
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // await getLastValidPixelId();
-                // await mintPixels();
-                // await mintPixels();
-                // await mintPixels();
-                // await mintPixels();
-                // for(let i=0;i<200;i++){
-                //     await mintPixels();
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
+                _a.sent();
+                return [4 /*yield*/, getCanvasDimensions()];
+            case 4:
+                _a.sent();
+                return [4 /*yield*/, getCanvasTotalSupply()];
+            case 5:
+                _a.sent();
+                return [4 /*yield*/, getLastValidPixelId()];
+            case 6:
+                _a.sent();
+                // for(let i=0;i<10;i++){
+                return [4 /*yield*/, mintPixels()];
+            case 7:
+                // for(let i=0;i<10;i++){
+                _a.sent();
+                return [4 /*yield*/, getLastValidPixelId()];
+            case 8:
                 _a.sent();
                 return [2 /*return*/];
         }

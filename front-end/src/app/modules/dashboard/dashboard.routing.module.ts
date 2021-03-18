@@ -6,7 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { HomeComponent } from './home/home.component';
 import { AuctionComponent } from './auction/auction.component';
-import { ChangeColorComponent } from './change-color/change-coloer.component';
+import { ChangeColorComponent } from './change-color/change-color.component';
 
 // Others
 import { config } from '../../config';

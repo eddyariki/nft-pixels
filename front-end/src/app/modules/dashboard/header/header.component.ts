@@ -12,6 +12,7 @@ import {
 import { Observable, map} from 'src/app/lib/rxjs';
 import { Actions, Store} from 'src/app/lib/ngrx';
 import { LoginOrLogout } from './log';
+import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 
 
 @Component({
@@ -23,6 +24,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     @Output() login = new EventEmitter<string>();
     @Output() logout = new EventEmitter<void>();
 
+    public loggedin$: Observable<boolean> =  this.store$.select(getIsUserLoggedIn)
 
     // tslint:disable-next-line: variable-name
     public _loggedIn: boolean;
@@ -32,7 +34,11 @@ export class HeaderComponent implements OnInit, OnChanges {
 
     public logInOrNot: LoginOrLogout = 'login';
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        // this.loggedin$.subscribe(v => {
+        //     this._loggedIn = v;
+        // });
+    }
 
     ngOnChanges(changes: SimpleChanges): void {}
 

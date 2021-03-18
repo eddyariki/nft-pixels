@@ -4,7 +4,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, UrlSegment } from '@angular/router';
 import { Observable, map, mergeMap, mapTo, switchMap, tap, concat} from 'src/app/lib/rxjs';
 
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -23,6 +23,7 @@ import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
+import { Account, UserSigner } from '@elrondnetwork/erdjs';
 
 @Component({
     selector: 'app-dashboard',
@@ -31,7 +32,7 @@ import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visi
 })
 export class DashboardComponent implements OnInit {
     public user$ = this.store$.select(getUser);
-    public loggedIn$: Observable<boolean>;
+    public loggedIn$: Observable<boolean>  = this.store$.select(getIsUserLoggedIn);
     public LoginModalIsVisible: boolean;
     public LoginModalIsVisible$ = this.store$.select(getLoginModalIsVisible);
 
@@ -54,7 +55,9 @@ export class DashboardComponent implements OnInit {
         this.store$.select(getUserAddress).subscribe(
             x => {
                 this.store$.dispatch(userActions.remove({id: x})),
-                this.store$.dispatch(payloadActions.payload({userAddress: x, isLoggedIn: false, key: null}));
+                this.store$.dispatch(payloadActions.payload({userAddress: null, isLoggedIn: false, key: null}));
+                localStorage.setItem('user', null);
+                this.router.navigate(['']);
             }
         );
     }
@@ -67,9 +70,15 @@ export class DashboardComponent implements OnInit {
 
     userLoggedIn(user: User): void{
         this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
-        this.store$.dispatch(userActions.add({user: {id: user.id,  loggedIn: true}}));
+        const jsonSigner = JSON.stringify(user.signer);
+        this.store$.dispatch(userActions.add({user: {id: user.id,  loggedIn: true, signer: jsonSigner, account: user.account}}));
         this.loggedIn$ = this.store$.select(getIsUserLoggedIn);
         this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: false}));
+        this.store$.select(getUser).subscribe(user =>
+            {
+                const userJson = JSON.stringify(user);
+                localStorage.setItem('user', userJson);
+            });
     }
 
 

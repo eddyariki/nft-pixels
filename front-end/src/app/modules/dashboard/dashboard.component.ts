@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit {
         this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
         this.store$.dispatch(userActions.add({user: {id: user.id,  loggedIn: true}}));
         this.loggedIn$ = this.store$.select(getIsUserLoggedIn);
-
+        this.LoginModalIsVisible = false;
     }
 
 

@@ -68,7 +68,7 @@ export default class CanvasContract {
             new GasLimit(100000000) //bad approach (hardcoded)
             );
 
-        return callTransaction;
+        return callTransaction; //set gaslimit later in transaction-confirmation modal
     }
 
 

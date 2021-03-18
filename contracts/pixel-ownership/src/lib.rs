@@ -346,6 +346,9 @@ pub trait PixelOwnership {
 	#[storage_get("auction")]
 	fn get_auction(&self, canvas_id:&u32, pixel_id:&u64) -> Auction<BigUint>;
 
+
+	// #[storage_mapper("colorOf")]
+	// fn get_color_mapper(&self, canvas_id: &u32) -> MapMapper<Self::Storage, u64, Color>;
 	//Setters
 
 	#[storage_set("owner")]

@@ -35,7 +35,7 @@ export default class CanvasContract {
         const address = new Address(contractAddress);
         this.contract = new SmartContract({ address });
         this.proxyProvider = provider || null;
-        this.user = usr||null;
+        this.user = usr || null;
     }
 
 
@@ -44,28 +44,28 @@ export default class CanvasContract {
     //Getters
     public async getCanvas(canvasId: number): Promise<Canvas> {
         if (!this.proxyProvider) {
-            const a = await this._generateRGBAArray(500, 500);
-            const dimensions = [500, 500];
+            const a = await this._generateRGBAArray(100, 100);
+            const dimensions = [100, 100];
             const canvas: Canvas = new Canvas(dimensions, a);
             return canvas;
         }
-        const stream =async()=>{
+        const stream = async () => {
             let buffer;
-            for(let i=0;i<10;i++){
-                if(!buffer){
-                    buffer=await this._query_get_canvas(canvasId,i*1000+1,(i+1)*1000);
-                }else{
-                    let b=await this._query_get_canvas(canvasId,i*1000+1,(i+1)*1000);
+            for (let i = 0; i < 10; i++) {
+                if (!buffer) {
+                    buffer = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                } else {
+                    let b = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                     buffer = this._concatTypedArrays(buffer, b);
                 }
-                
-                
+
+
             }
             return buffer;
-        } 
+        }
         const rgbArray = await stream();
         console.log(rgbArray.length);
-        console.log(rgbArray.slice(0,24));
+        console.log(rgbArray.slice(0, 24));
         const dimensions = await this._query_get_canvas_dimensions(canvasId);
         const rgbaArray = await this._generateRGBAArray(dimensions[0], dimensions[1], rgbArray);
         const canvas: Canvas = new Canvas(dimensions, rgbaArray);
@@ -84,7 +84,7 @@ export default class CanvasContract {
 
     public async getCanvasTotalPixelSupply(canvasId: number): Promise<number> {
         if (!this.proxyProvider) {
-            const a = 500*500;
+            const a = 500 * 500;
             return a;
         }
         const total_pixel_supply = await this._queryGetCanvasTotalPixelSupply(canvasId);
@@ -106,13 +106,13 @@ export default class CanvasContract {
     }
 
 
-    private async _query_get_canvas(canvasId: number, from:number, upTo:number): Promise<Uint8Array> {
+    private async _query_get_canvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
         const func = new ContractFunction("getCanvas");
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
             {
                 func,
-                args:[Argument.fromNumber(canvasId), Argument.fromNumber(from), Argument.fromNumber(upTo)]
+                args: [Argument.fromNumber(canvasId), Argument.fromNumber(from), Argument.fromNumber(upTo)]
             });
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
@@ -162,13 +162,16 @@ export default class CanvasContract {
         let count = 0;
         let rgbArrayCount = 0;
         let rgbaArray = new Uint8Array(w * h * 4);
-
         for (let i = 0; i < w * h * 4; i++) {
             if (count === 3) {
                 rgbaArray[i] = 255;
                 count = 0;
             } else {
-                rgbaArray[i] = rgbArray[rgbArrayCount];
+                if (!rgbArray) {
+                    rgbaArray[i] = 125;
+                } else {
+                    rgbaArray[i] = rgbArray[rgbArrayCount];
+                }
                 rgbArrayCount++;
                 count++;
             }

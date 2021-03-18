@@ -4,7 +4,7 @@ import {
     OnDestroy,
     OnInit,
 } from '@angular/core';
-import { Observable, map} from 'src/app/lib/rxjs';
+import { Observable, map } from 'src/app/lib/rxjs';
 
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import CanvasContract from 'src/app/contract-interface/canvas-contract';
@@ -34,10 +34,16 @@ export class DashboardComponent implements OnInit {
     async ngOnInit(): Promise<void> {
         const proxyProvider = new ProxyProvider('http://localhost:7950', 1000000);
         await NetworkConfig.getDefault().sync(proxyProvider);
-        const canvasContract = new CanvasContract(
-            'erd1qqqqqqqqqqqqqpgqd4kel97fslldfrfv2jce5u76qwa8w48pd8ss7zyjft',
-            proxyProvider
+        let canvasContract: CanvasContract;
+        try {
+            canvasContract = new CanvasContract(
+                // 'erd1qqqqqqqqqqqqqpgqd4kel97fslldfrfv2jce5u76qwa8w48pd8ss7zyjft',
+                // proxyProvider
             );
+        }catch(e){
+            canvasContract = new CanvasContract();
+        }
+       
         this.gettingCanvas = true;
         const rgbArray = await canvasContract.getCanvas(1);
         this.gettingCanvas = false;
@@ -45,25 +51,25 @@ export class DashboardComponent implements OnInit {
     }
 
     onLogin(loggedInOrNot: string): void {
-        if(loggedInOrNot === 'login'){
+        if (loggedInOrNot === 'login') {
             this.LoginModalIsVisible = true;
-        }else if(loggedInOrNot === 'logout'){
+        } else if (loggedInOrNot === 'logout') {
             //logout function (clear cache/localstorage)
         }
-        
+
     }
 
-    showLoginModal(show:boolean){
-        if(this.LoginModalIsVisible!==show){
+    showLoginModal(show: boolean) {
+        if (this.LoginModalIsVisible !== show) {
             this.LoginModalIsVisible = show;
         }
     }
 
-    userLoggedIn(user:User){
+    userLoggedIn(user: User) {
         console.log(user);
     }
 
 
-    constructor(private actions$: Actions, private store$: Store<any>, private sanitizer: DomSanitizer) {}
+    constructor(private actions$: Actions, private store$: Store<any>, private sanitizer: DomSanitizer) { }
 
 }

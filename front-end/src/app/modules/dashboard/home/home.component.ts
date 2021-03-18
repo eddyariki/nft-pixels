@@ -19,6 +19,8 @@ import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { Navigator } from '../navigator';
+import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
+import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
 
 @Component({
   selector: 'app-home',
@@ -60,13 +62,36 @@ export class HomeComponent implements OnInit {
     onAuction() {
         this.store$.select(getIsUserLoggedIn).subscribe(x => {
             if (x === false) {
-                return;
+                this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: true}));
             }
         });
 
         this.store$.select(getUserAddress).subscribe(
             id => {
-                this.url = Navigator.goAuction(id);
+                if (id) {
+                    this.url = Navigator.goAuction(id);
+                } else {
+                    this.url = '';
+                }
+            }
+        );
+        this.router.navigate([this.url]);
+    }
+
+    onChangeColor(): void{
+        this.store$.select(getIsUserLoggedIn).subscribe(x => {
+            if (x === false) {
+                this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: true}));
+            }
+        });
+
+        this.store$.select(getUserAddress).subscribe(
+            id => {
+                if (id){
+                    this.url = Navigator.goChangeColor(id);
+                } else {
+                    this.url = '';
+                }
             }
         );
         this.router.navigate([this.url]);

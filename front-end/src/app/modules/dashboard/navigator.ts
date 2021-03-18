@@ -5,8 +5,8 @@ class Navigators {
         return `auction/${id}`;
     }
 
-    goChangePixel(id: string): string {
-        return `change_pixel/${id}`;
+    goChangeColor(id: string): string {
+        return `change_color/${id}`;
     }
 }
 

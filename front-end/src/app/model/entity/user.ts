@@ -4,5 +4,5 @@ export interface User {
     id: string;
     account?: Account;
     signer?: UserSigner;
-    loggedI?: boolean;
+    loggedIn?: boolean;
 }

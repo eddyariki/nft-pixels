@@ -1,6 +1,7 @@
 <section>
     <app-header
     (login)="onLogin($event)"
+    [loggedIn]=" loggedIn$ | async"
     ></app-header>
     
     <div *ngIf="LoginModalIsVisible">

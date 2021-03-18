@@ -55,14 +55,14 @@ export default class CanvasContract {
                 if (!buffer) {
                     buffer = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                 } else {
-                    let b = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                    const b = await this._query_get_canvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                     buffer = this._concatTypedArrays(buffer, b);
                 }
 
 
             }
             return buffer;
-        }
+        };
         const rgbArray = await stream();
         console.log(rgbArray.length);
         console.log(rgbArray.slice(0, 24));
@@ -93,13 +93,9 @@ export default class CanvasContract {
 
 
 
-
-
-
-
-    //Private make more dry later
+    // Private make more dry later
     private _concatTypedArrays(a, b) {
-        var c = new (a.constructor)(a.length + b.length);
+        let c = new (a.constructor)(a.length + b.length);
         c.set(a, 0);
         c.set(b, a.length);
         return c;
@@ -107,7 +103,7 @@ export default class CanvasContract {
 
 
     private async _query_get_canvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
-        const func = new ContractFunction("getCanvas");
+        const func = new ContractFunction('getCanvas');
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
             {

@@ -8,6 +8,7 @@ import { HomeComponent } from './home/home.component';
 
 // Others
 import { config } from '../../config';
+import { AuctionComponent } from './auction/auction.component';
 
 const r = config.routes;
 
@@ -15,10 +16,16 @@ const routes: Routes = [
     {
         path: r.root,
         component: DashboardComponent,
-        children: [{
+        children: [
+        {
             path: r.root,
             component: HomeComponent
-        }]
+        },
+        {
+            path: r.auction,
+            component: AuctionComponent
+        }
+    ]
     }
 ];
 

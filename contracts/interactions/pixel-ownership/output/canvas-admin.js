@@ -52,7 +52,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -177,16 +177,16 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                mintPixels = function () { return __awaiter(void 0, void 0, void 0, function () {
+                mintPixels = function (loop, units) { return __awaiter(void 0, void 0, void 0, function () {
                     var callTransactions, i, callTransaction, sync_then_sign, hashes, i, _a, _b, i, i, executed;
                     return __generator(this, function (_c) {
                         switch (_c.label) {
                             case 0:
                                 callTransactions = [];
-                                for (i = 0; i < 500; i++) {
+                                for (i = 0; i < loop; i++) {
                                     callTransaction = smartContract.call({
                                         func: new erdjs_1.ContractFunction("mintPixels"),
-                                        args: [erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(20)],
+                                        args: [erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(units)],
                                         gasLimit: new erdjs_1.GasLimit(100000000)
                                     });
                                     callTransactions[i] = callTransaction;
@@ -197,7 +197,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 sync_then_sign = function (txs) { return __awaiter(void 0, void 0, void 0, function () {
                                     var i;
                                     return __generator(this, function (_a) {
-                                        for (i = 0; i < 500; i++) {
+                                        for (i = 0; i < loop; i++) {
                                             txs[i].setNonce(alice.nonce);
                                             aliceSigner.sign(txs[i]);
                                             alice.incrementNonce();
@@ -212,7 +212,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 3;
                             case 3:
-                                if (!(i < 500)) return [3 /*break*/, 6];
+                                if (!(i < loop)) return [3 /*break*/, 6];
                                 _a = hashes;
                                 _b = i;
                                 return [4 /*yield*/, callTransactions[i].send(proxyProvider)];
@@ -226,7 +226,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 7;
                             case 7:
-                                if (!(i < 500)) return [3 /*break*/, 10];
+                                if (!(i < loop)) return [3 /*break*/, 10];
                                 return [4 /*yield*/, callTransactions[i].awaitExecuted(proxyProvider)];
                             case 8:
                                 _c.sent();
@@ -238,7 +238,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 i = 0;
                                 _c.label = 11;
                             case 11:
-                                if (!(i < 500)) return [3 /*break*/, 14];
+                                if (!(i < loop)) return [3 /*break*/, 14];
                                 return [4 /*yield*/, proxyProvider.getTransactionStatus(hashes[i])];
                             case 12:
                                 executed = _c.sent();
@@ -251,7 +251,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                     });
                 }); };
                 getCanvas = function (from, upTo) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse;
+                    var func, qResponse, returnData, i;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -264,28 +264,157 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 qResponse = _a.sent();
                                 // qResponse.assertSuccess();
                                 console.log("Size: ", qResponse.returnData.length);
+                                returnData = qResponse.returnData;
+                                for (i = 0; i < returnData.length; i++) {
+                                    if (i % 3 === 0)
+                                        console.log(" //");
+                                    console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+                                }
                                 return [2 /*return*/];
                         }
                     });
                 }); };
-                return [4 /*yield*/, createCanvas(100, 100)];
+                getOwnedPixels = function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var func, qResponse;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                func = new erdjs_1.ContractFunction("getOwnedPixels");
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [erdjs_1.Argument.fromPubkey(alice.address), erdjs_1.Argument.fromNumber(1)]
+                                    })];
+                            case 1:
+                                qResponse = _a.sent();
+                                // qResponse.assertSuccess();
+                                console.log("Size: ", qResponse.returnData.length);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); };
+                changePixelColor = function (canvas_id, pixel_ids, r, g, b, loop) { return __awaiter(void 0, void 0, void 0, function () {
+                    var callTransactions, i, callTransaction, sync_then_sign, hashes, i, _a, _b, i, i, executed;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                callTransactions = [];
+                                //&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
+                                for (i = 0; i < loop; i++) {
+                                    console.log("creating tx");
+                                    callTransaction = smartContract.call({
+                                        func: new erdjs_1.ContractFunction("changePixelColor"),
+                                        args: [
+                                            erdjs_1.Argument.fromNumber(canvas_id),
+                                            erdjs_1.Argument.fromNumber(pixel_ids[i]),
+                                            erdjs_1.Argument.fromNumber(r[i]),
+                                            erdjs_1.Argument.fromNumber(r[i]),
+                                            erdjs_1.Argument.fromNumber(r[i])
+                                        ],
+                                        gasLimit: new erdjs_1.GasLimit(100000000)
+                                    });
+                                    callTransactions[i] = callTransaction;
+                                }
+                                return [4 /*yield*/, alice.sync(proxyProvider)];
+                            case 1:
+                                _c.sent();
+                                sync_then_sign = function (txs) { return __awaiter(void 0, void 0, void 0, function () {
+                                    var i;
+                                    return __generator(this, function (_a) {
+                                        for (i = 0; i < loop; i++) {
+                                            txs[i].setNonce(alice.nonce);
+                                            aliceSigner.sign(txs[i]);
+                                            alice.incrementNonce();
+                                        }
+                                        return [2 /*return*/];
+                                    });
+                                }); };
+                                return [4 /*yield*/, sync_then_sign(callTransactions)];
+                            case 2:
+                                _c.sent();
+                                hashes = [];
+                                i = 0;
+                                _c.label = 3;
+                            case 3:
+                                if (!(i < loop)) return [3 /*break*/, 6];
+                                _a = hashes;
+                                _b = i;
+                                return [4 /*yield*/, callTransactions[i].send(proxyProvider)];
+                            case 4:
+                                _a[_b] = _c.sent();
+                                _c.label = 5;
+                            case 5:
+                                i++;
+                                return [3 /*break*/, 3];
+                            case 6:
+                                i = 0;
+                                _c.label = 7;
+                            case 7:
+                                if (!(i < loop)) return [3 /*break*/, 10];
+                                return [4 /*yield*/, callTransactions[i].awaitExecuted(proxyProvider)];
+                            case 8:
+                                _c.sent();
+                                _c.label = 9;
+                            case 9:
+                                i++;
+                                return [3 /*break*/, 7];
+                            case 10:
+                                i = 0;
+                                _c.label = 11;
+                            case 11:
+                                if (!(i < loop)) return [3 /*break*/, 14];
+                                return [4 /*yield*/, proxyProvider.getTransactionStatus(hashes[i])];
+                            case 12:
+                                executed = _c.sent();
+                                _c.label = 13;
+                            case 13:
+                                i++;
+                                return [3 /*break*/, 11];
+                            case 14: return [2 /*return*/];
+                        }
+                    });
+                }); };
+                return [4 /*yield*/, createCanvas(5, 5)];
             case 3:
                 _a.sent();
-                return [4 /*yield*/, getCanvasDimensions()];
+                // await getCanvasDimensions();
+                // await getCanvasTotalSupply();
+                // await getLastValidPixelId();
+                // for(let i=0;i<10;i++){
+                return [4 /*yield*/, mintPixels(1, 25)];
             case 4:
-                _a.sent();
-                return [4 /*yield*/, getCanvasTotalSupply()];
+                // await getCanvasDimensions();
+                // await getCanvasTotalSupply();
+                // await getLastValidPixelId();
+                // for(let i=0;i<10;i++){
+                _a.sent(); //100pixels
+                // await getLastValidPixelId();
+                // }
+                // await getLastValidPixelId();
+                // const stream =async()=>{
+                //     for(let i=0;i<10;i++){
+                //         await getCanvas(i*1000+1,(i+1)*1000);
+                //     }
+                // } 
+                // await stream();
+                return [4 /*yield*/, getOwnedPixels()];
             case 5:
-                _a.sent();
-                return [4 /*yield*/, getLastValidPixelId()];
+                // await getLastValidPixelId();
+                // }
+                // await getLastValidPixelId();
+                // const stream =async()=>{
+                //     for(let i=0;i<10;i++){
+                //         await getCanvas(i*1000+1,(i+1)*1000);
+                //     }
+                // } 
+                // await stream();
+                _a.sent(); // worked
+                return [4 /*yield*/, getCanvas(1, 2)];
             case 6:
                 _a.sent();
-                // for(let i=0;i<10;i++){
-                return [4 /*yield*/, mintPixels()];
+                return [4 /*yield*/, changePixelColor(1, [1], [42], [42], [67], 1)];
             case 7:
-                // for(let i=0;i<10;i++){
                 _a.sent();
-                return [4 /*yield*/, getLastValidPixelId()];
+                return [4 /*yield*/, getCanvas(1, 2)];
             case 8:
                 _a.sent();
                 return [2 /*return*/];

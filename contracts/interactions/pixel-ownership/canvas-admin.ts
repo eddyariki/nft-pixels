@@ -141,13 +141,13 @@ const admin = async () =>{
         }
     }
     
-    const mintPixels = async ()=>{
+    const mintPixels = async (loop:number, units:number)=>{
         let callTransactions: Transaction[] = [];
 
-        for(let i=0;i<500;i++){
+        for(let i=0;i<loop;i++){
             let callTransaction = smartContract.call({
                 func: new ContractFunction("mintPixels"),
-                args: [Argument.fromNumber(1),Argument.fromNumber(20)],
+                args: [Argument.fromNumber(1),Argument.fromNumber(units)],
                 gasLimit: new GasLimit(100000000)
             });
             callTransactions[i] = callTransaction;
@@ -155,7 +155,7 @@ const admin = async () =>{
         
         await alice.sync(proxyProvider);
         const sync_then_sign=async(txs:Transaction[])=>{
-            for(let i=0;i<500;i++){
+            for(let i=0;i<loop;i++){
                 txs[i].setNonce(alice.nonce);
                 aliceSigner.sign(txs[i]);
                 alice.incrementNonce();
@@ -165,15 +165,15 @@ const admin = async () =>{
         await sync_then_sign(callTransactions);
 
         let hashes: TransactionHash[] = [];
-        for(let i=0;i<500;i++){
+        for(let i=0;i<loop;i++){
             hashes[i] = await callTransactions[i].send(proxyProvider);
         }
 
-        for(let i=0;i<500;i++){
+        for(let i=0;i<loop;i++){
             await callTransactions[i].awaitExecuted(proxyProvider);
         }
 
-        for(let i=0;i<500;i++){
+        for(let i=0;i<loop;i++){
             const executed = await proxyProvider.getTransactionStatus(hashes[i]);       
             // console.log(executed);
         }
@@ -192,27 +192,94 @@ const admin = async () =>{
         // qResponse.assertSuccess();
         console.log("Size: ", qResponse.returnData.length);
         // console.log(qResponse.returnData);
+        const returnData = qResponse.returnData;
+        
+        for(let i=0; i<returnData.length; i++){
+            if(i%3===0)console.log(" //");
+            console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+
+        }
+    }
+
+    const getOwnedPixels = async()=>{
+        const func = new ContractFunction("getOwnedPixels");
+        const qResponse = await smartContract.runQuery(
+            proxyProvider, 
+            {
+                func,
+                args:[Argument.fromPubkey(alice.address),Argument.fromNumber(1)]
+            });
+
+        // qResponse.assertSuccess();
+        console.log("Size: ", qResponse.returnData.length);
+        // console.log(qResponse.returnData);
         // const returnData = qResponse.returnData;
         
         // for(let i=0; i<returnData.length; i++){
-
-        //     // console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+        //     if(i%2===0)console.log(" //");
+        //     console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+            
         // }
+    }
+
+    const changePixelColor = async(canvas_id:number,pixel_ids:number[], r:number[],g:number[], b:number[], loop:number) =>{
+        let callTransactions: Transaction[] = [];
+        //&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
+        for(let i=0;i<loop;i++){
+            console.log("creating tx");
+            let callTransaction = smartContract.call({
+                func: new ContractFunction("changePixelColor"),
+                args: [
+                    Argument.fromNumber(canvas_id),
+                    Argument.fromNumber(pixel_ids[i]),
+                    Argument.fromNumber(r[i]),
+                    Argument.fromNumber(r[i]),
+                    Argument.fromNumber(r[i])
+                ],
+                gasLimit: new GasLimit(100000000)
+            });
+            callTransactions[i] = callTransaction;
+        }
+        
+        await alice.sync(proxyProvider);
+        const sync_then_sign=async(txs:Transaction[])=>{
+            for(let i=0;i<loop;i++){
+                txs[i].setNonce(alice.nonce);
+                aliceSigner.sign(txs[i]);
+                alice.incrementNonce();
+            }
+        }
+
+        await sync_then_sign(callTransactions);
+
+        let hashes: TransactionHash[] = [];
+        for(let i=0;i<loop;i++){
+            hashes[i] = await callTransactions[i].send(proxyProvider);
+        }
+
+        for(let i=0;i<loop;i++){
+            await callTransactions[i].awaitExecuted(proxyProvider);
+        }
+
+        for(let i=0;i<loop;i++){
+            const executed = await proxyProvider.getTransactionStatus(hashes[i]);       
+            // console.log(executed);
+        }
     }
 
 
 
 
-
-    // await createCanvas(100,100);
+    await createCanvas(5,5);
     // await getCanvasDimensions();
     // await getCanvasTotalSupply();
     // await getLastValidPixelId();
     // for(let i=0;i<10;i++){
-        // await mintPixels();
+        await mintPixels(1,25); //100pixels
         // await getLastValidPixelId();
     // }
     // await getLastValidPixelId();
+    
 
     // const stream =async()=>{
     //     for(let i=0;i<10;i++){
@@ -220,6 +287,10 @@ const admin = async () =>{
     //     }
     // } 
     // await stream();
+    await getOwnedPixels(); // worked
+    await getCanvas(1,2);
+    await changePixelColor(1,[1],[42],[42],[67], 1);
+    await getCanvas(1,2);
 }
 
 

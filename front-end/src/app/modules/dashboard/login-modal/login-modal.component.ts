@@ -1,5 +1,6 @@
 import { ReadVarExpr } from '@angular/compiler';
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { UseExistingWebDriver } from 'protractor/built/driverProviders';
 import { User } from 'src/app/contract-interface/user';
 
 @Component({
@@ -13,6 +14,8 @@ export class LoginModalComponent implements OnInit {
   public password: string;
   public file: File;
   public wrongPassword: boolean;
+  public loginSucceeded: boolean;
+  public user: User;
   constructor() { }
 
   ngOnInit(): void {
@@ -26,6 +29,9 @@ export class LoginModalComponent implements OnInit {
     this.file = file;
   }
 
+  close(){
+    this.loginEmitter.emit(this.user);
+  }
 
   onKey(event: any): void {
     if (event.keyCode === 13) {
@@ -53,7 +59,10 @@ export class LoginModalComponent implements OnInit {
       } else {
         this.password = '';
         this.wrongPassword = false;
-        this.loginEmitter.emit(user);
+        this.user = user;
+        this.loginSucceeded = true;
+
+        
       }
     };
   }

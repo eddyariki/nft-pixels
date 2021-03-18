@@ -12,12 +12,17 @@ export const getUserAddress = createSelector(
     state => state.userAddress,
 );
 
+export const getIsUserLoggedIn = createSelector(
+    getState,
+    state => state.isLoggedIn,
+);
+
 export const getUser = createSelector(
     getUserEntities,
     getUserAddress,
-    (entities, address) => {
-        if (address) {
-            return entities[address];
+    (entities, id) => {
+        if (id) {
+            return entities[id];
         }
     },
 );

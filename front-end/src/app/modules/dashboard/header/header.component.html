@@ -1,5 +1,5 @@
 <header>
     <ul class="nav">
-        <li><a (click)="onLogin()">{{ logInOrNot }}</a></li>
+        <li><a (click)="onLogin()">{{ _loggedIn ? 'logout' : 'login' }}</a></li>
     </ul>
 </header>

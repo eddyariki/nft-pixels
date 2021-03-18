@@ -39,9 +39,9 @@ export default class CanvasContract {
     }
 
 
-    //Public
+    // Public
 
-    //Getters
+    // Getters
     public async getCanvas(canvasId: number): Promise<Canvas> {
         if (!this.proxyProvider) {
             const a = await this._generateRGBAArray(100, 100);
@@ -124,7 +124,7 @@ export default class CanvasContract {
     }
 
     private async _query_get_canvas_dimensions(canvasId: number): Promise<number[]> {
-        const func = new ContractFunction("getCanvasDimensionsTopEncoded");
+        const func = new ContractFunction('getCanvasDimensionsTopEncoded');
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
             {
@@ -133,7 +133,7 @@ export default class CanvasContract {
             });
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
-        const dimensions = []
+        const dimensions = [];
         for (let i = 0; i < returnData.length; i++) {
             dimensions[i] = returnData[i].asNumber;
         }
@@ -141,7 +141,7 @@ export default class CanvasContract {
     }
 
     private async _queryGetCanvasTotalPixelSupply(canvasId: number): Promise<number[]> {
-        const func = new ContractFunction("getCanvasDimensionsTopEncoded");
+        const func = new ContractFunction('getCanvasDimensionsTopEncoded');
         const qResponse = await this.contract.runQuery(
             this.proxyProvider,
             {
@@ -150,7 +150,7 @@ export default class CanvasContract {
             });
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
-        const dimensions = []
+        const dimensions = [];
         for (let i = 0; i < returnData.length; i++) {
             dimensions[i] = returnData[i].asNumber;
         }
@@ -161,7 +161,8 @@ export default class CanvasContract {
     private _generateRGBAArray(w: number, h: number, rgbArray?: Uint8Array): Uint8Array {
         let count = 0;
         let rgbArrayCount = 0;
-        let rgbaArray = new Uint8Array(w * h * 4);
+        const rgbaArray = new Uint8Array(w * h * 4);
+
         for (let i = 0; i < w * h * 4; i++) {
             if (count === 3) {
                 rgbaArray[i] = 255;

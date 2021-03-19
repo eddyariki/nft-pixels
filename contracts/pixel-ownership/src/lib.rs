@@ -132,8 +132,28 @@ pub trait PixelOwnership {
 		self.set_pixel_color(&canvas_id, &pixel_id, &new_color);
 		
 		Ok(new_color)
-
 	}
+
+	#[endpoint(changeBatchPixelColor)]
+	fn change_batch_pixel_color(&self, canvas_id: u32, pixel_ids:&[u64], r: &[u8], g: &[u8], b: &[u8])->SCResult<()>{
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
+		let caller = self.get_caller();
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+
+		for (((pixel_id,&r),&g),&b) in pixel_ids.iter().zip(r.iter()).zip(g.iter()).zip(b.iter()){
+			require!(pixel_id<=&last_valid_pixel_id, "Pixel does not exist! ");
+			require!(pixel_id>&0, "Pixel does not exist!");
+			let pixel_owner = self.get_pixel_owner(&canvas_id, &pixel_id);
+			require!(pixel_owner == caller, "Only pixel owners can change the color!");
+			let new_color = Color{r,g,b};
+			self.set_pixel_color(&canvas_id, &pixel_id, &new_color);
+		}
+		Ok(())
+	}
+
+
 
 	#[endpoint(auctionPixel)]
 	fn auction_pixel(&self, canvas_id:u32, pixel_id:u64, starting_price:BigUint, ending_price:BigUint, deadline:u64)->SCResult<Auction<BigUint>>{

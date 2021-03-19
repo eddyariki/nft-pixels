@@ -9,9 +9,9 @@ import { DashboardComponent } from './dashboard.component';
 import { HeaderComponent } from './header/header.component';
 import { LoginModalComponent } from './login-modal/login-modal.component';
 import { HomeComponent } from './home/home.component';
+import { TransactionModalComponent } from './transaction-modal/transaction-modal.component';
 import { AuctionComponent } from './auction/auction.component';
-import { ChangeColorComponent } from './change-color/change-coloer.component';
-
+import { ChangeColorComponent } from './change-color/change-color.component';
 
 @NgModule({
     imports: [
@@ -24,6 +24,7 @@ import { ChangeColorComponent } from './change-color/change-coloer.component';
     HeaderComponent,
     LoginModalComponent,
     HomeComponent,
+    TransactionModalComponent,
     AuctionComponent,
     ChangeColorComponent
     ],

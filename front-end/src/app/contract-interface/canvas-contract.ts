@@ -152,9 +152,9 @@ export default class CanvasContract {
 
     private async _streamCanvas(canvasId:number):Promise<Uint8Array>{
         let buffer:Uint8Array;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 1; i++) {
             if (!buffer) {
-                buffer = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                buffer = await this._queryGetCanvas(canvasId, 1, 10000);
             } else {
                 const b = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
                 buffer = this._concatTypedArrays(buffer, b);

@@ -7,7 +7,7 @@ import {  map } from 'rxjs/operators';
 import * as userActions from 'src/app/model/store/user/actions';
 import * as testActions from 'src/app/model/store/test/actions';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
-import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
+// import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
 import { getUser } from 'src/app/modules/payload/payload.selectors';
 import { User } from './model/entity';
 
@@ -26,13 +26,17 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {}
 
   constructor(private actions$: Actions, private store$: Store<any>, private router: Router) {
-    const user: User = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-      this.store$.dispatch(userActions.add({user}));
-      this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
-    } else {
-        this.router.navigate(['']);
-    }
+    this.store$.select(getUser).subscribe(u => {
+      if (!u) {
+        const user: User = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+          this.store$.dispatch(userActions.add({user}));
+          this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
+        } else {
+            this.router.navigate(['']);
+        }
+      }
+    })
   }
 
 }

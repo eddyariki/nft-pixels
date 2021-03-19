@@ -96,7 +96,7 @@ export class ChangeColorComponent implements OnInit {
       let sliderSize: any;
       let button: any;
       let showImage: any;
-
+    
       const handeFile = file => {
         if (file.type === 'image') {
           img = s.createImg(file.data, '');
@@ -130,7 +130,6 @@ export class ChangeColorComponent implements OnInit {
 
         if (showImage) { button.html('画像オフ'); }
       };
-
 
       s.setup = () => {
         const input = s.createFileInput(handeFile);
@@ -167,7 +166,6 @@ export class ChangeColorComponent implements OnInit {
       };
 
       s.mouseClicked = () => {
-
         if (s.mouseX <= 0 || s.mouseY <= 0) { return; }
         if (img) {
           // image is setting color
@@ -231,4 +229,3 @@ export class ChangeColorComponent implements OnInit {
   //   let user;
   //   this.store$.select(getUserAddress).subscribe(x => {
   //     this.address = x;
-  // })

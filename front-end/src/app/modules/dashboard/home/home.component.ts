@@ -36,21 +36,23 @@ export class HomeComponent implements OnInit {
     public foundContract: boolean;
     public url: string;
     async ngOnInit(): Promise<void> {
+        let proxyProvider: ProxyProvider;
         try{
-            const proxyProvider = new ProxyProvider('http://localhost:7950', 1000000);
+            proxyProvider = new ProxyProvider( 'https://devnet-api.elrond.com', 1000000);
             await NetworkConfig.getDefault().sync(proxyProvider);
         }catch(e){
             console.log("Could not get proxy")
         }
+
             let canvasContract: CanvasContract;
             try {
                 canvasContract = new CanvasContract(
-                    // 'erd1qqqqqqqqqqqqqpgqd4kel97fslldfrfv2jce5u76qwa8w48pd8ss7zyjft',
-                    // proxyProvider
+                    'erd1qqqqqqqqqqqqqpgqlvaj8sy0j9tk6q90f9n2302hz9wr9xdsd8ssaaaeck',
+                    proxyProvider
                 );
             }catch (e){
                 canvasContract = new CanvasContract();
-
+                console.log(e);
             }
             if (canvasContract.proxyProvider){
                 this.foundContract = true;

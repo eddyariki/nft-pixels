@@ -17,8 +17,6 @@ import {
     TransactionHash,
 } from "@elrondnetwork/erdjs";
 
-import {BasicWallet} from "elrondjs";
-
 import { LOCAL_PROXY, SMART_CONTRACT_ADDRESS } from "./config";
 
 const fs = require('fs');
@@ -31,7 +29,7 @@ const readJSON = async (file: string):Promise<Buffer>=>{
 }
 
 const admin = async () =>{
-    const proxyProvider = new ProxyProvider(LOCAL_PROXY, 10000000);
+    const proxyProvider = new ProxyProvider(LOCAL_PROXY, 100000000);
     await NetworkConfig.getDefault().sync(proxyProvider);
 
     const smartContractAddress:Address = new Address(address);
@@ -148,7 +146,7 @@ const admin = async () =>{
             let callTransaction = smartContract.call({
                 func: new ContractFunction("mintPixels"),
                 args: [Argument.fromNumber(1),Argument.fromNumber(units)],
-                gasLimit: new GasLimit(100000000)
+                gasLimit: new GasLimit(1000000000)
             });
             callTransactions[i] = callTransaction;
         }
@@ -180,7 +178,7 @@ const admin = async () =>{
     
     }
 
-    const getCanvas = async(from:number, upTo:number)=>{
+    const getCanvas = async(from:number, upTo:number, log:boolean)=>{
         const func = new ContractFunction("getCanvas");
         const qResponse = await smartContract.runQuery(
             proxyProvider, 
@@ -193,7 +191,9 @@ const admin = async () =>{
         console.log("Size: ", qResponse.returnData.length);
         // console.log(qResponse.returnData);
         const returnData = qResponse.returnData;
-        
+        if(!log){
+            return
+        }
         for(let i=0; i<returnData.length; i++){
             if(i%3===0)console.log(" //");
             console.log(returnData[i].asNumber); //.asHex/Bool/etc 
@@ -203,15 +203,20 @@ const admin = async () =>{
 
     const getOwnedPixels = async()=>{
         const func = new ContractFunction("getOwnedPixels");
+        try{
         const qResponse = await smartContract.runQuery(
             proxyProvider, 
             {
                 func,
-                args:[Argument.fromPubkey(alice.address),Argument.fromNumber(1)]
+                args:[Argument.fromPubkey(alice.address),Argument.fromNumber(1),Argument.fromNumber(1),Argument.fromNumber(10000)]
             });
-
+            qResponse.assertSuccess();
+            console.log("Size: ", qResponse.returnData.length);
+        }catch(e){
+            console.log(e);
+        }
         // qResponse.assertSuccess();
-        console.log("Size: ", qResponse.returnData.length);
+       
         // console.log(qResponse.returnData);
         // const returnData = qResponse.returnData;
         
@@ -270,27 +275,27 @@ const admin = async () =>{
 
 
 
-    await createCanvas(5,5);
-    // await getCanvasDimensions();
-    // await getCanvasTotalSupply();
-    // await getLastValidPixelId();
+    // await createCanvas(100,100);
+    // // await getCanvasDimensions();
+    // // await getCanvasTotalSupply();
+    // // await getLastValidPixelId();
     // for(let i=0;i<10;i++){
-        await mintPixels(1,25); //100pixels
-        // await getLastValidPixelId();
+    //     await mintPixels(5,200); //100pixels
+    //     await getLastValidPixelId();
     // }
     // await getLastValidPixelId();
     
 
-    // const stream =async()=>{
-    //     for(let i=0;i<10;i++){
-    //         await getCanvas(i*1000+1,(i+1)*1000);
-    //     }
-    // } 
-    // await stream();
+    // // const stream =async()=>{
+    //     // for(let i=0;i<10;i++){
+            await getCanvas(1,10000, false);
+    //     // }
+    // // } 
+    // // await stream();
     await getOwnedPixels(); // worked
-    await getCanvas(1,2);
-    await changePixelColor(1,[1],[42],[42],[67], 1);
-    await getCanvas(1,2);
+    // await getCanvas(1,2,true);
+    // await changePixelColor(1,[1],[42],[42],[67], 1);
+    // await getCanvas(1,2, true);
 }
 
 

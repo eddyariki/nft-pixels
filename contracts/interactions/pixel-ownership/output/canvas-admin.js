@@ -38,6 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var erdjs_1 = require("@elrondnetwork/erdjs");
 var config_1 = require("./config");
+var typesystem_1 = require("@elrondnetwork/erdjs/out/smartcontracts/typesystem");
+var bignumber_js_1 = require("bignumber.js");
 var fs = require('fs');
 var address = config_1.SMART_CONTRACT_ADDRESS;
 var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, function () {
@@ -52,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor, changeBatchPixelColor, pixel_ids, rs, gs, bs;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, pixel_ids, rs, gs, bs;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -385,21 +387,45 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
+                createU8VectorArgument = function (from) {
+                    var res = [];
+                    for (var j = 0; j < from.length; j++) {
+                        res[j] = new typesystem_1.U8Value(from[j]);
+                    }
+                    return res;
+                };
+                createU32VectorArgument = function (from) {
+                    var res = [];
+                    for (var j = 0; j < from.length; j++) {
+                        res[j] = new typesystem_1.U32Value(from[j]);
+                    }
+                    return res;
+                };
+                createU64VectorArgument = function (from) {
+                    var res = [];
+                    for (var j = 0; j < from.length; j++) {
+                        res[j] = new typesystem_1.U64Value(new bignumber_js_1["default"](from[j]));
+                    }
+                    return res;
+                };
                 changeBatchPixelColor = function (canvas_id, pixel_ids, r, g, b, loop) { return __awaiter(void 0, void 0, void 0, function () {
-                    var callTransaction, hash, executed;
+                    var pixel_ids_vec, rs, gs, bs, callTransaction, hash, executed;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                //&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
+                                pixel_ids_vec = createU64VectorArgument(pixel_ids);
+                                rs = createU8VectorArgument(r);
+                                gs = createU8VectorArgument(g);
+                                bs = createU8VectorArgument(b);
                                 console.log("creating tx");
                                 callTransaction = smartContract.call({
-                                    func: new erdjs_1.ContractFunction("changePixelColor"),
+                                    func: new erdjs_1.ContractFunction("changeBatchPixelColor"),
                                     args: [
                                         erdjs_1.Argument.fromNumber(canvas_id),
-                                        erdjs_1.Argument.fromBytes(Buffer.from(pixel_ids)),
-                                        erdjs_1.Argument.fromBytes(Buffer.from(r)),
-                                        erdjs_1.Argument.fromBytes(Buffer.from(g)),
-                                        erdjs_1.Argument.fromBytes(Buffer.from(b)),
+                                        erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(pixel_ids_vec)),
+                                        erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(rs)),
+                                        erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(gs)),
+                                        erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(bs)),
                                     ],
                                     gasLimit: new erdjs_1.GasLimit(100000000)
                                 });
@@ -462,7 +488,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                 rs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
                 gs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
                 bs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                return [4 /*yield*/, changePixelColor(1, pixel_ids, rs, gs, bs, 1)];
+                return [4 /*yield*/, changeBatchPixelColor(1, pixel_ids, rs, gs, bs, 1)];
             case 4:
                 _a.sent();
                 return [4 /*yield*/, getCanvas(1, 10, true)];

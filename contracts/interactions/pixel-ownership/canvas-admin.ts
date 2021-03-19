@@ -18,8 +18,8 @@ import {
 } from "@elrondnetwork/erdjs";
 
 import { LOCAL_PROXY, SMART_CONTRACT_ADDRESS } from "./config";
-import { TypedValue, Vector, VectorType } from "@elrondnetwork/erdjs/out/smartcontracts/typesystem";
-
+import { Type, TypedValue, U32Value, U64Value, U8Value, Vector, VectorType } from "@elrondnetwork/erdjs/out/smartcontracts/typesystem";
+import BigNumber from "bignumber.js";
 const fs = require('fs');
 
 const address = SMART_CONTRACT_ADDRESS
@@ -273,21 +273,44 @@ const admin = async () => {
             // console.log(executed);
         }
     }
-
+    const createU8VectorArgument = (from:number[])=>{
+        let res = []
+        for(let j=0; j<from.length; j++){
+            res[j] = new U8Value(from[j]);
+        }
+        return res;
+    }
+    const createU32VectorArgument = (from:number[])=>{
+        let res = []
+        for(let j=0; j<from.length; j++){
+            res[j] = new U32Value(from[j]);
+        }
+        return res;
+    }
+    const createU64VectorArgument = (from:number[])=>{
+        let res=[];
+        for(let j=0; j<from.length; j++){
+            res[j] = new U64Value(new BigNumber(from[j]));
+        }
+        return res;
+    }
     const changeBatchPixelColor = async (canvas_id: number, pixel_ids:number[], r: number[], g: number[], b: number[], loop: number) => {
 
         //&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
-
+        let pixel_ids_vec = createU64VectorArgument(pixel_ids);
+        let rs = createU8VectorArgument(r);
+        let gs = createU8VectorArgument(g);
+        let bs = createU8VectorArgument(b);
         console.log("creating tx");
         let callTransaction = smartContract.call({
-            func: new ContractFunction("changePixelColor"),
+            func: new ContractFunction("changeBatchPixelColor"),
         
             args: [
                 Argument.fromNumber(canvas_id),
-                Argument.fromBytes(Buffer.from(pixel_ids)),
-                Argument.fromBytes(Buffer.from(r)),
-                Argument.fromBytes(Buffer.from(g)),
-                Argument.fromBytes(Buffer.from(b)),
+                Argument.fromTypedValue(new Vector(pixel_ids_vec)),
+                Argument.fromTypedValue(new Vector(rs)),
+                Argument.fromTypedValue(new Vector(gs)),
+                Argument.fromTypedValue(new Vector(bs)),
             ],
             gasLimit: new GasLimit(100000000)
         });
@@ -300,6 +323,7 @@ const admin = async () => {
         const executed = await proxyProvider.getTransactionStatus(hash);
         console.log(executed);
     }
+   
 
 
 
@@ -328,7 +352,7 @@ const admin = async () => {
     let rs = [6,6,6,6,6,6,6,6,6,6]
     let gs = [6,6,6,6,6,6,6,6,6,6]
     let bs = [6,6,6,6,6,6,6,6,6,6]
-    await changePixelColor(1,pixel_ids,rs,gs,bs,1);
+    await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);
     await getCanvas(1,10, true);
 }
 

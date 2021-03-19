@@ -23,112 +23,135 @@ export class ChangeColorComponent implements OnInit {
   public ownedPixelRGB: number[][];
   private canvasContract: CanvasContract;
 
-  ngOnInit(): void{
-
-  this.ownedPixels = [];
-  this.ownedPixelRGB=[];
-  let total = 100*100
-  for(let i=1; i<=total; i++){
-    if(Math.random()>(i/total*2)){
-      this.ownedPixels.push(i);
+  ngOnInit(): void {
+    
+    this.ownedPixels = [];
+    this.ownedPixelRGB = [];
+    let total = 100 * 100
+    for (let i = 1; i <= total; i++) {
+      if (Math.random() > (i / total * 2)) {
+        this.ownedPixels.push(i);
+      }
     }
-  }
-  console.log(this.ownedPixels.length);
-  for(let i=0;i<this.ownedPixels.length; i++){
-    this.ownedPixelRGB.push([Math.random()*255,Math.random()*255,Math.random()*255, 255])
-  }
+    console.log(this.ownedPixels.length);
+    for (let i = 0; i < this.ownedPixels.length; i++) {
+      this.ownedPixelRGB.push([Math.random() * 255, Math.random() * 255, Math.random() * 255, 255])
+    }
 
-  this.canvasDimensions = [100,100];
+    this.canvasDimensions = [100, 100];
+    this.renderCanvas(700,700,0.5);
     // this.ownedPixels = await this.canvasContract.getOwnedPixel(Address.fromString(this.address), 1);
+    
+  }
 
+  constructor(private actions$: Actions, private store$: Store<any>) { }
+
+ 
+  renderCanvas(width:number, height:number, strokeWeight:number){
     const sketch = s => {
       let canvasW = this.canvasDimensions[0];
       let canvasH = this.canvasDimensions[1];
       let totalPixels = canvasW * canvasH;
       let img;
-      let imgSize=[0.2,0.2];
+      let imgSize = [0.2, 0.2];
       let pGraphic;
-      const handeFile=file=>{
-        if(file.type==='image'){
-          img = s.createImg(file.data,'');
+      let wRatio = width/canvasW;
+      let hRatio = height/canvasH;
+      let sliderSize;
+      let button;
+      let showImage;
+      const handeFile = file => {
+        if (file.type === 'image') {
+          img = s.createImg(file.data, '');
           img.hide();
-        }else{
+        } else {
           img = null;
         }
       }
-      const reDraw=()=>{
-        for(let i=1; i<=totalPixels; i++){
-          if(this.ownedPixels.includes(i)){
-            pGraphic.stroke(0,0,0,120);
-            pGraphic.strokeWeight(1);
+
+      const reDraw = () => {
+        for (let i = 1; i <= totalPixels; i++) {
+          if (this.ownedPixels.includes(i)) {
+            pGraphic.stroke(0, 0, 0, 120);
+            pGraphic.strokeWeight(strokeWeight);
             let idx = this.ownedPixels.indexOf(i);
             let rgb = this.ownedPixelRGB[idx]
-            pGraphic.fill(rgb[0],rgb[1],rgb[2]);
-            pGraphic.rect((i-1)%canvasW*10,Math.floor((i-1)/canvasW)*10,10,10);
-          }else{
+            pGraphic.fill(rgb[0], rgb[1], rgb[2]);
+            pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
+          } else {
             pGraphic.noFill();
-            pGraphic.stroke(0,0,0,20);
-            pGraphic.strokeWeight(1)
+            pGraphic.stroke(0, 0, 0, 20);
+            pGraphic.strokeWeight(strokeWeight)
           }
-          
+
         }
       }
-      // console.log(totalPixels);
-      s.preload = () =>{
+
+      const enableImage = () =>{
+        if(img)showImage = !showImage;
+        if(showImage)button.html("Hide Image")
       }
 
-      s.setup = () =>{
+      s.preload = () => {
+      }
+
+      s.setup = () => {
         let input = s.createFileInput(handeFile);
         input.parent('file-uploader');
-        let _pCanvas = s.createCanvas(1000,1000);
-        pGraphic = s.createGraphics(1000,1000);
+
+        sliderSize = s.createSlider(0,100,20);
+        sliderSize.parent('w-slider');
+
+        button = s.createButton('show Image');
+        button.parent('enable-image');
+        button.mousePressed(enableImage);
+
+
+        let _pCanvas = s.createCanvas(width, height);
+        pGraphic = s.createGraphics(width, height);
         _pCanvas.parent('sketch-holder');
         s.frameRate(25);
         reDraw();
       }
 
-      s.draw = () =>{ 
+      s.draw = () => {
         s.background(255);
-        s.image(pGraphic,0,0);
-        if(img){
-          let imgW = img.width * imgSize[0];
-          let imgH = img.height * imgSize[1];
-          s.image(img, 
-            s.mouseX-imgW/2, 
-            s.mouseY-imgH/2, 
+        s.image(pGraphic, 0, 0);
+        if (img && showImage) {
+          let imgW = img.width * sliderSize.value()/100;
+          let imgH = img.height * sliderSize.value()/100;
+          s.image(img,
+            s.mouseX - imgW / 2,
+            s.mouseY - imgH / 2,
             imgW,
             imgH
           );
         }
-       
-       
       }
-      s.mouseClicked = () =>{
+      s.mouseClicked = () => {
 
-        if(img){
-          
+        if(s.mouseX<=0 || s.mouseY<=0)return
+        if (img) {
           //image is setting color
-          let imgW = img.width * imgSize[0];
-          let imgH = img.height * imgSize[1];
-          let imgStartX = s.mouseX-imgW/2; 
-          let imgStartY = s.mouseY-imgH/2;
+          let imgW = img.width * sliderSize.value()/100;
+          let imgH = img.height * sliderSize.value()/100;
+          let imgStartX = s.mouseX - imgW / 2;
+          let imgStartY = s.mouseY - imgH / 2;
 
-          for(let i=0; i<this.ownedPixels.length; i++){
+          for (let i = 0; i < this.ownedPixels.length; i++) {
             let pixelId = this.ownedPixels[i];
-            let pixelX = (pixelId-1)%canvasW*10;
-            let pixelY = Math.floor((pixelId-1)/canvasW)*10;
-            if(
-              pixelX>=imgStartX && 
-              pixelX<imgStartX+imgW && 
-              pixelY>=imgStartY &&
-              pixelY<imgStartY + imgH
-              ){
-                //pixel inside hovering image
-                let c = s.get(pixelX,pixelY);
-                
-
-                this.ownedPixelRGB[i] = c;
-              }
+            let pixelX = (pixelId - 1) % canvasW * wRatio;
+            let pixelY = Math.floor((pixelId - 1) / canvasW) * hRatio;
+            if (
+              pixelX >= imgStartX &&
+              pixelX < imgStartX + imgW &&
+              pixelY >= imgStartY &&
+              pixelY < imgStartY + imgH
+            ) {
+              //pixel inside hovering image
+              let c = s.get(pixelX, pixelY);
+              this.ownedPixelRGB[i] = c;
+            }
           }
           reDraw();
         }
@@ -136,10 +159,6 @@ export class ChangeColorComponent implements OnInit {
     }
     this.pCanvas = new p5(sketch);
   }
-
-  constructor(private actions$: Actions, private store$: Store<any>) { }
-
-
 
 }
 

@@ -52,6 +52,7 @@ export class DashboardComponent implements OnInit {
     }
 
     onLogout(): void {
+        // tslint:disable-next-line: deprecation
         this.store$.select(getUserAddress).subscribe(
             x => {
                 this.store$.dispatch(userActions.remove({id: x})),

@@ -24,7 +24,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     @Output() login = new EventEmitter<string>();
     @Output() logout = new EventEmitter<void>();
 
-    public loggedin$: Observable<boolean> =  this.store$.select(getIsUserLoggedIn)
+    public loggedin$: Observable<boolean> =  this.store$.select(getIsUserLoggedIn);
 
     // tslint:disable-next-line: variable-name
     public _loggedIn: boolean;

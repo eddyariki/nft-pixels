@@ -52,10 +52,12 @@ export class DashboardComponent implements OnInit {
     }
 
     onLogout(): void {
+        // tslint:disable-next-line: deprecation
         this.store$.select(getUserAddress).subscribe(
             x => {
                 this.store$.dispatch(userActions.remove({id: x})),
                 this.store$.dispatch(payloadActions.payload({userAddress: null, isLoggedIn: false, key: null}));
+                localStorage.removeItem('user');
                 localStorage.setItem('user', null);
                 this.router.navigate(['']);
             }

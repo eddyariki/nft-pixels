@@ -1,10 +1,12 @@
 import { analyzeAndValidateNgModules, ThrowStmt } from '@angular/compiler';
+import { getAllLifecycleHooks } from '@angular/compiler/src/lifecycle_reflector';
 import { DomSanitizer } from '@angular/platform-browser';
 import {
     SmartContract, Address, ProxyProvider, ContractFunction,
-    Transaction, TransactionPayload, Balance, GasLimit, WalletProvider, IDappProvider, Argument
+    Transaction, TransactionPayload, Balance, GasLimit, WalletProvider, IDappProvider, Argument, TransactionStatus, NetworkConfig
 } from '@elrondnetwork/erdjs';
 import { QueryResponse } from '@elrondnetwork/erdjs/out/smartcontracts/query';
+import { BigUIntType } from '@elrondnetwork/erdjs/out/smartcontracts/typesystem';
 import { environment } from 'src/environments/environment';
 import { User } from './user';
 
@@ -26,21 +28,50 @@ class Canvas {
 
     }
 }
-
+interface RGB{
+    r:number,
+    g:number,
+    b:number
+}
+interface TransactionAndFee{
+    transaction: Transaction,
+    fee: BigUIntType,
+}
 export default class CanvasContract {
     contract: SmartContract;
     proxyProvider: ProxyProvider;
+    networkConfig: NetworkConfig;
     user: User;
 
-    constructor(contractAddress = '', provider?: ProxyProvider, usr?: User) {
+    constructor(contractAddress = '', provider?: ProxyProvider, usr?: User, networkConfig?: NetworkConfig) {
         const address = new Address(contractAddress);
         this.contract = new SmartContract({ address });
         this.proxyProvider = provider || null;
         this.user = usr || null;
+        this.networkConfig = networkConfig || null;
     }
 
 
     // Public
+    // Calls
+
+    public async changePixelColor(canvasId:number, pixelId: number, rgb:number[]):Promise<Transaction>{
+        let callTransaction = await this._createCallTransactionAndSign(
+            "changePixelColor",
+            [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+                Argument.fromNumber(rgb[0]),
+                Argument.fromNumber(rgb[1]),
+                Argument.fromNumber(rgb[2])
+            ],
+            new GasLimit(100000000) //bad approach (hardcoded)
+            );
+
+        return callTransaction; //set gaslimit later in transaction-confirmation modal
+    }
+
+
 
     // Getters
     public async getCanvas(canvasId: number): Promise<Canvas> {
@@ -50,21 +81,7 @@ export default class CanvasContract {
             const canvas: Canvas = new Canvas(dimensions, a);
             return canvas;
         }
-        const stream = async () => {
-            let buffer;
-            for (let i = 0; i < 10; i++) {
-                if (!buffer) {
-                    buffer = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
-                } else {
-                    const b = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
-                    buffer = this._concatTypedArrays(buffer, b);
-                }
-
-
-            }
-            return buffer;
-        };
-        const rgbArray = await stream();
+        const rgbArray = await this._streamCanvas(canvasId);
         console.log(rgbArray.length);
         console.log(rgbArray.slice(0, 24));
         const dimensions = await this._queryGetCanvasDimensions(canvasId);
@@ -92,9 +109,15 @@ export default class CanvasContract {
         return total_pixel_supply[0];
     }
 
+    public async getOwnedPixel(address:Address, canvasId: number): Promise<number[]> {
+        const ownedPixels = await this._getOwnedPixes(address,canvasId);
+        return ownedPixels;
+    }
+
 
 
     // Private make more dry later
+
     private _concatTypedArrays(a, b) {
         let c = new (a.constructor)(a.length + b.length);
         c.set(a, 0);
@@ -102,7 +125,19 @@ export default class CanvasContract {
         return c;
     }
 
-    
+    private async _createCallTransactionAndSign(funcString:string, argument: Argument[],gasLimit:GasLimit):Promise<Transaction>{
+        let callTransaction = this.contract.call({
+            func:new ContractFunction(funcString),
+            args: argument,
+            gasLimit
+        });
+        //prepares transaction
+        await this.user.account.sync(this.proxyProvider);
+        callTransaction.setNonce(this.user.account.nonce);
+        this.user.signer.sign(callTransaction);
+        this.user.account.incrementNonce();
+        return callTransaction;
+    }
 
     private async _runQuery(funcString: string, argument: Argument[]): Promise<QueryResponse> {
         const func = new ContractFunction(funcString);
@@ -114,7 +149,32 @@ export default class CanvasContract {
             });
         return qResponse;
     }
-    private async _getOwnedPixes(){}
+
+    private async _streamCanvas(canvasId:number):Promise<Uint8Array>{
+        let buffer:Uint8Array;
+        for (let i = 0; i < 10; i++) {
+            if (!buffer) {
+                buffer = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+            } else {
+                const b = await this._queryGetCanvas(canvasId, i * 1000 + 1, (i + 1) * 1000);
+                buffer = this._concatTypedArrays(buffer, b);
+            }
+
+
+        }
+        return buffer;
+    };
+
+
+    private async _getOwnedPixes(qAddress:Address, canvasId:number){
+        const qResponse = await this._runQuery("getOwnedPixel", [Argument.fromPubkey(qAddress), Argument.fromNumber(canvasId)])
+        const returnData = qResponse.returnData;
+        const ownedPixels = [];
+        for (let i=0; i<returnData.length; i++){
+            ownedPixels[i] = returnData[i].asNumber;
+        }
+        return ownedPixels;
+    }
 
     private async _queryGetCanvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
         const qResponse = await this._runQuery("getCanvas",

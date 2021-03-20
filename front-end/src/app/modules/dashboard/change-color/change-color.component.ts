@@ -9,6 +9,7 @@ import { timeInterval, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from 'src/app/contract-interface/user';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
+import { actions as pathActions } from '../../payload/path/path.actions';
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -22,7 +23,9 @@ export class ChangeColorComponent implements OnInit {
 
   public user$ = this.store$.select(getUser);
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.store$.dispatch(pathActions.path({path: 'changeColor'}));
+  }
 
   constructor(
     private actions$: Actions,

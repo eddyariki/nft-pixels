@@ -12,6 +12,7 @@ import CanvasContract from 'src/app/contract-interface/canvas-contract';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
+import { actions as pathActions } from '../../payload/path/path.actions';
 import * as userActions from 'src/app/model/store/user/actions';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
@@ -39,6 +40,7 @@ export class HomeComponent implements OnInit {
     public foundContract: boolean;
     public url: string;
     async ngOnInit(): Promise<void> {
+        this.store$.dispatch(pathActions.path({path: 'home'}));
         let proxyProvider: ProxyProvider;
         try{
             proxyProvider = new ProxyProvider( PROXY_PROVIDER_ENDPOINT, 1000000);

@@ -1,15 +1,15 @@
 import {
     SmartContract, Address, ProxyProvider, ContractFunction,
-    Transaction, TransactionPayload, Balance, GasLimit, Argument, NetworkConfig
+    Transaction, TransactionPayload, Balance, GasLimit, Argument, NetworkConfig, UserSigner
 } from '@elrondnetwork/erdjs';
 import { QueryResponse } from '@elrondnetwork/erdjs/out/smartcontracts/query';
 import { U32Value, U64Value, U8Value, Vector } from '@elrondnetwork/erdjs/out/smartcontracts/typesystem';
 import { environment } from 'src/environments/environment';
-import { User } from './user';
+// import { User } from 'src/app/contract-interface/user';
 import BigNumber from 'bignumber.js';
+import { User } from '../model/entity';
 
 const production = environment.production;
-
 class Canvas {
     bitmap: Uint8Array;
     dataURL: string;
@@ -68,8 +68,9 @@ export default class CanvasContract {
         const rs = this._createU8VectorArgument(r);
         const gs = this._createU8VectorArgument(g);
         const bs = this._createU8VectorArgument(b);
-        const callTransaction = await this._createCallTransactionAndSign(
-            'changePixelColor',
+        try{
+        const callTransaction = await this._createCallTransaction(
+            'changeBatchPixelColor',
             [
                 Argument.fromNumber(canvasId),
                 Argument.fromTypedValue(new Vector(pixelIdsVec)),
@@ -79,8 +80,12 @@ export default class CanvasContract {
             ],
             new GasLimit(100000000) // bad approach (hardcoded)
         );
-
         return callTransaction; // set gaslimit later in transaction-confirmation modal
+        }catch (e){
+            console.log('Failure occurred in transaction signing step');
+            console.log(e);
+        }
+        // return callTransaction; // set gaslimit later in transaction-confirmation modal
     }
     // Getters
     public async getCanvas(canvasId: number): Promise<Canvas> {
@@ -163,7 +168,14 @@ export default class CanvasContract {
         c.set(b, a.length);
         return c;
     }
-
+    private async _createCallTransaction(funcString: string, argument: Argument[], gasLimit: GasLimit): Promise<Transaction> {
+        const callTransaction = this.contract.call({
+            func: new ContractFunction(funcString),
+            args: argument,
+            gasLimit
+        });
+        return callTransaction;
+    }
     private async _createCallTransactionAndSign(funcString: string, argument: Argument[], gasLimit: GasLimit): Promise<Transaction> {
         const callTransaction = this.contract.call({
             func: new ContractFunction(funcString),
@@ -173,7 +185,8 @@ export default class CanvasContract {
         // prepares transaction
         await this.user.account.sync(this.proxyProvider);
         callTransaction.setNonce(this.user.account.nonce);
-        this.user.signer.sign(callTransaction);
+        const signer = this.user.signer as UserSigner;
+        await signer.sign(callTransaction);
         this.user.account.incrementNonce();
         return callTransaction;
     }

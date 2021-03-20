@@ -41,6 +41,7 @@ export class DashboardComponent implements OnInit {
             if (user === undefined) {
                 if (!localStorage.getItem('user')) {
                 } else {
+                    console.log('hello')
                     this.userFromStorage = JSON.parse(localStorage.getItem('user'));
                     this.store$.dispatch(userActions.add({user: this.userFromStorage}));
                     this.store$.dispatch(payloadActions.payload({userAddress: this.userFromStorage.id, isLoggedIn: true, key: null}))
@@ -62,8 +63,8 @@ export class DashboardComponent implements OnInit {
     }
 
     onLogout(): void {
-        this.store$.dispatch(payloadActions.reset());
         localStorage.removeItem('user');
+        this.store$.dispatch(payloadActions.reset());
         this.router.navigate(['']);
     }
 

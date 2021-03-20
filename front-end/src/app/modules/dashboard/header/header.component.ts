@@ -55,7 +55,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     }
 
     onLogout(): void {
-        this.store$.dispatch(userActions.remove({id: this.user.id}))
+        // this.store$.dispatch(userActions.remove({id: this.user.id}))
         this.logout.emit();
     }
 

@@ -28,6 +28,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     @Input() user: User;
 
     public loggedin$: Observable<boolean> =  this.store$.select(getIsUserLoggedIn);
+    public changeText = false;
 
     // tslint:disable-next-line: variable-name
     public _loggedIn: boolean;

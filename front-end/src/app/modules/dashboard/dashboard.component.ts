@@ -39,7 +39,7 @@ export class DashboardComponent implements OnInit {
     ngOnInit(): void {
         this.store$.select(getUser).subscribe(user => {
             if (user === undefined) {
-                if (localStorage.getItem('user') === 'null' || 'undefined') {
+                if (!localStorage.getItem('user')) {
                 } else {
                     this.userFromStorage = JSON.parse(localStorage.getItem('user'));
                     this.store$.dispatch(userActions.add({user: this.userFromStorage}));

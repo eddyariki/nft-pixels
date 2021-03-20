@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, i, pixel_ids, rs, gs, bs;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -325,7 +325,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                         args: [erdjs_1.Argument.fromPubkey(alice.address),
                                             erdjs_1.Argument.fromNumber(1),
                                             erdjs_1.Argument.fromNumber(1),
-                                            erdjs_1.Argument.fromNumber(10000)]
+                                            erdjs_1.Argument.fromNumber(1000)]
                                     })];
                             case 2:
                                 qResponse = _a.sent();
@@ -483,32 +483,41 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                // await createCanvas(100, 100);
-                // // await getCanvasDimensions();
-                // // await getCanvasTotalSupply();
-                // // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
-                // // // const stream =async()=>{
-                // //     // for(let i=0;i<10;i++){
-                // // await getCanvas(1,10000, false);
-                return [4 /*yield*/, getOwnedPixelsColor()];
+                return [4 /*yield*/, createCanvas(100, 100)];
             case 3:
-                // await createCanvas(100, 100);
-                // // await getCanvasDimensions();
-                // // await getCanvasTotalSupply();
-                // // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
+                _a.sent();
+                i = 0;
+                _a.label = 4;
+            case 4:
+                if (!(i < 10)) return [3 /*break*/, 8];
+                return [4 /*yield*/, mintPixels(5, 200)];
+            case 5:
+                _a.sent(); //100pixels
+                return [4 /*yield*/, getLastValidPixelId()];
+            case 6:
+                _a.sent();
+                _a.label = 7;
+            case 7:
+                i++;
+                return [3 /*break*/, 4];
+            case 8: 
+            // await getLastValidPixelId();
+            // // // const stream =async()=>{
+            // //     // for(let i=0;i<10;i++){
+            // // await getCanvas(1,10000, false);
+            return [4 /*yield*/, getOwnedPixelsColor()];
+            case 9:
                 // await getLastValidPixelId();
                 // // // const stream =async()=>{
                 // //     // for(let i=0;i<10;i++){
                 // // await getCanvas(1,10000, false);
+                _a.sent();
+                pixel_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+                rs = [255, 255, 255, 255, 200, 200, 226, 226, 226, 226];
+                gs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+                bs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+                return [4 /*yield*/, changeBatchPixelColor(1, pixel_ids, rs, gs, bs, 1)];
+            case 10:
                 _a.sent();
                 return [2 /*return*/];
         }

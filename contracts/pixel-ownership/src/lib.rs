@@ -78,10 +78,26 @@ pub trait PixelOwnership {
 			self.set_pixel_owner(&canvas_id, &pixel_id, &caller);//5
 			//owner: &Address, canvas_id: &u32, pixel_id: &u64, owned: &bool) {
 			// self._set_pixel_ownership(&caller, &canvas_id, &pixel_id, &true);
-
-			let r = 0u8;
-			let g = 0u8;
-			let b = 0u8;
+			let mut r = 0u8;
+			let mut g = 0u8;
+			let mut b = 0u8;
+			if &pixel_id<=&2500u64{
+				r = 25u8;
+				g = 255u8;
+				b = 55u8;
+			}else if &pixel_id<=&5000u64{
+				r = 255u8;
+				g = 55u8;
+				b = 55u8;
+			}else if &pixel_id<=&7500u64{
+				r = 55u8;
+				g = 55u8;
+				b = 255u8;
+			}else{
+				r = 5u8;
+				g = 255u8;
+				b = 255u8;
+			}
 			let color = Color{r,g,b};
 			self.set_pixel_color(&canvas_id,&pixel_id, &color);//5
 			pixel_id+=1u64.clone();

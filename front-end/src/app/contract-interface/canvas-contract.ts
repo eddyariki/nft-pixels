@@ -63,11 +63,13 @@ export default class CanvasContract {
 
     public async changeBatchPixelColor(canvasId: number, pixelIds: number[], r: number[], g: number[], b: number[]): Promise<Transaction> {
         // &self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
-
+        // this.networkConfig = new NetworkConfig();
+        // await this.networkConfig.sync(this.proxyProvider);
         const pixelIdsVec = this._createU64VectorArgument(pixelIds);
         const rs = this._createU8VectorArgument(r);
         const gs = this._createU8VectorArgument(g);
         const bs = this._createU8VectorArgument(b);
+
         try{
         const callTransaction = await this._createCallTransaction(
             'changeBatchPixelColor',
@@ -78,8 +80,9 @@ export default class CanvasContract {
                 Argument.fromTypedValue(new Vector(gs)),
                 Argument.fromTypedValue(new Vector(bs)),
             ],
-            new GasLimit(100000000) // bad approach (hardcoded)
+            new GasLimit(10000000) // bad approach (hardcoded)
         );
+        // const fee = await callTransaction.computeFee(this.networkConfig);
         return callTransaction; // set gaslimit later in transaction-confirmation modal
         }catch (e){
             console.log('Failure occurred in transaction signing step');

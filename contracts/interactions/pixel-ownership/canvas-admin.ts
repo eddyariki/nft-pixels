@@ -243,7 +243,7 @@ const admin = async () => {
                     args: [Argument.fromPubkey(alice.address), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1), 
-                        Argument.fromNumber(10000)]
+                        Argument.fromNumber(1000)]
                 });
             qResponse.assertSuccess();
             console.log("Size: ", qResponse.returnData.length);
@@ -306,7 +306,7 @@ const admin = async () => {
         }
     }
     const createU8VectorArgument = (from:number[])=>{
-        let res = []
+        const res = []
         for(let j=0; j<from.length; j++){
             res[j] = new U8Value(from[j]);
         }
@@ -344,7 +344,7 @@ const admin = async () => {
                 Argument.fromTypedValue(new Vector(gs)),
                 Argument.fromTypedValue(new Vector(bs)),
             ],
-            gasLimit: new GasLimit(100000000)
+            gasLimit: new GasLimit(Math.min(pixel_ids.length * 50000, 100000000))
         });
         await alice.sync(proxyProvider);
         callTransaction.setNonce(alice.nonce);
@@ -360,14 +360,14 @@ const admin = async () => {
 
 
 
-    // await createCanvas(100, 100);
+    await createCanvas(100, 100);
     // // await getCanvasDimensions();
     // // await getCanvasTotalSupply();
     // // // await getLastValidPixelId();
-    // for (let i = 0; i < 10; i++) {
-    //     await mintPixels(5, 200); //100pixels
-    //     await getLastValidPixelId();
-    // }
+    for (let i = 0; i < 10; i++) {
+        await mintPixels(5, 200); //100pixels
+        await getLastValidPixelId();
+    }
     // await getLastValidPixelId();
 
 
@@ -381,11 +381,11 @@ const admin = async () => {
     // // await getOwnedPixels(); // worked
     // // await getCanvas(1,10,true);
     // // // await changeBatchPixelColor(1, )
-    // let pixel_ids = [1,2,3,4,5,6,7,8,9,10]
-    // let rs = [255,255,255,255,200,200,226,226,226,226]
-    // let gs = [6,6,6,6,6,6,6,6,6,6]
-    // let bs = [6,6,6,6,6,6,6,6,6,6]
-    // await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);
+    let pixel_ids = [1,2,3,4,5,6,7,8,9,10]
+    let rs = [255,255,255,255,200,200,226,226,226,226]
+    let gs = [6,6,6,6,6,6,6,6,6,6]
+    let bs = [6,6,6,6,6,6,6,6,6,6]
+    await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);
     // await getCanvas(1,10, true);
 }
 

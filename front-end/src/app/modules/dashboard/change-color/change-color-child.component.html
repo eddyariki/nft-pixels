@@ -2,9 +2,11 @@
     <div id="file-uploader"></div>
     <div id="enable-image"></div>
     <div id="w-slider"></div>
-    <div id="sketch-holder"></div>
+    <div id="sketch-holder">
+        <div class="status" *ngIf="loadingStateMessage && loadingStateMessage !==''">{{loadingStateMessage}}</div>
+    </div>
 </div>
-
+<button (click)="showLoginModal(true)">login</button>
 <div class="pixel-information-container">
     <div *ngIf="ownedPixels">所有ピクセル数: {{ownedPixels.length}}</div>
     <div *ngIf="updatedPixels">変換される数: {{updatedPixelsSum}}</div>
@@ -18,4 +20,9 @@
     <button (click)="confirmTransaction()">
         Send Transaction
     </button>
+</div>
+
+<div *ngIf="loginModalIsVisible">
+    <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
+    </app-login-modal>
 </div>

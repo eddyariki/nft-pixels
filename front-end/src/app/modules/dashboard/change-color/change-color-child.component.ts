@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Account, Address, NetworkConfig, ProxyProvider, Transaction, UserSigner } from '@elrondnetwork/erdjs/out';
+import { Account, Address, NetworkConfig, ProxyProvider, Transaction, TransactionOnNetwork, UserSigner } from '@elrondnetwork/erdjs/out';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -9,7 +9,10 @@ import { timeInterval, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 // import { User } from 'src/app/contract-interface/user';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
-import { User } from 'src/app/model/entity';
+// import { User } from 'src/app/model/entity';
+import { ISigner } from '@elrondnetwork/erdjs/out/interface';
+import { BooleanValue } from '@elrondnetwork/erdjs/out/smartcontracts/typesystem';
+import { User } from 'src/app/contract-interface/user';
 // let a: User
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -19,7 +22,7 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./change-color-child.component.less']
 })
 export class ChangeColorChildComponent implements OnInit {
-  @Input() user: User;
+  // @Input() user: User;
   public pCanvas: any;
   public foundContract: boolean;
   public ownedPixels: number[];
@@ -28,27 +31,53 @@ export class ChangeColorChildComponent implements OnInit {
   public ownedPixelRGB: number[][];
   public updatedPixels: boolean[];
   public updatedPixelsSum: number;
-  public transactionCallBack: Transaction;
+  public transactionCallBacks: Transaction[];
   public showTransactionModal: boolean;
   public sendingTransaction: boolean;
+  public loginModalIsVisible: boolean;
+  public loadingStateMessage = '';
   private canvasContract: CanvasContract;
   private proxyProvider: ProxyProvider;
   private networkConfig: NetworkConfig;
+  public user: User;
 
   async ngOnInit(): Promise<void> {
+  }
+
+  constructor(
+    private actions$: Actions,
+    private store$: Store<any>
+  ) { }
+
+  showLoginModal(show: boolean): void {
+    this.loginModalIsVisible = show;
+  }
+  async userLoggedIn(user: User): Promise<void> {
+    this.user = user;
+    this.loginModalIsVisible = false;
+    await this.loadContractCanvas();
+  }
+
+  async loadContractCanvas(): Promise<void> {
     this.updatedPixels = [];
+    this.loadingStateMessage = 'Connecting to Proxy...';
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 100000);
     await NetworkConfig.getDefault().sync(this.proxyProvider);
+    this.loadingStateMessage = 'Syncing network...';
     // this.user = this.store$.select(getUser); // ここにユーザー情報
+    this.loadingStateMessage = 'Getting Contract...';
     this.canvasContract = new CanvasContract(CANVAS_CONTRACT_ADDRESS, this.proxyProvider, this.user, this.networkConfig);
+
     try {
       // console.log(this.user.account.address);
+      this.loadingStateMessage = 'Getting User-Owned pixel ids...';
       this.ownedPixels = await this.canvasContract.getOwnedPixels(
         this.user.account.address,
         1,
         1,
         10000
       );
+      this.loadingStateMessage = 'Getting User-Owned pixel colors...';
       const ownedPixelArray = await this.canvasContract.getOwnedPixelsColor(
         this.user.account.address,
         1,
@@ -63,68 +92,87 @@ export class ChangeColorChildComponent implements OnInit {
         const b = ownedPixelArray[i + 2];
         this.ownedPixelRGB.push([r, g, b]);
       }
-      console.log(this.ownedPixelRGB[0]);
+      console.log(this.ownedPixelRGB.length);
     } catch (e) {
       console.log(e);
-      console.log('failed to get address information');
+      this.loadingStateMessage = 'failed to get address information';
       this.ownedPixels = [];
       this.ownedPixelRGB = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 100 * 100; i++) {
         this.ownedPixels[i] = i + 1;
         this.ownedPixelRGB[i] = [Math.random() * 255, Math.random() * 255, Math.random() * 255];
       }
     }
+    this.loadingStateMessage = 'Rendering canvas...';
+    console.log(this.ownedPixels.length);
     console.log('total pixels owned: ', this.ownedPixels.length);
     this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
     this.renderCanvas(700, 700, 0.5);
     this.updatedPixels = this.ownedPixels.map(() => false);
+    console.log(this.ownedPixelRGB.length);
+    this.loadingStateMessage = '';
   }
-
-  constructor(
-    private actions$: Actions,
-    private store$: Store<any>
-  ) { }
 
   async changeColorTransaction(): Promise<void> {
-    const updatedPixelArray = this.ownedPixels.filter((el, idx) => {
-      return this.updatedPixels[idx] === true;
-    });
-    const updatedPixelArrayRGB =  this.ownedPixelRGB.filter((el, idx) => {
-      return this.updatedPixels[idx] === true;
-    });
-    const rs = updatedPixelArrayRGB.map(rgb => rgb[0]);
-    const gs = updatedPixelArrayRGB.map(rgb => rgb[1]);
-    const bs = updatedPixelArrayRGB.map(rgb => rgb[2]);
-    try {
-      this.transactionCallBack = await this.canvasContract.changeBatchPixelColor(1, updatedPixelArray, rs, gs, bs);
-      this.showTransactionModal = true;
-      console.log('Successful transaction created.');
-    } catch (e) {
-      console.log('Failed to create transaction');
-      console.log(e);
+    if (this.updatedPixelsSum > 0) {
+
+
+      const updatedPixelArray = this.ownedPixels.filter((el, idx) => {
+        return this.updatedPixels[idx] === true;
+      });
+      const updatedPixelArrayRGB = this.ownedPixelRGB.filter((el, idx) => {
+        return this.updatedPixels[idx] === true;
+      });
+      const rs = updatedPixelArrayRGB.map(rgb => rgb[0]);
+      const gs = updatedPixelArrayRGB.map(rgb => rgb[1]);
+      const bs = updatedPixelArrayRGB.map(rgb => rgb[2]);
+      try {
+
+        this.transactionCallBacks = [];
+        const limit = 2;
+        console.log('Updated pixels: ', updatedPixelArray.length);
+        const batches = Math.floor(updatedPixelArray.length / limit) + 1;
+        console.log('Batches: ', batches);
+        for (let i = 0; i < batches; i++){
+          this.transactionCallBacks[i] = await this.canvasContract.changeBatchPixelColor(
+            1,
+            updatedPixelArray.slice(i * limit, (i + 1) * limit),
+            rs.slice(i * limit, (i + 1) * limit),
+            gs.slice(i * limit, (i + 1) * limit),
+            bs.slice(i * limit, (i + 1) * limit));
+        }
+        this.showTransactionModal = true;
+        console.log('Successful transaction created.');
+      } catch (e) {
+        console.log('Failed to create transaction');
+        console.log(e);
+      }
     }
   }
-  async confirmTransaction(): Promise<void> {
-    console.log('1 here');
-    this.sendingTransaction = true;
-    const newUser = new Account(this.user.account.address);
-    await newUser.sync(this.proxyProvider);
-    console.log('2 here');
-    this.transactionCallBack.setNonce(newUser.nonce);
-    const signer = this.user.signer as UserSigner;
-    await signer.sign(this.transactionCallBack);
 
-    console.log('3 here');
-    newUser.incrementNonce();
-    console.log('4 here');
-    const hash = await this.transactionCallBack.send(this.proxyProvider);
-    console.log('5 here');
-    await this.transactionCallBack.awaitExecuted(this.proxyProvider);
-    console.log('6 here');
-    const executed = await this.proxyProvider.getTransactionStatus(hash);
-    console.log('7 here');
-    this.sendingTransaction = false;
-    this.showTransactionModal = false;
+  async confirmTransaction(): Promise<void> {
+    console.log('Sending transaction');
+
+    await NetworkConfig.getDefault().sync(this.proxyProvider);
+
+    this.sendingTransaction = true;
+    await this.user.account.sync(this.proxyProvider);
+
+    for (const transactionCallBack of this.transactionCallBacks){
+
+      transactionCallBack.setNonce(this.user.account.nonce);
+
+      await this.user.signer.sign(transactionCallBack);
+
+      this.user.account.incrementNonce();
+    }
+
+    for (const transactionCallBack of this.transactionCallBacks){
+      const hash = await transactionCallBack.send(this.proxyProvider);
+    }
+
+    await this.transactionCallBacks[this.transactionCallBacks.length - 1].awaitExecuted(this.proxyProvider);
+    console.log('Done');
   }
 
 
@@ -201,8 +249,10 @@ export class ChangeColorChildComponent implements OnInit {
         if (this.ownedPixels.length === this.ownedPixelRGB.length) {
           reDraw();
         } else {
+          console.log('Mismatch');
           console.log(this.ownedPixels.length);
-          console.log(this.ownedPixelRGB.length);
+          console.log(this.ownedPixelRGB.length / 3);
+          reDraw();
         }
       };
 
@@ -229,8 +279,8 @@ export class ChangeColorChildComponent implements OnInit {
           // image is setting color
           const imgW = img.width * sliderSize.value() / 100;
           const imgH = img.height * sliderSize.value() / 100;
-          const imgStartX = s.mouseX - imgW / 2;
-          const imgStartY = s.mouseY - imgH / 2;
+          const imgStartX = Math.min(Math.max(s.mouseX - imgW / 2, 0), s.width);
+          const imgStartY = Math.min(Math.max(s.mouseY - imgH / 2, 0), s.height);
 
           for (let i = 0; i < this.ownedPixels.length; i++) {
             const pixelId = this.ownedPixels[i];

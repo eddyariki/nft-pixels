@@ -1,5 +1,5 @@
-import { Account, Address, UserSigner, UserWallet } from "@elrondnetwork/erdjs/out";
-import { ISigner } from "@elrondnetwork/erdjs/out/interface";
+import { Account, Address, UserSigner, UserWallet } from '@elrondnetwork/erdjs/out';
+import { ISigner } from '@elrondnetwork/erdjs/out/interface';
 
 export class User {
     id: string;
@@ -11,7 +11,7 @@ export class User {
         this.account = acc || null;
         this.id = acc?.address.toString() || null;
         this.signer = accSigner || null;
-        if(!acc || !accSigner){
+        if (!acc || !accSigner){
             this.isLoggedIn = false;
         }else{
             this.isLoggedIn = true;

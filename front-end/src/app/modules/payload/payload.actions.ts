@@ -8,5 +8,6 @@ export interface Payload {
 }
 
 export const actions = {
-    payload: actionCreator<Payload>('PAYLOAD')
+    payload: actionCreator<Payload>('PAYLOAD'),
+    reset: actionCreator<void>('RESET_PAYLOAD'),
 };

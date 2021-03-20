@@ -20,7 +20,12 @@ const payloadHandler = (state: State, payload: Payload): State => {
   };
 };
 
+const resetHandler = (state: State): State => {
+    return initialState;
+};
+
 export const reducer = reducerWithInitialState(initialState)
     .case(actions.payload, payloadHandler)
+    .case(actions.reset, resetHandler)
     .build();
 

@@ -33,17 +33,28 @@ import { Account, UserSigner } from '@elrondnetwork/erdjs';
 export class DashboardComponent implements OnInit {
     public user$ = this.store$.select(getUser);
     public loggedIn$: Observable<boolean>  = this.store$.select(getIsUserLoggedIn);
-    public LoginModalIsVisible: boolean;
     public LoginModalIsVisible$ = this.store$.select(getLoginModalIsVisible);
+    public userFromStorage: User;
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.store$.select(getUser).subscribe(user => {
+            if (user === undefined) {
+                if (!localStorage.getItem('user')) {
+                } else {
+                    console.log('hello')
+                    this.userFromStorage = JSON.parse(localStorage.getItem('user'));
+                    this.store$.dispatch(userActions.add({user: this.userFromStorage}));
+                    this.store$.dispatch(payloadActions.payload({userAddress: this.userFromStorage.id, isLoggedIn: true, key: null}))
+                }
+            }
+        });
+    }
 
 
     onLogin(loggedInOrNot: string): void {
 
         // this.store$.select()
         if (loggedInOrNot === 'login'){
-            this.LoginModalIsVisible = true;
             this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: true}));
         }else if (loggedInOrNot === 'logout'){
             // logout function (clear cache/localstorage)
@@ -52,16 +63,9 @@ export class DashboardComponent implements OnInit {
     }
 
     onLogout(): void {
-        // tslint:disable-next-line: deprecation
-        this.store$.select(getUserAddress).subscribe(
-            x => {
-                this.store$.dispatch(userActions.remove({id: x})),
-                this.store$.dispatch(payloadActions.payload({userAddress: null, isLoggedIn: false, key: null}));
-                localStorage.removeItem('user');
-                localStorage.setItem('user', null);
-                this.router.navigate(['']);
-            }
-        );
+        localStorage.removeItem('user');
+        this.store$.dispatch(payloadActions.reset());
+        this.router.navigate(['']);
     }
 
     showLoginModal(show: boolean): void{
@@ -71,9 +75,9 @@ export class DashboardComponent implements OnInit {
     }
 
     userLoggedIn(user: User): void{
-        this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
         const jsonSigner = JSON.stringify(user.signer);
         this.store$.dispatch(userActions.add({user: {id: user.id,  loggedIn: true, signer: jsonSigner, account: user.account}}));
+        this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
         this.loggedIn$ = this.store$.select(getIsUserLoggedIn);
         this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: false}));
         this.store$.select(getUser).subscribe(user =>

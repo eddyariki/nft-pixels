@@ -12,19 +12,34 @@ header {
         list-style-type: none;
         float: right;
 
+            .id-name {
+                margin-right: 10%;
+            }
+
             .id {
+                -webkit-transition: width 0.8s ease-out;
+                transition: width 1s ease-out;
                 height: 20px;
-                min-width: 200px;
+                width: 200px;
                 font-weight: 400;
                 color: #fff;
                 border-radius: 0;
                 border-radius: 100vh;
-                background-image: -webkit-gradient(linear,right top,left top,color-stop(40%,#ff3cac),to(#562b7c));
-                background-image: -webkit-linear-gradient(right,#ff3cac 40%,#562b7c 100%);
-                background-image: linear-gradient(to left,#ff3cac 40%,#562b7c 100%);
+                background-image: -webkit-gradient(linear,right top,left top,color-stop(40%,#3955b3),to(#4ff1dc));
+                background-image: -webkit-linear-gradient(right,#3955b3 40%,#4ff1dc 100%);
+                background-image: linear-gradient(to left,#3955b3 40%,#4ff1dc 100%);
                 padding-top: 10px;
                 text-align: center;
+                overflow: hidden;
+                position: absolute;
+                right: 130px;
+                font-family: monospace;
             }
+
+            .id:hover {
+                width: 500px;
+            }
+
     
             .login {
                 padding-top: 10px;

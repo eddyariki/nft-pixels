@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -25,17 +25,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  constructor(private actions$: Actions, private store$: Store<any>, private router: Router) {
-    this.store$.select(getUser).subscribe(u => {
-      if (!u) {
-        const user: User = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-          this.store$.dispatch(userActions.add({user}));
-          this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: null}));
-        } else {
-            this.router.navigate(['']);
-        }
-      }
-    });
+  constructor(private actions$: Actions, private store$: Store<any>, private router: Router) {}
+
+  prepareRoute(outlet: RouterOutlet): void {
+    return (
+      outlet && outlet.activatedRouteData && outlet.activatedRouteData.animation
+    );
   }
 }

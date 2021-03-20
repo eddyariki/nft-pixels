@@ -6,7 +6,11 @@
     [loggedIn]=" loggedIn$ | async"
     ></app-header>
     <div *ngIf="LoginModalIsVisible$ | async">
-        <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
+        <app-login-modal
+        (cancelEmitter)="showLoginModal(false)"
+        (loginEmitter)="userLoggedIn($event)"
+        [user]="user$ | async"
+        >
         </app-login-modal>
     </div>
     <router-outlet></router-outlet>

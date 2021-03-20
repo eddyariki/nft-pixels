@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -37,5 +37,11 @@ export class AppComponent implements OnInit {
         }
       }
     });
+  }
+
+  prepareRoute(outlet: RouterOutlet): void {
+    return (
+      outlet && outlet.activatedRouteData && outlet.activatedRouteData.animation
+    );
   }
 }

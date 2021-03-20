@@ -20,15 +20,18 @@ const routes: Routes = [
         children: [
         {
             path: r.root,
-            component: HomeComponent
+            component: HomeComponent,
+            data: { animation: 'home' }
         },
         {
             path: r.auction,
-            component: AuctionComponent
+            component: AuctionComponent,
+            data: { animation: 'auction' }
         },
         {
             path: r.changeColor,
-            component: ChangeColorComponent
+            component: ChangeColorComponent,
+            data: { animation: 'changeColor' }
         }
     ]
     }

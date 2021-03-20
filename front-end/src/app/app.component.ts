@@ -1,5 +1,6 @@
 import { Component, OnInit, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { Animation } from './modules/dashboard/animation';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -14,7 +15,8 @@ import { User } from './model/entity';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.less']
+  styleUrls: ['./app.component.less'],
+  animations: [Animation],
 })
 export class AppComponent implements OnInit {
 

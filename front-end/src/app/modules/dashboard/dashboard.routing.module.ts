@@ -21,17 +21,17 @@ const routes: Routes = [
         {
             path: r.root,
             component: HomeComponent,
-            data: { animation: 'home' }
+            data: { animation: 'Home' }
         },
         {
             path: r.auction,
             component: AuctionComponent,
-            data: { animation: 'auction' }
+            data: { animation: 'Auction' }
         },
         {
             path: r.changeColor,
             component: ChangeColorComponent,
-            data: { animation: 'changeColor' }
+            data: { animation: 'ChangeColor' }
         }
     ]
     }

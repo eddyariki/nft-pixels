@@ -38,7 +38,8 @@ export class ChangeColorComponent implements OnInit {
     this.updatedPixels = [];
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 100000);
     await NetworkConfig.getDefault().sync(this.proxyProvider);
-    this.user = this.store$.select(getUser); // ここにユーザー情報
+    // this.user = this.store$.select(getUser); // ここにユーザー情報
+    this.user = new User();
     this.canvasContract = new CanvasContract(CANVAS_CONTRACT_ADDRESS, this.proxyProvider, this.user, this.networkConfig);
     try {
       console.log(this.user.account.address);

@@ -1,5 +1,5 @@
 import { ReadVarExpr } from '@angular/compiler';
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { User } from 'src/app/contract-interface/user';
 
 @Component({
@@ -8,6 +8,7 @@ import { User } from 'src/app/contract-interface/user';
   styleUrls: ['./login-modal.component.less']
 })
 export class LoginModalComponent implements OnInit {
+  @Input() user: User;
   @Output() cancelEmitter = new EventEmitter<boolean>();
   @Output() loginEmitter = new EventEmitter<User>();
   public password: string;
@@ -53,6 +54,7 @@ export class LoginModalComponent implements OnInit {
       } else {
         this.password = '';
         this.wrongPassword = false;
+        console.log(user)
         this.loginEmitter.emit(user);
       }
     };

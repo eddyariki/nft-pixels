@@ -14,6 +14,7 @@ import { Actions, Store} from 'src/app/lib/ngrx';
 import { LoginOrLogout } from './log';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 import { User } from 'src/app/model/entity';
+import * as userActions from 'src/app/model/store/user/actions';
 
 
 @Component({
@@ -45,6 +46,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {}
 
     onLogin(): void {
+        console.log(this._loggedIn)
         if (this._loggedIn === true) {
             this.logout.emit();
         }
@@ -52,6 +54,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     }
 
     onLogout(): void {
+        this.store$.dispatch(userActions.remove({id: this.user.id}))
         this.logout.emit();
     }
 

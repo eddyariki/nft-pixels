@@ -26,6 +26,7 @@ import { AppEffects } from './app.effects';
     BrowserModule,
     AppRoutesModule,
     BrowserModule,
+    BrowserAnimationsModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([AppEffects]),
     StoreDevtoolsModule.instrument({

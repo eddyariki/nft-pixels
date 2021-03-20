@@ -1,19 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { Address, NetworkConfig, ProxyProvider } from '@elrondnetwork/erdjs/out';
+import { Address, NetworkConfig, ProxyProvider, Transaction } from '@elrondnetwork/erdjs/out';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import CanvasContract from 'src/app/contract-interface/canvas-contract';
-import { getUserAddress } from '../../payload';
 import * as p5 from 'p5';
 import { timeInterval } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { User } from 'src/app/contract-interface/user';
+import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 
-
+const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
+const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 @Component({
   selector: 'app-change-color',
   templateUrl: './change-color.component.html',
   styleUrls: ['./change-color.component.less']
 })
+
 export class ChangeColorComponent implements OnInit {
   public pCanvas: any;
   public foundContract: boolean;
@@ -21,45 +25,86 @@ export class ChangeColorComponent implements OnInit {
   public address: string;
   public canvasDimensions: number[];
   public ownedPixelRGB: number[][];
+  public user: User;
+  public updatedPixels: number[];
+  public transactionCallBack: Transaction;
+  public showTransactionModal: boolean;
+  public sendingTransaction: boolean;
   private canvasContract: CanvasContract;
+  private proxyProvider: ProxyProvider;
+  private networkConfig: NetworkConfig;
 
-  ngOnInit(): void {
-
-    this.ownedPixels = [];
-    this.ownedPixelRGB = [];
-    const total = 100 * 100;
-    for (let i = 1; i <= total; i++) {
-      if (Math.random() > (i / total * 2)) {
-        this.ownedPixels.push(i);
+  async ngOnInit(): Promise<void> {
+    this.updatedPixels = [];
+    this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 100000);
+    await NetworkConfig.getDefault().sync(this.proxyProvider);
+    this.user = this.store$.select(getUser); // ここにユーザー情報
+    this.canvasContract = new CanvasContract(CANVAS_CONTRACT_ADDRESS, this.proxyProvider, this.user, this.networkConfig);
+    try {
+      console.log(this.user.account.address);
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(this.user.account.address, 1);
+      console.log(this.ownedPixels);
+      const ownedPixelU8intArray = await this.canvasContract.getColorsByPixelIds(1, this.ownedPixels);
+      for (let i = 0; i < ownedPixelU8intArray.length; i += 3) {
+        const r = ownedPixelU8intArray[i];
+        const g = ownedPixelU8intArray[i + 1];
+        const b = ownedPixelU8intArray[i + 2];
+        this.ownedPixelRGB[i] = [r, g, b];
+      }
+    } catch (e) {
+      console.log('failed to get address information');
+      this.ownedPixels = [];
+      this.ownedPixelRGB = [];
+      for (let i = 0; i < 100; i++) {
+        this.ownedPixels[i] = i + 1;
+        this.ownedPixelRGB[i] = [Math.random() * 255, Math.random() * 255, Math.random() * 255];
       }
     }
-    console.log(this.ownedPixels.length);
-    for (let i = 0; i < this.ownedPixels.length; i++) {
-      this.ownedPixelRGB.push([Math.random() * 255, Math.random() * 255, Math.random() * 255, 255]);
-    }
-
-    this.canvasDimensions = [100, 100];
+    console.log('total pixels owned: ', this.ownedPixels.length);
+    this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
     this.renderCanvas(700, 700, 0.5);
-    // this.ownedPixels = await this.canvasContract.getOwnedPixel(Address.fromString(this.address), 1);
-
   }
 
-  constructor(private actions$: Actions, private store$: Store<any>) { }
+  constructor(
+    private actions$: Actions,
+    private store$: Store<any>
+  ) { }
+
+  async changeColor(): Promise<void> {
+    const rs = this.ownedPixelRGB.map(rgb => rgb[0]);
+    const gs = this.ownedPixelRGB.map(rgb => rgb[1]);
+    const bs = this.ownedPixelRGB.map(rgb => rgb[2]);
+    try {
+      this.transactionCallBack = await this.canvasContract.changeBatchPixelColor(1, this.ownedPixels, rs, gs, bs);
+      this.showTransactionModal = true;
+    } catch (e) {
+      console.log('Failed to create transaction');
+    }
+  }
+  async confirmTransation(): Promise<void> {
+    this.sendingTransaction = true;
+    const hash = await this.transactionCallBack.send(this.proxyProvider);
+    await this.transactionCallBack.awaitExecuted(this.proxyProvider);
+    const executed = await this.proxyProvider.getTransactionStatus(hash);
+    this.sendingTransaction = false;
+    this.showTransactionModal = false;
+  }
 
 
-  renderCanvas(width: number, height: number, strokeWeight: number){
+
+  renderCanvas(width: number, height: number, strokeWeight: number): void {
     const sketch = s => {
       const canvasW = this.canvasDimensions[0];
       const canvasH = this.canvasDimensions[1];
       const totalPixels = canvasW * canvasH;
-      let img;
-      const imgSize = [0.2, 0.2];
-      let pGraphic;
+      let img: any;
+      let pGraphic: any;
       const wRatio = width / canvasW;
       const hRatio = height / canvasH;
-      let sliderSize;
-      let button;
-      let showImage;
+      let sliderSize: any;
+      let button: any;
+      let showImage: any;
+
       const handeFile = file => {
         if (file.type === 'image') {
           img = s.createImg(file.data, '');
@@ -80,36 +125,35 @@ export class ChangeColorComponent implements OnInit {
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
           } else {
             pGraphic.noFill();
-            pGraphic.stroke(0, 0, 0, 20);
+            pGraphic.stroke(0, 0, 0, 10);
             pGraphic.strokeWeight(strokeWeight);
+            pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
           }
 
         }
       };
 
       const enableImage = () => {
-        if (img) {showImage = !showImage; }
-        if (showImage) {button.html('Hide Image'); }
-      };
+        if (img) { showImage = !showImage; }
 
-      s.preload = () => {
+        if (showImage) { button.html('画像オフ'); }
       };
 
       s.setup = () => {
         const input = s.createFileInput(handeFile);
         input.parent('file-uploader');
 
-        sliderSize = s.createSlider(0, 100, 20);
+        sliderSize = s.createSlider(1, 100, 20);
         sliderSize.parent('w-slider');
 
-        button = s.createButton('show Image');
+        button = s.createButton('画像オン');
         button.parent('enable-image');
         button.mousePressed(enableImage);
 
 
-        let _pCanvas = s.createCanvas(width, height);
+        const pCanvas = s.createCanvas(width, height);
         pGraphic = s.createGraphics(width, height);
-        _pCanvas.parent('sketch-holder');
+        pCanvas.parent('sketch-holder');
         s.frameRate(25);
         reDraw();
       };
@@ -129,8 +173,7 @@ export class ChangeColorComponent implements OnInit {
         }
       };
       s.mouseClicked = () => {
-
-        if (s.mouseX <= 0 || s.mouseY <= 0) {return; }
+        if (s.mouseX <= 0 || s.mouseY <= 0) { return; }
         if (img) {
           // image is setting color
           const imgW = img.width * sliderSize.value() / 100;
@@ -151,6 +194,7 @@ export class ChangeColorComponent implements OnInit {
               // pixel inside hovering image
               const c = s.get(pixelX, pixelY);
               this.ownedPixelRGB[i] = c;
+              this.updatedPixels.push(i);
             }
           }
           reDraw();
@@ -192,4 +236,3 @@ export class ChangeColorComponent implements OnInit {
   //   let user;
   //   this.store$.select(getUserAddress).subscribe(x => {
   //     this.address = x;
-  // });

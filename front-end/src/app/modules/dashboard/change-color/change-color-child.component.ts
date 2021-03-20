@@ -129,7 +129,7 @@ export class ChangeColorChildComponent implements OnInit {
       try {
 
         this.transactionCallBacks = [];
-        const limit = 2;
+        const limit = 1;
         console.log('Updated pixels: ', updatedPixelArray.length);
         const batches = Math.floor(updatedPixelArray.length / limit) + 1;
         console.log('Batches: ', batches);

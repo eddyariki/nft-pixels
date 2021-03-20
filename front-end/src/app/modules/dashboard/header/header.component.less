@@ -8,13 +8,17 @@ header {
     line-height:0;
 
     .nav {
-        display: flex;
+        display: -webkit-flex;
         list-style-type: none;
         float: right;
 
+
+
             .id {
+                -webkit-transition: width 1s ease-out;
+                transition: width 1s ease-out;
                 height: 20px;
-                min-width: 200px;
+                width: 200px;
                 font-weight: 400;
                 color: #fff;
                 border-radius: 0;
@@ -24,7 +28,15 @@ header {
                 background-image: linear-gradient(to left,#ff3cac 40%,#562b7c 100%);
                 padding-top: 10px;
                 text-align: center;
+                overflow: hidden;
+                position: absolute;
+                right: 130px;
             }
+
+            .id:hover {
+                width: 600px;
+            }
+
     
             .login {
                 padding-top: 10px;

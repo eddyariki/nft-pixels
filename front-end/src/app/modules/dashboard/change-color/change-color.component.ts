@@ -4,11 +4,11 @@ import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import CanvasContract from 'src/app/contract-interface/canvas-contract';
-import { getUserAddress } from '../../payload';
 import * as p5 from 'p5';
 import { timeInterval } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from 'src/app/contract-interface/user';
+import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -38,10 +38,12 @@ export class ChangeColorComponent implements OnInit {
     this.updatedPixels = [];
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 100000);
     await NetworkConfig.getDefault().sync(this.proxyProvider);
-    this.user = new User(); // need global user here and it's good to go!
+    this.user = this.store$.select(getUser); // ここにユーザー情報
     this.canvasContract = new CanvasContract(CANVAS_CONTRACT_ADDRESS, this.proxyProvider, this.user, this.networkConfig);
     try {
+      console.log(this.user.account.address);
       this.ownedPixels = await this.canvasContract.getOwnedPixels(this.user.account.address, 1);
+      console.log(this.ownedPixels);
       const ownedPixelU8intArray = await this.canvasContract.getColorsByPixelIds(1, this.ownedPixels);
       for (let i = 0; i < ownedPixelU8intArray.length; i += 3) {
         const r = ownedPixelU8intArray[i];
@@ -63,7 +65,10 @@ export class ChangeColorComponent implements OnInit {
     this.renderCanvas(700, 700, 0.5);
   }
 
-  constructor(private actions$: Actions, private store$: Store<any>) { }
+  constructor(
+    private actions$: Actions,
+    private store$: Store<any>
+  ) { }
 
   async changeColor(): Promise<void> {
     const rs = this.ownedPixelRGB.map(rgb => rgb[0]);
@@ -84,19 +89,22 @@ export class ChangeColorComponent implements OnInit {
     this.sendingTransaction = false;
     this.showTransactionModal = false;
   }
+
+
+
   renderCanvas(width: number, height: number, strokeWeight: number): void {
     const sketch = s => {
       const canvasW = this.canvasDimensions[0];
       const canvasH = this.canvasDimensions[1];
       const totalPixels = canvasW * canvasH;
-      let img: any;
-      let pGraphic: any;
+      let img;
+      const imgSize = [0.2, 0.2];
+      let pGraphic;
       const wRatio = width / canvasW;
       const hRatio = height / canvasH;
-      let sliderSize: any;
-      let button: any;
-      let showImage: any;
-
+      let sliderSize;
+      let button;
+      let showImage;
       const handeFile = file => {
         if (file.type === 'image') {
           img = s.createImg(file.data, '');
@@ -117,9 +125,10 @@ export class ChangeColorComponent implements OnInit {
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
           } else {
             pGraphic.noFill();
-            pGraphic.stroke(0, 0, 0, 10);
+            pGraphic.stroke(0, 0, 0, 20);
             pGraphic.strokeWeight(strokeWeight);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
+
           }
 
         }
@@ -127,16 +136,17 @@ export class ChangeColorComponent implements OnInit {
 
       const enableImage = () => {
         if (img) { showImage = !showImage; }
-
-        if (showImage) { button.html('画像オフ'); }
+        if (showImage) { button.html('Hide Image'); }
       };
 
+      s.preload = () => {
+      };
 
       s.setup = () => {
         const input = s.createFileInput(handeFile);
         input.parent('file-uploader');
 
-        sliderSize = s.createSlider(1, 100, 20);
+        sliderSize = s.createSlider(0, 100, 20);
         sliderSize.parent('w-slider');
 
         button = s.createButton('画像オン');
@@ -165,7 +175,6 @@ export class ChangeColorComponent implements OnInit {
           );
         }
       };
-
       s.mouseClicked = () => {
 
         if (s.mouseX <= 0 || s.mouseY <= 0) { return; }
@@ -231,4 +240,4 @@ export class ChangeColorComponent implements OnInit {
   //   let user;
   //   this.store$.select(getUserAddress).subscribe(x => {
   //     this.address = x;
-  // })
+  // });

@@ -21,7 +21,10 @@ import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { Navigator } from '../navigator';
 import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
+import { environment } from 'src/environments/environment';
 
+const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
+const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -38,36 +41,36 @@ export class HomeComponent implements OnInit {
     async ngOnInit(): Promise<void> {
         let proxyProvider: ProxyProvider;
         try{
-            proxyProvider = new ProxyProvider( 'https://devnet-api.elrond.com', 1000000);
+            proxyProvider = new ProxyProvider( PROXY_PROVIDER_ENDPOINT, 1000000);
             await NetworkConfig.getDefault().sync(proxyProvider);
-        }catch(e){
-            console.log("Could not get proxy")
+        }catch (e){
+            console.log('Could not get proxy');
         }
 
-            let canvasContract: CanvasContract;
-            try {
+        let canvasContract: CanvasContract;
+        try {
                 canvasContract = new CanvasContract(
-                    'erd1qqqqqqqqqqqqqpgqlvaj8sy0j9tk6q90f9n2302hz9wr9xdsd8ssaaaeck',
+                    CANVAS_CONTRACT_ADDRESS,
                     proxyProvider
                 );
             }catch (e){
                 canvasContract = new CanvasContract();
                 console.log(e);
             }
-            if (canvasContract.proxyProvider){
+        if (canvasContract.proxyProvider){
                 this.foundContract = true;
             }else{
                 this.foundContract = false;
             }
-            
-            this.gettingCanvas = true;
-            const rgbArray = await canvasContract.getCanvas(1);
-            this.gettingCanvas = false;
-            this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
-        
+
+        this.gettingCanvas = true;
+        const rgbArray = await canvasContract.getCanvas(1);
+        this.gettingCanvas = false;
+        this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
+
     }
 
-    onAuction() {
+    onAuction(): void{
         this.store$.select(getIsUserLoggedIn).subscribe(x => {
             if (x === false) {
                 this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: true}));

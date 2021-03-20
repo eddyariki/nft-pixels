@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, pixel_ids, rs, gs, bs;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -449,52 +449,24 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                // await createCanvas(100, 100);
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
-                // // const stream =async()=>{
-                //     // for(let i=0;i<10;i++){
-                // await getCanvas(1,10000, false);
-                //     // }
-                // // } 
-                // // await stream();
-                // await getOwnedPixels(); // worked
-                return [4 /*yield*/, getCanvas(1, 10, true)];
+                return [4 /*yield*/, createCanvas(100, 100)];
             case 3:
-                // await createCanvas(100, 100);
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
-                // // const stream =async()=>{
-                //     // for(let i=0;i<10;i++){
-                // await getCanvas(1,10000, false);
-                //     // }
-                // // } 
-                // // await stream();
-                // await getOwnedPixels(); // worked
                 _a.sent();
-                pixel_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                rs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                gs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                bs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                return [4 /*yield*/, changeBatchPixelColor(1, pixel_ids, rs, gs, bs, 1)];
+                i = 0;
+                _a.label = 4;
             case 4:
-                _a.sent();
-                return [4 /*yield*/, getCanvas(1, 10, true)];
+                if (!(i < 10)) return [3 /*break*/, 8];
+                return [4 /*yield*/, mintPixels(5, 200)];
             case 5:
+                _a.sent(); //100pixels
+                return [4 /*yield*/, getLastValidPixelId()];
+            case 6:
                 _a.sent();
-                return [2 /*return*/];
+                _a.label = 7;
+            case 7:
+                i++;
+                return [3 /*break*/, 4];
+            case 8: return [2 /*return*/];
         }
     });
 }); };

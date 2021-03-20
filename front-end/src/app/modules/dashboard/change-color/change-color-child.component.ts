@@ -40,17 +40,30 @@ export class ChangeColorChildComponent implements OnInit {
     // this.user = this.store$.select(getUser); // ここにユーザー情報
   this.canvasContract = new CanvasContract(CANVAS_CONTRACT_ADDRESS, this.proxyProvider, this.user, this.networkConfig);
   try {
-      console.log(this.user.account.address);
-      this.ownedPixels = await this.canvasContract.getOwnedPixels(this.user.account.address, 1);
-      console.log(this.ownedPixels);
-      const ownedPixelU8intArray = await this.canvasContract.getColorsByPixelIds(1, this.ownedPixels);
-      for (let i = 0; i < ownedPixelU8intArray.length; i += 3) {
-        const r = ownedPixelU8intArray[i];
-        const g = ownedPixelU8intArray[i + 1];
-        const b = ownedPixelU8intArray[i + 2];
-        this.ownedPixelRGB[i] = [r, g, b];
+      // console.log(this.user.account.address);
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(
+        this.user.account.address,
+        1,
+        1,
+        10000
+        );
+      const ownedPixelArray  = await this.canvasContract.getOwnedPixelsColor(
+          this.user.account.address,
+          1,
+          1,
+          1000,
+          this.ownedPixels.length
+          );
+      this.ownedPixelRGB = [];
+      for (let i = 0; i < ownedPixelArray.length * 3; i += 3) {
+        const r = ownedPixelArray[i];
+        const g = ownedPixelArray[i + 1];
+        const b = ownedPixelArray[i + 2];
+        this.ownedPixelRGB.push([r, g, b]);
       }
+      console.log(this.ownedPixelRGB[0]);
     } catch (e) {
+      console.log(e);
       console.log('failed to get address information');
       this.ownedPixels = [];
       this.ownedPixelRGB = [];
@@ -119,9 +132,13 @@ export class ChangeColorChildComponent implements OnInit {
             pGraphic.stroke(0, 0, 0, 120);
             pGraphic.strokeWeight(strokeWeight);
             const idx = this.ownedPixels.indexOf(i);
+            try{
             const rgb = this.ownedPixelRGB[idx];
             pGraphic.fill(rgb[0], rgb[1], rgb[2]);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
+            }catch(e){
+              console.log(e);
+            }
           } else {
             pGraphic.noFill();
             pGraphic.stroke(0, 0, 0, 10);
@@ -154,7 +171,12 @@ export class ChangeColorChildComponent implements OnInit {
         pGraphic = s.createGraphics(width, height);
         pCanvas.parent('sketch-holder');
         s.frameRate(25);
-        reDraw();
+        if (this.ownedPixels.length === this.ownedPixelRGB.length){
+          reDraw();
+        }else{
+          console.log(this.ownedPixels.length);
+          console.log(this.ownedPixelRGB.length);
+        }
       };
 
       s.draw = () => {

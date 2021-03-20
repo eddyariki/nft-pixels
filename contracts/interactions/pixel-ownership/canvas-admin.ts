@@ -205,12 +205,17 @@ const admin = async () => {
 
     const getOwnedPixels = async () => {
         const func = new ContractFunction("getOwnedPixels");
+        console.log(alice);
+        console.log(alice.address);
         try {
             const qResponse = await smartContract.runQuery(
                 proxyProvider,
                 {
                     func,
-                    args: [Argument.fromPubkey(alice.address), Argument.fromNumber(1), Argument.fromNumber(1), Argument.fromNumber(10000)]
+                    args: [Argument.fromPubkey(alice.address), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(10000)]
                 });
             qResponse.assertSuccess();
             console.log("Size: ", qResponse.returnData.length);
@@ -228,7 +233,34 @@ const admin = async () => {
 
         // }
     }
+    const getOwnedPixelsColor = async () => {
+        const func = new ContractFunction("getOwnedPixelsColor");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [Argument.fromPubkey(alice.address), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(10000)]
+                });
+            qResponse.assertSuccess();
+            console.log("Size: ", qResponse.returnData.length);
+        } catch (e) {
+            console.log(e);
+        }
+        // qResponse.assertSuccess();
 
+        // console.log(qResponse.returnData);
+        // const returnData = qResponse.returnData;
+
+        // for(let i=0; i<returnData.length; i++){
+        //     if(i%2===0)console.log(" //");
+        //     console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+
+        // }
+    }
     const changePixelColor = async (canvas_id: number, pixel_ids: number[], r: number[], g: number[], b: number[], loop: number) => {
         let callTransactions: Transaction[] = [];
         //&self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
@@ -328,28 +360,29 @@ const admin = async () => {
 
 
 
-    await createCanvas(100, 100);
-    // await getCanvasDimensions();
-    // await getCanvasTotalSupply();
-    // // await getLastValidPixelId();
-    for (let i = 0; i < 10; i++) {
-        await mintPixels(5, 200); //100pixels
-        await getLastValidPixelId();
-    }
+    // await createCanvas(100, 100);
+    // // await getCanvasDimensions();
+    // // await getCanvasTotalSupply();
+    // // // await getLastValidPixelId();
+    // for (let i = 0; i < 10; i++) {
+    //     await mintPixels(5, 200); //100pixels
+    //     await getLastValidPixelId();
+    // }
     // await getLastValidPixelId();
 
 
-    // // const stream =async()=>{
-    //     // for(let i=0;i<10;i++){
-    // await getCanvas(1,10000, false);
-    //     // }
-    // // } 
-    // // await stream();
-    // await getOwnedPixels(); // worked
-    // await getCanvas(1,10,true);
-    // // await changeBatchPixelColor(1, )
+    // // // const stream =async()=>{
+    // //     // for(let i=0;i<10;i++){
+    // // await getCanvas(1,10000, false);
+    await getOwnedPixelsColor();
+    // //     // }
+    // // // } 
+    // // // await stream();
+    // // await getOwnedPixels(); // worked
+    // // await getCanvas(1,10,true);
+    // // // await changeBatchPixelColor(1, )
     // let pixel_ids = [1,2,3,4,5,6,7,8,9,10]
-    // let rs = [6,6,6,6,6,6,6,6,6,6]
+    // let rs = [255,255,255,255,200,200,226,226,226,226]
     // let gs = [6,6,6,6,6,6,6,6,6,6]
     // let bs = [6,6,6,6,6,6,6,6,6,6]
     // await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);

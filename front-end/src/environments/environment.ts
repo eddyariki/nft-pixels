@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   development: true,
-  contractAddress: 'erd1qqqqqqqqqqqqqpgqlpnuu64ukrjmaylsz5vja8qff4hgfcp9d8ssgc7rt3',
+  contractAddress: 'erd1qqqqqqqqqqqqqpgqxe8fr7he93f8v7ujfsnfgk2fjk0gtd9gd8ssvqt87q',
   proxyProviderEndpoint: 'https://devnet-api.elrond.com'
 };
 

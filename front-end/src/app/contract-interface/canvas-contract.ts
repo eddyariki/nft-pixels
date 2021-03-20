@@ -61,7 +61,7 @@ export default class CanvasContract {
         return callTransaction; // set gaslimit later in transaction-confirmation modal
     }
 
-    public async changeBatchPixelColor(canvasId: number, pixelIds: number[], r: number[], g: number[], b: number[]): Promise<Transaction>{
+    public async changeBatchPixelColor(canvasId: number, pixelIds: number[], r: number[], g: number[], b: number[]): Promise<Transaction> {
         // &self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
 
         const pixelIdsVec = this._createU64VectorArgument(pixelIds);
@@ -120,39 +120,44 @@ export default class CanvasContract {
         return totalPixelSupply[0];
     }
 
-    public async getOwnedPixels(address: Address, canvasId: number): Promise<number[]> {
-        const ownedPixels = await this._getOwnedPixels(address, canvasId);
+    public async getOwnedPixels(address: Address, canvasId: number, from: number, to: number): Promise<number[]> {
+        const ownedPixels = await this._getOwnedPixels(address, canvasId, from, to);
         return ownedPixels;
     }
-    public async getColorsByPixelIds(canvasId: number, pixelIds: number[]): Promise<Uint8Array>{
-        const rgbArray = await this._getColorsByPixelds(canvasId, pixelIds);
-        const rgbaArray = this._generateRGBAArray(1, rgbArray.length / 3, rgbArray);
-        return rgbaArray;
+    public async getOwnedPixelsColor(
+        address: Address, canvasId: number,
+        from: number, to: number,
+        ownedAmount: number ): Promise<Uint8Array> {
+
+        const rgbArray = await this._streamOwnedPixelsColor(address, canvasId);
+        console.log(rgbArray.length);
+        // console.log(rgbArray.slice(0, 24));
+        return rgbArray;
     }
 
     // Private make more dry later
-    private _createU8VectorArgument(from: number[]): U8Value[]{
+    private _createU8VectorArgument(from: number[]): U8Value[] {
         const res = [];
-        for (let j = 0; j < from.length; j++){
+        for (let j = 0; j < from.length; j++) {
             res[j] = new U8Value(from[j]);
         }
         return res;
     }
-    private _createU32VectorArgument(from: number[]): U32Value[]{
+    private _createU32VectorArgument(from: number[]): U32Value[] {
         const res = [];
-        for (let j = 0; j < from.length; j++){
+        for (let j = 0; j < from.length; j++) {
             res[j] = new U32Value(from[j]);
         }
         return res;
     }
-    private _createU64VectorArgument(from: number[]): U64Value[]{
+    private _createU64VectorArgument(from: number[]): U64Value[] {
         const res = [];
-        for (let j = 0; j < from.length; j++){
+        for (let j = 0; j < from.length; j++) {
             res[j] = new U64Value(new BigNumber(from[j]));
         }
         return res;
     }
-    private _concatTypedArrays(a: any, b: any): any{
+    private _concatTypedArrays(a: any, b: any): any {
         const c = new (a.constructor)(a.length + b.length);
         c.set(a, 0);
         c.set(b, a.length);
@@ -183,13 +188,39 @@ export default class CanvasContract {
             });
         return qResponse;
     }
-    private async _getColorsByPixelds(canvasId: number, pixelIds: number[]): Promise<Uint8Array>{
-        const pixelIdsVec = this._createU64VectorArgument(pixelIds);
-        const qResponse = await this._runQuery('getColorsByPixelIds',
-            [
-                Argument.fromNumber(1),
-                Argument.fromTypedValue(new Vector(pixelIdsVec)),
-            ]);
+    private async _getOwnedPixels(qAddress: Address, canvasId: number, from: number, to: number): Promise<number[]> {
+        const qResponse = await this._runQuery('getOwnedPixels', [
+            Argument.fromPubkey(qAddress),
+            Argument.fromNumber(canvasId),
+            Argument.fromNumber(from),
+            Argument.fromNumber(to),
+        ]);
+        const returnData = qResponse.returnData;
+        const ownedPixels = [];
+        for (let i = 0; i < returnData.length; i++) {
+            ownedPixels[i] = returnData[i].asNumber;
+        }
+        return ownedPixels;
+    }
+    private async _streamOwnedPixelsColor(qAddress: Address, canvasId: number): Promise<Uint8Array> {
+        let buffer: Uint8Array;
+        for (let i = 0; i < 10; i++) {
+            if (!buffer) {
+                buffer = await this._getOwnedPixelsColor(qAddress, canvasId, 1, 1000);
+            } else {
+                const b = await this._getOwnedPixelsColor(qAddress, canvasId, i * 1000 + 1, (i + 1) * 1000);
+                buffer = this._concatTypedArrays(buffer, b);
+            }
+        }
+        return buffer;
+    }
+    private async _getOwnedPixelsColor(qAddress: Address, canvasId: number, from: number, to: number): Promise<Uint8Array> {
+        const qResponse = await this._runQuery('getOwnedPixelsColor', [
+            Argument.fromPubkey(qAddress),
+            Argument.fromNumber(canvasId),
+            Argument.fromNumber(from),
+            Argument.fromNumber(to),
+        ]);
         qResponse.assertSuccess();
         const returnData = qResponse.returnData;
         const rgbArrayRaw = new Uint8Array(qResponse.returnData.length);
@@ -198,6 +229,23 @@ export default class CanvasContract {
         }
         return rgbArrayRaw;
     }
+
+    private _splitVectorBy1024(vec: U8Value[] | U64Value[] | U32Value[]): any {
+        const length = vec.length;
+        const splitVec = [];
+        splitVec[0] = [];
+        let idx = 0;
+        splitVec[idx].push(vec[0]);
+        for (let i = 1; i < length; i++) {
+            if (i % 1024 === 0) {
+                idx++;
+                splitVec[idx] = [];
+            }
+            splitVec[idx].push(vec[i]);
+        }
+        return splitVec;
+    }
+
 
     private async _streamCanvas(canvasId: number): Promise<Uint8Array> {
         let buffer: Uint8Array;
@@ -212,17 +260,6 @@ export default class CanvasContract {
 
         }
         return buffer;
-    }
-
-
-    private async _getOwnedPixels(qAddress: Address, canvasId: number): Promise<number[]>{
-        const qResponse = await this._runQuery('getOwnedPixels', [Argument.fromPubkey(qAddress), Argument.fromNumber(canvasId)]);
-        const returnData = qResponse.returnData;
-        const ownedPixels = [];
-        for (let i = 0; i < returnData.length; i++) {
-            ownedPixels[i] = returnData[i].asNumber;
-        }
-        return ownedPixels;
     }
 
     private async _queryGetCanvas(canvasId: number, from: number, upTo: number): Promise<Uint8Array> {
@@ -269,6 +306,28 @@ export default class CanvasContract {
         let count = 0;
         let rgbArrayCount = 0;
         const rgbaArray = new Uint8Array(w * h * 4);
+
+        for (let i = 0; i < w * h * 4; i++) {
+            if (count === 3) {
+                rgbaArray[i] = 255;
+                count = 0;
+            } else {
+                if (!rgbArray) {
+                    rgbaArray[i] = 125;
+                } else {
+                    rgbaArray[i] = rgbArray[rgbArrayCount];
+                }
+                rgbArrayCount++;
+                count++;
+            }
+        }
+        return rgbaArray;
+    }
+
+    private _generateRGBAArrayFromNumberArray(w: number, h: number, rgbArray?: number[]): number[] {
+        let count = 0;
+        let rgbArrayCount = 0;
+        const rgbaArray = [];
 
         for (let i = 0; i < w * h * 4; i++) {
             if (count === 3) {

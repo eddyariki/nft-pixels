@@ -377,6 +377,40 @@ pub trait PixelOwnership {
 		}
 		pixels.into()
 	}
+
+	#[view(getOwnedPixelsColor)]
+	fn get_owned_pixels_color(
+		&self,
+     	address: Address,
+		canvas_id: &u32,
+		from:&u64,
+		up_to: &u64
+	)->MultiResultVec<u8>{
+		
+		// let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+		let mut end = last_valid_pixel_id.clone();
+		if up_to < &last_valid_pixel_id{
+			end = up_to.clone();
+		}
+		let mut pixel_id = from.clone();
+
+		let mut pixels = Vec::new();
+
+		while &pixel_id <= &end {
+			let id = self.get_pixel_owner(&canvas_id, &pixel_id);
+			if id == address{
+				let color = self.get_pixel_color(&canvas_id, &pixel_id);
+				pixels.push(color.r);
+				pixels.push(color.g);
+				pixels.push(color.b);
+			}
+			
+			pixel_id +=1u64;
+		}
+		pixels.into()
+	}
+
 	#[view(getColorsByPixelIds)]
 	fn get_colors_by_pixel_ids(
 		&self,

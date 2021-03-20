@@ -1,5 +1,6 @@
 <section>
     <app-header
+    [user]="user$ | async"
     (login)="onLogin($event)"
     (logout)="onLogout()"
     [loggedIn]=" loggedIn$ | async"

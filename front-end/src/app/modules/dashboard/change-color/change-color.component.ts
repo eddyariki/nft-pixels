@@ -97,14 +97,14 @@ export class ChangeColorComponent implements OnInit {
       const canvasW = this.canvasDimensions[0];
       const canvasH = this.canvasDimensions[1];
       const totalPixels = canvasW * canvasH;
-      let img;
-      const imgSize = [0.2, 0.2];
-      let pGraphic;
+      let img: any;
+      let pGraphic: any;
       const wRatio = width / canvasW;
       const hRatio = height / canvasH;
-      let sliderSize;
-      let button;
-      let showImage;
+      let sliderSize: any;
+      let button: any;
+      let showImage: any;
+
       const handeFile = file => {
         if (file.type === 'image') {
           img = s.createImg(file.data, '');
@@ -125,10 +125,9 @@ export class ChangeColorComponent implements OnInit {
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
           } else {
             pGraphic.noFill();
-            pGraphic.stroke(0, 0, 0, 20);
+            pGraphic.stroke(0, 0, 0, 10);
             pGraphic.strokeWeight(strokeWeight);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
-
           }
 
         }
@@ -136,17 +135,15 @@ export class ChangeColorComponent implements OnInit {
 
       const enableImage = () => {
         if (img) { showImage = !showImage; }
-        if (showImage) { button.html('Hide Image'); }
-      };
 
-      s.preload = () => {
+        if (showImage) { button.html('画像オフ'); }
       };
 
       s.setup = () => {
         const input = s.createFileInput(handeFile);
         input.parent('file-uploader');
 
-        sliderSize = s.createSlider(0, 100, 20);
+        sliderSize = s.createSlider(1, 100, 20);
         sliderSize.parent('w-slider');
 
         button = s.createButton('画像オン');
@@ -176,7 +173,6 @@ export class ChangeColorComponent implements OnInit {
         }
       };
       s.mouseClicked = () => {
-
         if (s.mouseX <= 0 || s.mouseY <= 0) { return; }
         if (img) {
           // image is setting color
@@ -240,4 +236,3 @@ export class ChangeColorComponent implements OnInit {
   //   let user;
   //   this.store$.select(getUserAddress).subscribe(x => {
   //     this.address = x;
-  // });

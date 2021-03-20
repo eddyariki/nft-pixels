@@ -12,6 +12,7 @@ import { HomeComponent } from './home/home.component';
 import { TransactionModalComponent } from './transaction-modal/transaction-modal.component';
 import { AuctionComponent } from './auction/auction.component';
 import { ChangeColorComponent } from './change-color/change-color.component';
+import { ChangeColorChildComponent } from './change-color/change-color-child.component';
 
 @NgModule({
     imports: [
@@ -26,7 +27,8 @@ import { ChangeColorComponent } from './change-color/change-color.component';
     HomeComponent,
     TransactionModalComponent,
     AuctionComponent,
-    ChangeColorComponent
+    ChangeColorComponent,
+    ChangeColorChildComponent,
     ],
     exports: [],
     providers: [],

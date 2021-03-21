@@ -37,7 +37,7 @@ export class AuctionComponent implements OnInit {
   private proxyProvider: ProxyProvider;
   private networkConfig: NetworkConfig;
   private activeAuctions: number[];
-  private bidAmount: number;
+  public bidAmount: number;
   
   public user: User;
 

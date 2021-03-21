@@ -12,7 +12,7 @@
     <form class="auction-form" (submit)="$event.preventDefault()" > 
         <div class="bid-amount-container">
             <label for="bid-amount">Bid: </label>
-            <input type="text" (keyup)="onKey($event)" [(value)]="password" placeholder="enter bid amount"
+            <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount"
                 required>
             <button type="submit" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
         </div>

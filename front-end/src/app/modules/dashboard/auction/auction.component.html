@@ -1,0 +1,31 @@
+
+<button (click)="showLoginModal(true)">login</button>
+
+<div *ngIf ="currentAuction" class="auction-info">
+    <div>Pixel Id: {{currentAuction.pixelId}}</div>
+    <div>Starting Price: {{currentAuction.startingPrice}}</div>
+    <div>Ending Price: {{currentAuction.endingPrice}}</div>
+    <div>Current Bid: {{currentAuction.currentBid}}</div>
+    <div>Deadline: {{currentAuction.deadline}}</div>
+</div>
+
+    <form class="auction-form" (submit)="$event.preventDefault()" > 
+        <div class="bid-amount-container">
+            <label for="bid-amount">Bid: </label>
+            <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount"
+                required>
+            <button type="submit" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
+        </div>
+    </form>
+<div *ngIf="transactionModalIsVisible">
+    <button (click)="confirmTransaction()">
+        Send Transaction
+    </button>
+</div>
+
+<div *ngIf="loginModalIsVisible">
+    <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
+    </app-login-modal>
+</div>
+
+

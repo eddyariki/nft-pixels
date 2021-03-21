@@ -31,6 +31,7 @@ export class ChangeColorChildComponent implements OnInit {
   public ownedPixelRGB: number[][];
   public updatedPixels: boolean[];
   public updatedPixelsSum: number;
+  public canvasRGB: number[][];
   public transactionCallBacks: Transaction[];
   public showTransactionModal: boolean;
   public sendingTransaction: boolean;
@@ -78,19 +79,29 @@ export class ChangeColorChildComponent implements OnInit {
         10000
       );
       this.loadingStateMessage = 'Getting User-Owned pixel colors...';
-      const ownedPixelArray = await this.canvasContract.getOwnedPixelsColor(
-        this.user.account.address,
-        1,
-        1,
-        1000,
-        this.ownedPixels.length
-      );
+      // const ownedPixelArray = await this.canvasContract.getOwnedPixelsColor(
+      //   this.user.account.address,
+      //   1,
+      //   1,
+      //   1000,
+      //   this.ownedPixels.length
+      // );
+      const pixelArray = await this.canvasContract.getCanvasRGB(1);
+      this.canvasRGB = [];
+      // console.log(this.ownedPixelRGB.length);
       this.ownedPixelRGB = [];
-      for (let i = 0; i < ownedPixelArray.length * 3; i += 3) {
-        const r = ownedPixelArray[i];
-        const g = ownedPixelArray[i + 1];
-        const b = ownedPixelArray[i + 2];
-        this.ownedPixelRGB.push([r, g, b]);
+      let ownedPixelId = 1;
+      for (let i = 0; i < pixelArray.length; i += 3) {
+        const r = pixelArray[i];
+        const g = pixelArray[i + 1];
+        const b = pixelArray[i + 2];
+        if (this.ownedPixels.includes(ownedPixelId)){
+          // id is owned, so show it as such
+          this.ownedPixelRGB.push([r, g, b]);
+          this.canvasRGB .push([r, g, b]);
+        }
+        this.canvasRGB .push([r, g, b]);
+        ownedPixelId++;
       }
       console.log(this.ownedPixelRGB.length);
     } catch (e) {
@@ -214,7 +225,8 @@ export class ChangeColorChildComponent implements OnInit {
               console.log(e);
             }
           } else {
-            pGraphic.noFill();
+            const rgb = this.canvasRGB[i - 1];
+            pGraphic.noFill(rgb[0], rgb[1], rgb[2], 20);
             pGraphic.stroke(0, 0, 0, 10);
             pGraphic.strokeWeight(strokeWeight);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);

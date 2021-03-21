@@ -108,7 +108,11 @@ export default class CanvasContract {
             return canvas;
         }
     }
-
+    // return a 1D array of  RGB (100x100x3=30,000 elements)
+    public async getCanvasRGB(canvasId: number): Promise<Uint8Array>{
+        const rgbArray = await this._queryGetCanvas(canvasId, 1, 10000);
+        return rgbArray;
+    }
 
     public async getCanvasDimensions(canvasId: number): Promise<number[]> {
         if (!this.proxyProvider) {

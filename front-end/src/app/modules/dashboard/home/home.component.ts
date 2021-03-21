@@ -22,23 +22,30 @@ import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { Navigator } from '../navigator';
 import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
+import { getState as getPath } from '../../payload/path/path.selector';
 import { environment } from 'src/environments/environment';
+import { HomeAnimation } from './animation';
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.less']
+  styleUrls: ['./home.component.less'],
+  animations: [HomeAnimation],
 })
 export class HomeComponent implements OnInit {
     public user$ = this.store$.select(getUser);
+    public path$ = this.store$.select(getPath);
+    public path = 'home';
     public image: SafeUrl;
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
     public gettingCanvas: boolean;
     public foundContract: boolean;
     public url: string;
+    
+
     async ngOnInit(): Promise<void> {
         this.store$.dispatch(pathActions.path({path: 'home'}));
         let proxyProvider: ProxyProvider;
@@ -72,6 +79,15 @@ export class HomeComponent implements OnInit {
 
     }
 
+    get getPath(): string {
+        this.store$.select(getPath).subscribe(
+            p => {
+                this.path = p.path;
+            }
+        );
+        return this.path;
+    }
+
     onAuction(): void{
         this.store$.select(getIsUserLoggedIn).subscribe(x => {
             if (x === false) {
@@ -79,16 +95,17 @@ export class HomeComponent implements OnInit {
             }
         });
 
-        this.store$.select(getUserAddress).subscribe(
-            id => {
-                if (id) {
-                    this.url = Navigator.goAuction(id);
-                } else {
-                    this.url = '';
-                }
-            }
-        );
-        this.router.navigate([this.url]);
+        // this.store$.select(getUserAddress).subscribe(
+        //     id => {
+        //         if (id) {
+        //             this.url = Navigator.goAuction(id);
+        //         } else {
+        //             this.url = '';
+        //         }
+        //     }
+        // );
+        // this.router.navigate([this.url]);
+        this.store$.dispatch(pathActions.path({ path: 'auction'}));
     }
 
     onChangeColor(): void{
@@ -108,6 +125,16 @@ export class HomeComponent implements OnInit {
             }
         );
         this.router.navigate([this.url]);
+    }
+
+    onHome() {
+        this.store$.dispatch(pathActions.path({ path: 'home'}));
+    }
+
+    get isHome(): boolean {
+        if (this.path === 'home') {
+            return true;
+        }
     }
 
    constructor(

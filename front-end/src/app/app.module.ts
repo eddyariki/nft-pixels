@@ -9,6 +9,7 @@ import { EntityStoreModule } from './model/store/store.module';
 import { RouterModule } from '@angular/router';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { PayloadModule } from 'src/app/modules/payload/payload.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // Components
 import { AppComponent } from './app.component';
@@ -23,6 +24,7 @@ import { AppEffects } from './app.effects';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutesModule,
     StoreModule.forRoot({}),
     EffectsModule.forRoot([AppEffects]),

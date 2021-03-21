@@ -5,4 +5,5 @@ export interface User {
     account?: Account;
     signer?: ISigner | string;
     loggedIn?: boolean;
+    password?: string;
 }

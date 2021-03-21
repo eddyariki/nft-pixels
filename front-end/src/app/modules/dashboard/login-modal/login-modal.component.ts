@@ -54,6 +54,7 @@ export class LoginModalComponent implements OnInit {
       } else {
         this.password = '';
         this.wrongPassword = false;
+        console.log(user);
         this.loginEmitter.emit(user);
       }
     };

@@ -432,6 +432,31 @@ const admin = async () => {
         const executed = await proxyProvider.getTransactionStatus(hash);
         console.log(executed);
     }
+    const endAuctionBob = async(canvasId:number, pixelId:number) => {
+        const bobJSON = await readJSON("bob.json");
+    const bobSecret = UserWallet.decryptSecretKey(bobJSON, "password");
+    const bobWallet = new UserWallet(bobSecret, "password");
+    const bobAddress = new Address(bobSecret.generatePublicKey().toAddress());
+    const bob = new Account(bobAddress);
+    const bobSigner = UserSigner.fromWallet(bobJSON, "password");
+        let callTransaction = smartContract.call({
+            func: new ContractFunction("endAuction"),
+            args: [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ],
+            gasLimit: new GasLimit(50000000)
+        });
+        await bob.sync(proxyProvider);
+        callTransaction.setNonce(bob.nonce);
+        bobSigner.sign(callTransaction);
+        bob.incrementNonce();
+        let hash = await callTransaction.send(proxyProvider);
+        await callTransaction.awaitExecuted(proxyProvider);
+        const executed = await proxyProvider.getTransactionStatus(hash);
+        console.log(executed);
+    }
+    
     const getAuctions = async () => {
         const func = new ContractFunction("getAuctionsActive");
         try {
@@ -606,31 +631,36 @@ const admin = async () => {
             console.log(e);
         }
     }
-    await createCanvas(5, 5);
+    // await createCanvas(5, 5);
     // // await getCanvasDimensions();
     // // await getCanvasTotalSupply();
     // // // await getLastValidPixelId();
-    await mintPixels(1, 25);
+    // await mintPixels(1, 25);
     // for (let i = 0; i < 10; i++) {
     //     await mintPixels(5, 200); //100pixels
     //     await getLastValidPixelId();
     // }
-    await getLastValidPixelId();
-    await createAuction(1,3);
-    await createAuction(1,4);
-    await bidAuction(3, 1.2);
-    console.log('STARTING PRICE');
-    await getAuctionStartingPrice(3);
-    console.log('ENDING PRICE');
-    await getAuctionEndingPrice(3);
-    console.log('DEADLINE');
-    await getAuctionDeadline(3);
-    console.log('OWNER');
-    await getAuctionOwner(3);
-    console.log('CURRENT BID');
-    await getAuctionCurrentBid(3);
-    console.log('CURRENT WINNER');
-    await getAuctionCurrentWinner(3);
+    // await getLastValidPixelId();
+    // await createAuction(1,3);
+    // await createAuction(1,4);
+    // await bidAuction(4, 1.2);
+    console.log("Pixels owned by bob: ");
+    await getOwnedPixelsBob();
+    await endAuctionBob(1,4);
+    console.log("Pixels owned by bob: ");
+    await getOwnedPixelsBob();
+    // console.log('STARTING PRICE');
+    // await getAuctionStartingPrice(4);
+    // console.log('ENDING PRICE');
+    // await getAuctionEndingPrice(4);
+    // console.log('DEADLINE');
+    // await getAuctionDeadline(4);
+    // console.log('OWNER');
+    // await getAuctionOwner(4);
+    // console.log('CURRENT BID');
+    // await getAuctionCurrentBid(4);
+    // console.log('CURRENT WINNER');
+    // await getAuctionCurrentWinner(4);
     // await createAuction(1,6);
     // await createAuction(1,7);
 
@@ -643,8 +673,8 @@ const admin = async () => {
     // console.log('BIDDING NOW')
     // await bidAuction(21, 1.2);
     // await getAuction(14);
-    // await getOwnedPixelsBob();
-    // await endAuction(1,19);
+    await getOwnedPixelsBob();
+    
     // await getOwnedPixelsBob();
     // await getAuctions();
     // // // const stream =async()=>{

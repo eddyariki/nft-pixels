@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsBob, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, createAuction, endAuction, getAuctions, bidAuction, getAuctionStartingPrice, getAuctionEndingPrice, getAuctionDeadline, getAuctionOwner, getAuctionCurrentBid, getAuctionCurrentWinner;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsBob, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, createAuction, endAuction, endAuctionBob, getAuctions, bidAuction, getAuctionStartingPrice, getAuctionEndingPrice, getAuctionDeadline, getAuctionOwner, getAuctionCurrentBid, getAuctionCurrentWinner;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -586,6 +586,46 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
+                endAuctionBob = function (canvasId, pixelId) { return __awaiter(void 0, void 0, void 0, function () {
+                    var bobJSON, bobSecret, bobWallet, bobAddress, bob, bobSigner, callTransaction, hash, executed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, readJSON("bob.json")];
+                            case 1:
+                                bobJSON = _a.sent();
+                                bobSecret = erdjs_1.UserWallet.decryptSecretKey(bobJSON, "password");
+                                bobWallet = new erdjs_1.UserWallet(bobSecret, "password");
+                                bobAddress = new erdjs_1.Address(bobSecret.generatePublicKey().toAddress());
+                                bob = new erdjs_1.Account(bobAddress);
+                                bobSigner = erdjs_1.UserSigner.fromWallet(bobJSON, "password");
+                                callTransaction = smartContract.call({
+                                    func: new erdjs_1.ContractFunction("endAuction"),
+                                    args: [
+                                        erdjs_1.Argument.fromNumber(canvasId),
+                                        erdjs_1.Argument.fromNumber(pixelId),
+                                    ],
+                                    gasLimit: new erdjs_1.GasLimit(50000000)
+                                });
+                                return [4 /*yield*/, bob.sync(proxyProvider)];
+                            case 2:
+                                _a.sent();
+                                callTransaction.setNonce(bob.nonce);
+                                bobSigner.sign(callTransaction);
+                                bob.incrementNonce();
+                                return [4 /*yield*/, callTransaction.send(proxyProvider)];
+                            case 3:
+                                hash = _a.sent();
+                                return [4 /*yield*/, callTransaction.awaitExecuted(proxyProvider)];
+                            case 4:
+                                _a.sent();
+                                return [4 /*yield*/, proxyProvider.getTransactionStatus(hash)];
+                            case 5:
+                                executed = _a.sent();
+                                console.log(executed);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); };
                 getAuctions = function () { return __awaiter(void 0, void 0, void 0, function () {
                     var func, qResponse, i, e_4;
                     return __generator(this, function (_a) {
@@ -848,69 +888,62 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                return [4 /*yield*/, createCanvas(5, 5)];
+                // await createCanvas(5, 5);
+                // // await getCanvasDimensions();
+                // // await getCanvasTotalSupply();
+                // // // await getLastValidPixelId();
+                // await mintPixels(1, 25);
+                // for (let i = 0; i < 10; i++) {
+                //     await mintPixels(5, 200); //100pixels
+                //     await getLastValidPixelId();
+                // }
+                // await getLastValidPixelId();
+                // await createAuction(1,3);
+                // await createAuction(1,4);
+                // await bidAuction(4, 1.2);
+                console.log("Pixels owned by bob: ");
+                return [4 /*yield*/, getOwnedPixelsBob()];
             case 3:
                 _a.sent();
-                // // await getCanvasDimensions();
-                // // await getCanvasTotalSupply();
-                // // // await getLastValidPixelId();
-                return [4 /*yield*/, mintPixels(1, 25)];
+                return [4 /*yield*/, endAuctionBob(1, 4)];
             case 4:
-                // // await getCanvasDimensions();
-                // // await getCanvasTotalSupply();
-                // // // await getLastValidPixelId();
                 _a.sent();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
-                return [4 /*yield*/, getLastValidPixelId()];
+                console.log("Pixels owned by bob: ");
+                return [4 /*yield*/, getOwnedPixelsBob()];
             case 5:
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
                 _a.sent();
-                return [4 /*yield*/, createAuction(1, 3)];
-            case 6:
-                _a.sent();
-                return [4 /*yield*/, createAuction(1, 4)];
-            case 7:
-                _a.sent();
-                return [4 /*yield*/, bidAuction(3, 1.2)];
-            case 8:
-                _a.sent();
-                console.log('STARTING PRICE');
-                return [4 /*yield*/, getAuctionStartingPrice(3)];
-            case 9:
-                _a.sent();
-                console.log('ENDING PRICE');
-                return [4 /*yield*/, getAuctionEndingPrice(3)];
-            case 10:
-                _a.sent();
-                console.log('DEADLINE');
-                return [4 /*yield*/, getAuctionDeadline(3)];
-            case 11:
-                _a.sent();
-                console.log('OWNER');
-                return [4 /*yield*/, getAuctionOwner(3)];
-            case 12:
-                _a.sent();
-                console.log('CURRENT BID');
-                return [4 /*yield*/, getAuctionCurrentBid(3)];
-            case 13:
-                _a.sent();
-                console.log('CURRENT WINNER');
-                return [4 /*yield*/, getAuctionCurrentWinner(3)];
-            case 14:
-                _a.sent();
+                // console.log('STARTING PRICE');
+                // await getAuctionStartingPrice(4);
+                // console.log('ENDING PRICE');
+                // await getAuctionEndingPrice(4);
+                // console.log('DEADLINE');
+                // await getAuctionDeadline(4);
+                // console.log('OWNER');
+                // await getAuctionOwner(4);
+                // console.log('CURRENT BID');
+                // await getAuctionCurrentBid(4);
+                // console.log('CURRENT WINNER');
+                // await getAuctionCurrentWinner(4);
                 // await createAuction(1,6);
                 // await createAuction(1,7);
                 // await createAuction(1,21);
                 // await getAuctionStartingPrice(15);
                 console.log('Active Auction Count: ');
                 return [4 /*yield*/, getAuctions()];
-            case 15:
+            case 6:
+                _a.sent();
+                // await getOwnedPixels();
+                // await getAuction(21);
+                // console.log('BIDDING NOW')
+                // await bidAuction(21, 1.2);
+                // await getAuction(14);
+                return [4 /*yield*/, getOwnedPixelsBob()];
+            case 7:
+                // await getOwnedPixels();
+                // await getAuction(21);
+                // console.log('BIDDING NOW')
+                // await bidAuction(21, 1.2);
+                // await getAuction(14);
                 _a.sent();
                 return [2 /*return*/];
         }

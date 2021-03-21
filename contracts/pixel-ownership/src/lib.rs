@@ -199,18 +199,27 @@ pub trait PixelOwnership {
 		
 		require!(!self.is_empty_auction(&canvas_id, &pixel_id), "Auction does not exist!");
 
-		let caller = self.get_caller();
-		require!(caller == self._get_auction_pixel_owner(&canvas_id, &pixel_id), "Only auction pixel owners can auction their pixel");
-
 		let auction = self.get_auction(&canvas_id, &pixel_id);
-		let _current_winner = auction.current_winner;
+		let current_winner = auction.current_winner;
 		let current_bid = auction.current_bid;
-		let _pixel_owner = auction.pixel_owner;
+		let pixel_owner = auction.pixel_owner;
 
-		self._end_auction(canvas_id, pixel_id, _current_winner,current_bid, _pixel_owner);
-
-
-
+		let caller = self.get_caller();
+		let deadline = auction.deadline;
+		let current_timestamp = self.get_block_timestamp();
+		if caller == pixel_owner{
+			self._end_auction(canvas_id, pixel_id, current_winner,current_bid, pixel_owner);
+			return Ok(())
+		}
+		//auction ended
+		if deadline < current_timestamp {
+			require!(caller == current_winner, "Winners can only end the auction after the deadline!");
+			if current_winner == caller{
+				self._end_auction(canvas_id, pixel_id, current_winner, current_bid, pixel_owner);
+				return Ok(())
+			}
+		}
+		require!(caller == pixel_owner, "Only the pixel owner can end the auction before deadline!");
 		Ok(())
 	}
 

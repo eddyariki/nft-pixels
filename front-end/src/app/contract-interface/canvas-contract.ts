@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 // import { User } from 'src/app/contract-interface/user';
 import BigNumber from 'bignumber.js';
 import { User } from '../model/entity';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'node:constants';
 
 const production = environment.production;
 class Canvas {
@@ -62,9 +63,6 @@ export default class CanvasContract {
     }
 
     public async changeBatchPixelColor(canvasId: number, pixelIds: number[], r: number[], g: number[], b: number[]): Promise<Transaction> {
-        // &self, canvas_id: u32, pixel_id:u64, r:u8,g:u8,b:u8
-        // this.networkConfig = new NetworkConfig();
-        // await this.networkConfig.sync(this.proxyProvider);
         const pixelIdsVec = this._createU64VectorArgument(pixelIds);
         const rs = this._createU8VectorArgument(r);
         const gs = this._createU8VectorArgument(g);
@@ -90,6 +88,70 @@ export default class CanvasContract {
         }
         // return callTransaction; // set gaslimit later in transaction-confirmation modal
     }
+
+    public async createAuction(
+        canvasId: number,
+        pixelId: number,
+        startingPrice: number,
+        endingPrice: number,
+        endsIn: number
+        ): Promise<Transaction>{
+            try{
+            const callTransaction = await this._createCallTransaction(
+                'auctionPixel',
+                [
+                    Argument.fromNumber(canvasId),
+                    Argument.fromNumber(pixelId),
+                    Argument.fromBigInt(new BigNumber(startingPrice * (10 ** 18))),
+                    Argument.fromBigInt(new BigNumber(endingPrice * (10 ** 18))),
+                    Argument.fromNumber(600),
+                ],
+                new GasLimit(10000000) // bad approach (hardcoded)
+            );
+            return callTransaction;
+            }catch (e){
+                console.log('Failure occurred in transaction signing step');
+                console.log(e);
+            }
+    }
+    public async endAuction(canvasId: number, pixelId: number): Promise<Transaction>{
+        try{
+            const callTransaction = await this._createCallTransaction(
+                'endAuction',
+                [
+                    Argument.fromNumber(canvasId),
+                    Argument.fromNumber(pixelId)
+                ],
+                new GasLimit(50000000) // bad approach (hardcoded)
+            );
+            return callTransaction;
+            }catch (e){
+                console.log('Failure occurred in transaction signing step');
+                console.log(e);
+            }
+    }
+
+    public async bidAuction(
+        canvasId: number,
+        pixelId: number,
+        amount: number): Promise<Transaction>{
+        try{
+            const callTransaction = await this._createCallTransaction(
+                '',
+                [
+                    Argument.fromNumber(canvasId),
+                    Argument.fromNumber(pixelId)
+                ],
+                new GasLimit(50000000), // bad approach (hardcoded),
+                Balance.eGLD(amount)
+            );
+            return callTransaction;
+            }catch (e){
+                console.log('Failure occurred in transaction signing step');
+                console.log(e);
+            }
+    }
+
     // Getters
     public async getCanvas(canvasId: number): Promise<Canvas> {
         if (!this.proxyProvider) {
@@ -146,6 +208,40 @@ export default class CanvasContract {
         // console.log(rgbArray.slice(0, 24));
         return rgbArray;
     }
+    public async getAuctions(canvasId: number, from: number, to: number): Promise<number[]>{
+        const pixelIds = await this._getAuctions(canvasId, from, to);
+        return pixelIds;
+    }
+    public async getAuctionStartingPrice(canvasId: number, pixelId: number): Promise<number>{
+        const startingPrice = await this._getAuctionStartingPrice(canvasId, pixelId);
+        return startingPrice;
+    }
+
+    public async getAuctionEndingPrice(canvasId: number, pixelId: number): Promise<number>{
+        const endingPrice = await this._getAuctionEndingPrice(canvasId, pixelId);
+        return endingPrice;
+    }
+
+    public async getAuctionDeadline(canvasId: number, pixelId: number): Promise<number>{
+        const deadline = await this._getAuctionDeadline(canvasId, pixelId);
+        return deadline;
+    }
+
+    public async getAuctionOwner(canvasId: number, pixelId: number): Promise<Address>{
+        const owner = await this._getAuctionOwner(canvasId, pixelId);
+        return owner;
+    }
+
+    public async getAuctionCurrentBid(canvasId: number, pixelId: number): Promise<number>{
+        const currentBid = await this._getAuctioCurrentBid(canvasId, pixelId);
+        return currentBid;
+    }
+
+    public async getAuctionCurrentWinner(canvasId: number, pixelId: number): Promise<Address>{
+        const currentWinner = await this._getAuctionCurrentWinner(canvasId, pixelId);
+        return currentWinner;
+    }
+
 
     // Private make more dry later
     private _createU8VectorArgument(from: number[]): U8Value[] {
@@ -175,11 +271,16 @@ export default class CanvasContract {
         c.set(b, a.length);
         return c;
     }
-    private async _createCallTransaction(funcString: string, argument: Argument[], gasLimit: GasLimit): Promise<Transaction> {
+    private async _createCallTransaction(
+        funcString: string,
+        argument: Argument[],
+        gasLimit: GasLimit,
+        amount?: Balance): Promise<Transaction> {
         const callTransaction = this.contract.call({
             func: new ContractFunction(funcString),
             args: argument,
-            gasLimit
+            gasLimit,
+            value: amount,
         });
         return callTransaction;
     }
@@ -208,6 +309,87 @@ export default class CanvasContract {
             });
         return qResponse;
     }
+    private async _getAuctions(
+        canvasId: number,
+        from: number,
+        to: number
+        ): Promise<number[]>{
+            const qResponse = await this._runQuery('getAuctionsActive', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(from),
+                Argument.fromNumber(to)
+            ]);
+            const pixelIds = [];
+            for (let i = 0; i < qResponse.returnData.length; i++){
+                pixelIds[i] = qResponse.returnData[i].asNumber;
+            }
+            return pixelIds;
+    }
+    private async _getAuctionStartingPrice(
+        canvasId: number,
+        pixelId: number): Promise<number>{
+            const qResponse = await this._runQuery('getAuctionStartingPrice', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return returnData[0].asNumber;
+    }
+    private async _getAuctionEndingPrice(
+        canvasId: number,
+        pixelId: number): Promise<number>{
+            const qResponse = await this._runQuery('getAuctionEndingPrice', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return returnData[0].asNumber;
+    }
+
+    private async _getAuctionDeadline(
+        canvasId: number,
+        pixelId: number): Promise<number>{
+            const qResponse = await this._runQuery('getAuctionDeadline', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return returnData[0].asNumber;
+    }
+
+    private async _getAuctionOwner(
+        canvasId: number,
+        pixelId: number): Promise<Address>{
+            const qResponse = await this._runQuery('getAuctionOwner', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return Address.fromHex(returnData[0].asHex);
+    }
+
+    private async _getAuctioCurrentBid(
+        canvasId: number,
+        pixelId: number): Promise<number>{
+            const qResponse = await this._runQuery('getAuctionCurrentBid', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return returnData[0].asNumber;
+    }
+    private async _getAuctionCurrentWinner(
+        canvasId: number,
+        pixelId: number): Promise<Address>{
+            const qResponse = await this._runQuery('getAuctionCurrentWinner', [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ]);
+            const returnData = qResponse.returnData;
+            return Address.fromHex(returnData[0].asHex);
+    }
+
+
     private async _getOwnedPixels(qAddress: Address, canvasId: number, from: number, to: number): Promise<number[]> {
         const qResponse = await this._runQuery('getOwnedPixels', [
             Argument.fromPubkey(qAddress),

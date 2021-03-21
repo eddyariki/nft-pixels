@@ -401,7 +401,7 @@ const admin = async () => {
                 Argument.fromNumber(pixelId),
                 Argument.fromBigInt(new BigNumber(1*(10**18))),
                 Argument.fromBigInt(new BigNumber(2*(10**18))),
-                Argument.fromNumber(600000),
+                Argument.fromNumber(600),
             ],
             gasLimit: new GasLimit(50000000)
         });
@@ -478,8 +478,8 @@ const admin = async () => {
         const executed = await proxyProvider.getTransactionStatus(hash);
         console.log(executed);
     }
-    const getAuction = async (pixelId:number) => {
-        const func = new ContractFunction("getAuction");
+    const getAuctionStartingPrice = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionStartingPrice");
         try {
             const qResponse = await smartContract.runQuery(
                 proxyProvider,
@@ -491,34 +491,155 @@ const admin = async () => {
                     ]
                 });
             qResponse.assertSuccess();
-            console.log("Size: ", qResponse.returnData);
+
             for(let i = 0; i<qResponse.returnData.length; i++){
-                console.log(qResponse.returnData[i]);
+                console.log(qResponse.returnData[i].asNumber);
             }
         } catch (e) {
             console.log(e);
         }
     }
-    // await createCanvas(5, 5);
+    const getAuctionEndingPrice = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionEndingPrice");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(qResponse.returnData[i].asNumber);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const getAuctionDeadline = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionDeadline");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                let unix = qResponse.returnData[i].asNumber;
+                let dateTime = new Date(unix*1000);
+                console.log(dateTime.toString());
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const getAuctionOwner = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionOwner");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(Address.fromHex(qResponse.returnData[i].asHex).toString());
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const getAuctionCurrentBid = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionCurrentBid");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(qResponse.returnData[i].asNumber);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const getAuctionCurrentWinner = async (pixelId:number) => {
+        const func = new ContractFunction("getAuctionCurrentWinner");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(Address.fromHex(qResponse.returnData[i].asHex).toString());
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    await createCanvas(5, 5);
     // // await getCanvasDimensions();
     // // await getCanvasTotalSupply();
     // // // await getLastValidPixelId();
-    // await mintPixels(1, 25);
+    await mintPixels(1, 25);
     // for (let i = 0; i < 10; i++) {
     //     await mintPixels(5, 200); //100pixels
     //     await getLastValidPixelId();
     // }
-    // await getLastValidPixelId();
-    // await createAuction(1,3);
-    // await createAuction(1,4);
+    await getLastValidPixelId();
+    await createAuction(1,3);
+    await createAuction(1,4);
+    await bidAuction(3, 1.2);
+    console.log('STARTING PRICE');
+    await getAuctionStartingPrice(3);
+    console.log('ENDING PRICE');
+    await getAuctionEndingPrice(3);
+    console.log('DEADLINE');
+    await getAuctionDeadline(3);
+    console.log('OWNER');
+    await getAuctionOwner(3);
+    console.log('CURRENT BID');
+    await getAuctionCurrentBid(3);
+    console.log('CURRENT WINNER');
+    await getAuctionCurrentWinner(3);
     // await createAuction(1,6);
     // await createAuction(1,7);
 
-    await createAuction(1,21);
+    // await createAuction(1,21);
     // await getAuctionStartingPrice(15);
-    // await getAuctions();
+    console.log('Active Auction Count: ')
+    await getAuctions();
     // await getOwnedPixels();
-    // await getAuction(14);
+    // await getAuction(21);
     // console.log('BIDDING NOW')
     // await bidAuction(21, 1.2);
     // await getAuction(14);

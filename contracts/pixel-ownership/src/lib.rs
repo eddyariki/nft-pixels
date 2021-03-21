@@ -171,7 +171,7 @@ pub trait PixelOwnership {
 
 		require!(starting_price<ending_price, "End Price must be smaller than Start Price");
 
-		require!(deadline>=600000u64, "Deadline must be more than 10 minutes in the future.");
+		require!(deadline>=600u64, "Deadline must be more than 10 minutes in the future.");
 
 		let deadline_from_now = deadline.clone() + self.get_block_timestamp();
 		let auction = Auction::new(
@@ -394,7 +394,7 @@ pub trait PixelOwnership {
 		while &pixel_id <= &end {
 			if !self.is_empty_auction(&canvas_id, &pixel_id){
 				let auction = self.get_auction(&canvas_id, &pixel_id);
-				if auction.deadline<self.get_block_timestamp(){
+				if auction.deadline>=self.get_block_timestamp(){
 					pixels.push(pixel_id);
 				}
 				
@@ -484,6 +484,61 @@ pub trait PixelOwnership {
 		pixels.into()
 	}
 
+	#[view(getAuctionStartingPrice)]
+	fn get_auction_starting_price(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.starting_price
+	}
+	#[view(getAuctionEndingPrice)]
+	fn get_auction_ending_price(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.ending_price
+	}	
+	#[view(getAuctionDeadline)]
+	fn get_auction_deadline(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->u64{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.deadline
+	}	
+	#[view(getAuctionOwner)]
+	fn get_auction_owner(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->Address{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.pixel_owner
+	}
+	#[view(getAuctionCurrentBid)]
+	fn get_auction_current_bid(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.current_bid
+	}		
+
+	#[view(getAuctionCurrentWinner)]
+	fn get_auction_current_winner(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->Address{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.current_winner
+	}				
 
 	#[view(getCanvasDimensionsTopEncoded)]
 	fn get_canvas_dimensions_topencoded(&self, canvas_id:u32)->MultiResultVec<u32>{

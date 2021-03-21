@@ -15,6 +15,7 @@ import {
     GasPrice,
     Transaction,
     TransactionHash,
+    Balance,
 } from "@elrondnetwork/erdjs";
 
 import { LOCAL_PROXY, SMART_CONTRACT_ADDRESS } from "./config";
@@ -205,14 +206,50 @@ const admin = async () => {
 
     const getOwnedPixels = async () => {
         const func = new ContractFunction("getOwnedPixels");
-        console.log(alice);
-        console.log(alice.address);
+        // console.log(alice);
+        // console.log(alice.address);
         try {
             const qResponse = await smartContract.runQuery(
                 proxyProvider,
                 {
                     func,
                     args: [Argument.fromPubkey(alice.address), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(10000)]
+                });
+            qResponse.assertSuccess();
+            console.log("Size: ", qResponse.returnData.length);
+        } catch (e) {
+            console.log(e);
+        }
+        // qResponse.assertSuccess();
+
+        // console.log(qResponse.returnData);
+        // const returnData = qResponse.returnData;
+
+        // for(let i=0; i<returnData.length; i++){
+        //     if(i%2===0)console.log(" //");
+        //     console.log(returnData[i].asNumber); //.asHex/Bool/etc 
+
+        // }
+    }
+    const getOwnedPixelsBob = async () => {
+        const bobJSON = await readJSON("bob.json");
+        const bobSecret = UserWallet.decryptSecretKey(bobJSON, "password");
+        const bobWallet = new UserWallet(bobSecret, "password");
+        const bobAddress = new Address(bobSecret.generatePublicKey().toAddress());
+        const bob = new Account(bobAddress);
+        const bobSigner = UserSigner.fromWallet(bobJSON, "password");
+        const func = new ContractFunction("getOwnedPixels");
+        // console.log(alice);
+        // console.log(alice.address);
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [Argument.fromPubkey(bob.address), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(10000)]
@@ -355,37 +392,155 @@ const admin = async () => {
         const executed = await proxyProvider.getTransactionStatus(hash);
         console.log(executed);
     }
-   
-
-
-
-
-    await createCanvas(100, 100);
+   // 	fn auction_pixel(&self, canvas_id:u32, pixel_id:u64, starting_price:BigUint, ending_price:BigUint, deadline:u64)-
+    const createAuction = async(canvasId:number, pixelId:number) => {
+        let callTransaction = smartContract.call({
+            func: new ContractFunction("auctionPixel"),
+            args: [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+                Argument.fromBigInt(new BigNumber(1*(10**18))),
+                Argument.fromBigInt(new BigNumber(2*(10**18))),
+                Argument.fromNumber(600000),
+            ],
+            gasLimit: new GasLimit(50000000)
+        });
+        await alice.sync(proxyProvider);
+        callTransaction.setNonce(alice.nonce);
+        aliceSigner.sign(callTransaction);
+        alice.incrementNonce();
+        let hash = await callTransaction.send(proxyProvider);
+        await callTransaction.awaitExecuted(proxyProvider);
+        const executed = await proxyProvider.getTransactionStatus(hash);
+        console.log(executed);
+    }
+    const endAuction = async(canvasId:number, pixelId:number) => {
+        let callTransaction = smartContract.call({
+            func: new ContractFunction("endAuction"),
+            args: [
+                Argument.fromNumber(canvasId),
+                Argument.fromNumber(pixelId),
+            ],
+            gasLimit: new GasLimit(50000000)
+        });
+        await alice.sync(proxyProvider);
+        callTransaction.setNonce(alice.nonce);
+        aliceSigner.sign(callTransaction);
+        alice.incrementNonce();
+        let hash = await callTransaction.send(proxyProvider);
+        await callTransaction.awaitExecuted(proxyProvider);
+        const executed = await proxyProvider.getTransactionStatus(hash);
+        console.log(executed);
+    }
+    const getAuctions = async () => {
+        const func = new ContractFunction("getAuctionsActive");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(25)]
+                });
+            qResponse.assertSuccess();
+            console.log("Size: ", qResponse.returnData.length);
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(qResponse.returnData[i].asNumber);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    const bidAuction = async(pixelId:number, amount:number) =>{
+        const bobJSON = await readJSON("bob.json");
+        const bobSecret = UserWallet.decryptSecretKey(bobJSON, "password");
+        const bobWallet = new UserWallet(bobSecret, "password");
+        const bobAddress = new Address(bobSecret.generatePublicKey().toAddress());
+        const bob = new Account(bobAddress);
+        const bobSigner = UserSigner.fromWallet(bobJSON, "password");
+        let callTransaction = smartContract.call({
+            func: new ContractFunction("bid"),
+            args: [
+                Argument.fromNumber(1),
+                Argument.fromNumber(pixelId),
+            ],
+            gasLimit: new GasLimit(50000000),
+            value: Balance.eGLD(amount)
+        });
+        await bob.sync(proxyProvider);
+        callTransaction.setNonce(bob.nonce);
+        bobSigner.sign(callTransaction);
+        bob.incrementNonce();
+        let hash = await callTransaction.send(proxyProvider);
+        await callTransaction.awaitExecuted(proxyProvider);
+        const executed = await proxyProvider.getTransactionStatus(hash);
+        console.log(executed);
+    }
+    const getAuction = async (pixelId:number) => {
+        const func = new ContractFunction("getAuction");
+        try {
+            const qResponse = await smartContract.runQuery(
+                proxyProvider,
+                {
+                    func,
+                    args: [
+                        Argument.fromNumber(1), 
+                        Argument.fromNumber(pixelId), 
+                    ]
+                });
+            qResponse.assertSuccess();
+            console.log("Size: ", qResponse.returnData);
+            for(let i = 0; i<qResponse.returnData.length; i++){
+                console.log(qResponse.returnData[i]);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    // await createCanvas(5, 5);
     // // await getCanvasDimensions();
     // // await getCanvasTotalSupply();
     // // // await getLastValidPixelId();
-    for (let i = 0; i < 10; i++) {
-        await mintPixels(5, 200); //100pixels
-        await getLastValidPixelId();
-    }
+    // await mintPixels(1, 25);
+    // for (let i = 0; i < 10; i++) {
+    //     await mintPixels(5, 200); //100pixels
+    //     await getLastValidPixelId();
+    // }
     // await getLastValidPixelId();
+    // await createAuction(1,3);
+    // await createAuction(1,4);
+    // await createAuction(1,6);
+    // await createAuction(1,7);
 
-
+    await createAuction(1,21);
+    // await getAuctionStartingPrice(15);
+    // await getAuctions();
+    // await getOwnedPixels();
+    // await getAuction(14);
+    // console.log('BIDDING NOW')
+    // await bidAuction(21, 1.2);
+    // await getAuction(14);
+    // await getOwnedPixelsBob();
+    // await endAuction(1,19);
+    // await getOwnedPixelsBob();
+    // await getAuctions();
     // // // const stream =async()=>{
     // //     // for(let i=0;i<10;i++){
     // // await getCanvas(1,10000, false);
-    await getOwnedPixelsColor();
+    // await getOwnedPixelsColor();
     // //     // }
     // // // } 
     // // // await stream();
-    // // await getOwnedPixels(); // worked
+    // await getOwnedPixels(); // worked
     // // await getCanvas(1,10,true);
     // // // await changeBatchPixelColor(1, )
-    let pixel_ids = [1,2,3,4,5,6,7,8,9,10]
-    let rs = [255,255,255,255,200,200,226,226,226,226]
-    let gs = [6,6,6,6,6,6,6,6,6,6]
-    let bs = [6,6,6,6,6,6,6,6,6,6]
-    await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);
+    // let pixel_ids = [1,2,3,4,5,6,7,8,9,10]
+    // let rs = [255,255,255,255,200,200,226,226,226,226]
+    // let gs = [6,6,6,6,6,6,6,6,6,6]
+    // let bs = [6,6,6,6,6,6,6,6,6,6]
+    // await changeBatchPixelColor(1,pixel_ids,rs,gs,bs,1);
     // await getCanvas(1,10, true);
 }
 

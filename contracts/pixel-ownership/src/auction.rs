@@ -20,13 +20,13 @@ impl<BigUint: BigUintApi> Auction<BigUint> {
 	pub fn new(
 		starting_price: &BigUint,
 		ending_price: &BigUint,
-		deadline: u64,
+		deadline: &u64,
 		pixel_owner: &Address,
 	) -> Self {
 		Auction {
 			starting_price: starting_price.clone(),
 			ending_price: ending_price.clone(),
-			deadline,
+			deadline: deadline.clone(),
 			pixel_owner: pixel_owner.clone(),
 			current_bid: BigUint::zero(),
 			current_winner: Address::zero(),

@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, i, pixel_ids, rs, gs, bs;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsBob, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, createAuction, endAuction, getAuctions, bidAuction, getAuction;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -286,8 +286,6 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         switch (_a.label) {
                             case 0:
                                 func = new erdjs_1.ContractFunction("getOwnedPixels");
-                                console.log(alice);
-                                console.log(alice.address);
                                 _a.label = 1;
                             case 1:
                                 _a.trys.push([1, 3, , 4]);
@@ -311,8 +309,44 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
+                getOwnedPixelsBob = function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var bobJSON, bobSecret, bobWallet, bobAddress, bob, bobSigner, func, qResponse, e_2;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, readJSON("bob.json")];
+                            case 1:
+                                bobJSON = _a.sent();
+                                bobSecret = erdjs_1.UserWallet.decryptSecretKey(bobJSON, "password");
+                                bobWallet = new erdjs_1.UserWallet(bobSecret, "password");
+                                bobAddress = new erdjs_1.Address(bobSecret.generatePublicKey().toAddress());
+                                bob = new erdjs_1.Account(bobAddress);
+                                bobSigner = erdjs_1.UserSigner.fromWallet(bobJSON, "password");
+                                func = new erdjs_1.ContractFunction("getOwnedPixels");
+                                _a.label = 2;
+                            case 2:
+                                _a.trys.push([2, 4, , 5]);
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [erdjs_1.Argument.fromPubkey(bob.address),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(10000)]
+                                    })];
+                            case 3:
+                                qResponse = _a.sent();
+                                qResponse.assertSuccess();
+                                console.log("Size: ", qResponse.returnData.length);
+                                return [3 /*break*/, 5];
+                            case 4:
+                                e_2 = _a.sent();
+                                console.log(e_2);
+                                return [3 /*break*/, 5];
+                            case 5: return [2 /*return*/];
+                        }
+                    });
+                }); };
                 getOwnedPixelsColor = function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, e_2;
+                    var func, qResponse, e_3;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -333,8 +367,8 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 console.log("Size: ", qResponse.returnData.length);
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_2 = _a.sent();
-                                console.log(e_2);
+                                e_3 = _a.sent();
+                                console.log(e_3);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
@@ -461,7 +495,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                         erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(gs)),
                                         erdjs_1.Argument.fromTypedValue(new typesystem_1.Vector(bs)),
                                     ],
-                                    gasLimit: new erdjs_1.GasLimit(100000000)
+                                    gasLimit: new erdjs_1.GasLimit(Math.min(pixel_ids.length * 50000, 100000000))
                                 });
                                 return [4 /*yield*/, alice.sync(proxyProvider)];
                             case 1:
@@ -483,41 +517,211 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                return [4 /*yield*/, createCanvas(100, 100)];
-            case 3:
-                _a.sent();
-                i = 0;
-                _a.label = 4;
-            case 4:
-                if (!(i < 10)) return [3 /*break*/, 8];
-                return [4 /*yield*/, mintPixels(5, 200)];
-            case 5:
-                _a.sent(); //100pixels
-                return [4 /*yield*/, getLastValidPixelId()];
-            case 6:
-                _a.sent();
-                _a.label = 7;
-            case 7:
-                i++;
-                return [3 /*break*/, 4];
-            case 8: 
-            // await getLastValidPixelId();
-            // // // const stream =async()=>{
-            // //     // for(let i=0;i<10;i++){
-            // // await getCanvas(1,10000, false);
-            return [4 /*yield*/, getOwnedPixelsColor()];
-            case 9:
+                createAuction = function (canvasId, pixelId) { return __awaiter(void 0, void 0, void 0, function () {
+                    var callTransaction, hash, executed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                callTransaction = smartContract.call({
+                                    func: new erdjs_1.ContractFunction("auctionPixel"),
+                                    args: [
+                                        erdjs_1.Argument.fromNumber(canvasId),
+                                        erdjs_1.Argument.fromNumber(pixelId),
+                                        erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](1 * (Math.pow(10, 18)))),
+                                        erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](2 * (Math.pow(10, 18)))),
+                                        erdjs_1.Argument.fromNumber(600000),
+                                    ],
+                                    gasLimit: new erdjs_1.GasLimit(50000000)
+                                });
+                                return [4 /*yield*/, alice.sync(proxyProvider)];
+                            case 1:
+                                _a.sent();
+                                callTransaction.setNonce(alice.nonce);
+                                aliceSigner.sign(callTransaction);
+                                alice.incrementNonce();
+                                return [4 /*yield*/, callTransaction.send(proxyProvider)];
+                            case 2:
+                                hash = _a.sent();
+                                return [4 /*yield*/, callTransaction.awaitExecuted(proxyProvider)];
+                            case 3:
+                                _a.sent();
+                                return [4 /*yield*/, proxyProvider.getTransactionStatus(hash)];
+                            case 4:
+                                executed = _a.sent();
+                                console.log(executed);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); };
+                endAuction = function (canvasId, pixelId) { return __awaiter(void 0, void 0, void 0, function () {
+                    var callTransaction, hash, executed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                callTransaction = smartContract.call({
+                                    func: new erdjs_1.ContractFunction("endAuction"),
+                                    args: [
+                                        erdjs_1.Argument.fromNumber(canvasId),
+                                        erdjs_1.Argument.fromNumber(pixelId),
+                                    ],
+                                    gasLimit: new erdjs_1.GasLimit(50000000)
+                                });
+                                return [4 /*yield*/, alice.sync(proxyProvider)];
+                            case 1:
+                                _a.sent();
+                                callTransaction.setNonce(alice.nonce);
+                                aliceSigner.sign(callTransaction);
+                                alice.incrementNonce();
+                                return [4 /*yield*/, callTransaction.send(proxyProvider)];
+                            case 2:
+                                hash = _a.sent();
+                                return [4 /*yield*/, callTransaction.awaitExecuted(proxyProvider)];
+                            case 3:
+                                _a.sent();
+                                return [4 /*yield*/, proxyProvider.getTransactionStatus(hash)];
+                            case 4:
+                                executed = _a.sent();
+                                console.log(executed);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); };
+                getAuctions = function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var func, qResponse, i, e_4;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                func = new erdjs_1.ContractFunction("getAuctionsActive");
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(25)
+                                        ]
+                                    })];
+                            case 2:
+                                qResponse = _a.sent();
+                                qResponse.assertSuccess();
+                                console.log("Size: ", qResponse.returnData.length);
+                                for (i = 0; i < qResponse.returnData.length; i++) {
+                                    console.log(qResponse.returnData[i].asNumber);
+                                }
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_4 = _a.sent();
+                                console.log(e_4);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); };
+                bidAuction = function (pixelId, amount) { return __awaiter(void 0, void 0, void 0, function () {
+                    var bobJSON, bobSecret, bobWallet, bobAddress, bob, bobSigner, callTransaction, hash, executed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, readJSON("bob.json")];
+                            case 1:
+                                bobJSON = _a.sent();
+                                bobSecret = erdjs_1.UserWallet.decryptSecretKey(bobJSON, "password");
+                                bobWallet = new erdjs_1.UserWallet(bobSecret, "password");
+                                bobAddress = new erdjs_1.Address(bobSecret.generatePublicKey().toAddress());
+                                bob = new erdjs_1.Account(bobAddress);
+                                bobSigner = erdjs_1.UserSigner.fromWallet(bobJSON, "password");
+                                callTransaction = smartContract.call({
+                                    func: new erdjs_1.ContractFunction("bid"),
+                                    args: [
+                                        erdjs_1.Argument.fromNumber(1),
+                                        erdjs_1.Argument.fromNumber(pixelId),
+                                    ],
+                                    gasLimit: new erdjs_1.GasLimit(50000000),
+                                    value: erdjs_1.Balance.eGLD(amount)
+                                });
+                                return [4 /*yield*/, bob.sync(proxyProvider)];
+                            case 2:
+                                _a.sent();
+                                callTransaction.setNonce(bob.nonce);
+                                bobSigner.sign(callTransaction);
+                                bob.incrementNonce();
+                                return [4 /*yield*/, callTransaction.send(proxyProvider)];
+                            case 3:
+                                hash = _a.sent();
+                                return [4 /*yield*/, callTransaction.awaitExecuted(proxyProvider)];
+                            case 4:
+                                _a.sent();
+                                return [4 /*yield*/, proxyProvider.getTransactionStatus(hash)];
+                            case 5:
+                                executed = _a.sent();
+                                console.log(executed);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); };
+                getAuction = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
+                    var func, qResponse, i, e_5;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                func = new erdjs_1.ContractFunction("getAuction");
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(pixelId),
+                                        ]
+                                    })];
+                            case 2:
+                                qResponse = _a.sent();
+                                qResponse.assertSuccess();
+                                console.log("Size: ", qResponse.returnData);
+                                for (i = 0; i < qResponse.returnData.length; i++) {
+                                    console.log(qResponse.returnData[i]);
+                                }
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_5 = _a.sent();
+                                console.log(e_5);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); };
+                // await createCanvas(5, 5);
+                // // await getCanvasDimensions();
+                // // await getCanvasTotalSupply();
+                // // // await getLastValidPixelId();
+                // await mintPixels(1, 25);
+                // for (let i = 0; i < 10; i++) {
+                //     await mintPixels(5, 200); //100pixels
+                //     await getLastValidPixelId();
+                // }
                 // await getLastValidPixelId();
-                // // // const stream =async()=>{
-                // //     // for(let i=0;i<10;i++){
-                // // await getCanvas(1,10000, false);
-                _a.sent();
-                pixel_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                rs = [255, 255, 255, 255, 200, 200, 226, 226, 226, 226];
-                gs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                bs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-                return [4 /*yield*/, changeBatchPixelColor(1, pixel_ids, rs, gs, bs, 1)];
-            case 10:
+                // await createAuction(1,3);
+                // await createAuction(1,4);
+                // await createAuction(1,6);
+                // await createAuction(1,7);
+                return [4 /*yield*/, createAuction(1, 21)];
+            case 3:
+                // await createCanvas(5, 5);
+                // // await getCanvasDimensions();
+                // // await getCanvasTotalSupply();
+                // // // await getLastValidPixelId();
+                // await mintPixels(1, 25);
+                // for (let i = 0; i < 10; i++) {
+                //     await mintPixels(5, 200); //100pixels
+                //     await getLastValidPixelId();
+                // }
+                // await getLastValidPixelId();
+                // await createAuction(1,3);
+                // await createAuction(1,4);
+                // await createAuction(1,6);
+                // await createAuction(1,7);
                 _a.sent();
                 return [2 /*return*/];
         }

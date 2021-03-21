@@ -1,31 +1,43 @@
+<div class="auction-container"> 
+    
+    <div class="sketch-container">
+        <div id="file-uploader"></div>
+        <div id="enable-image"></div>
+        <div id="w-slider"></div>
+        <div id="sketch-holder">
+            <div class="status" *ngIf="loadingStateMessage && loadingStateMessage !==''">{{loadingStateMessage}}</div>
+        </div>
+    </div>
 
-<button (click)="showLoginModal(true)">login</button>
+    <button (click)="showLoginModal(true)">login</button>
 
-<div *ngIf ="currentAuction" class="auction-info">
-    <div>Pixel Id: {{currentAuction.pixelId}}</div>
-    <div>Starting Price: {{currentAuction.startingPrice}}</div>
-    <div>Ending Price: {{currentAuction.endingPrice}}</div>
-    <div>Current Bid: {{currentAuction.currentBid}}</div>
-    <div>Deadline: {{currentAuction.deadline}}</div>
-</div>
+    <div *ngFor="let pixelId of activeAuctions">
+        <button (click)="selectPixel(pixelId)">{{pixelId}}</button>
+    </div>
+    <div *ngIf="currentAuction" class="auction-info">
+        <div *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()">You own this auction</div>
+        <div>Pixel Id: {{currentAuction.pixelId}}</div>
+        <div>Starting Price: {{currentAuction.startingPrice}} XeGLD</div>
+        <div>Ending Price: {{currentAuction.endingPrice}} XeGLD</div>
+        <div>Current Bid: {{currentAuction.currentBid}} XeGLD</div>
+        <div>Deadline: {{currentAuction.deadlineString}}</div>
+    </div>
 
-    <form class="auction-form" (submit)="$event.preventDefault()" > 
+    <form class="auction-form" (submit)="$event.preventDefault()">
         <div class="bid-amount-container">
             <label for="bid-amount">Bid: </label>
-            <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount"
-                required>
+            <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount" required>
             <button type="submit" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
         </div>
     </form>
-<div *ngIf="transactionModalIsVisible">
-    <button (click)="confirmTransaction()">
-        Send Transaction
-    </button>
+    <div *ngIf="transactionModalIsVisible">
+        <button (click)="confirmTransaction()">
+            Send Transaction
+        </button>
+    </div>
+
+    <div *ngIf="loginModalIsVisible">
+        <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
+        </app-login-modal>
+    </div>
 </div>
-
-<div *ngIf="loginModalIsVisible">
-    <app-login-modal (cancelEmitter)="showLoginModal(false)" (loginEmitter)="userLoggedIn($event)">
-    </app-login-modal>
-</div>
-
-

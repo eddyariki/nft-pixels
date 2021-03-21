@@ -529,7 +529,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                         erdjs_1.Argument.fromNumber(pixelId),
                                         erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](1 * (Math.pow(10, 18)))),
                                         erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](2 * (Math.pow(10, 18)))),
-                                        erdjs_1.Argument.fromNumber(600),
+                                        erdjs_1.Argument.fromNumber(72000),
                                     ],
                                     gasLimit: new erdjs_1.GasLimit(50000000)
                                 });
@@ -888,62 +888,37 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                // await createCanvas(5, 5);
+                return [4 /*yield*/, createCanvas(5, 5)];
+            case 3:
+                _a.sent();
                 // // await getCanvasDimensions();
                 // // await getCanvasTotalSupply();
-                // // // await getLastValidPixelId();
-                // await mintPixels(1, 25);
+                // await getLastValidPixelId();
+                return [4 /*yield*/, mintPixels(1, 25)];
+            case 4:
+                // // await getCanvasDimensions();
+                // // await getCanvasTotalSupply();
+                // await getLastValidPixelId();
+                _a.sent();
                 // for (let i = 0; i < 10; i++) {
                 //     await mintPixels(5, 200); //100pixels
                 //     await getLastValidPixelId();
                 // }
-                // await getLastValidPixelId();
-                // await createAuction(1,3);
-                // await createAuction(1,4);
-                // await bidAuction(4, 1.2);
-                console.log("Pixels owned by bob: ");
-                return [4 /*yield*/, getOwnedPixelsBob()];
-            case 3:
-                _a.sent();
-                return [4 /*yield*/, endAuctionBob(1, 4)];
-            case 4:
-                _a.sent();
-                console.log("Pixels owned by bob: ");
-                return [4 /*yield*/, getOwnedPixelsBob()];
+                return [4 /*yield*/, getLastValidPixelId()];
             case 5:
+                // for (let i = 0; i < 10; i++) {
+                //     await mintPixels(5, 200); //100pixels
+                //     await getLastValidPixelId();
+                // }
                 _a.sent();
-                // console.log('STARTING PRICE');
-                // await getAuctionStartingPrice(4);
-                // console.log('ENDING PRICE');
-                // await getAuctionEndingPrice(4);
-                // console.log('DEADLINE');
-                // await getAuctionDeadline(4);
-                // console.log('OWNER');
-                // await getAuctionOwner(4);
-                // console.log('CURRENT BID');
-                // await getAuctionCurrentBid(4);
-                // console.log('CURRENT WINNER');
-                // await getAuctionCurrentWinner(4);
-                // await createAuction(1,6);
-                // await createAuction(1,7);
-                // await createAuction(1,21);
-                // await getAuctionStartingPrice(15);
-                console.log('Active Auction Count: ');
-                return [4 /*yield*/, getAuctions()];
+                return [4 /*yield*/, createAuction(1, 3)];
             case 6:
                 _a.sent();
-                // await getOwnedPixels();
-                // await getAuction(21);
-                // console.log('BIDDING NOW')
-                // await bidAuction(21, 1.2);
-                // await getAuction(14);
-                return [4 /*yield*/, getOwnedPixelsBob()];
+                return [4 /*yield*/, createAuction(1, 4)];
             case 7:
-                // await getOwnedPixels();
-                // await getAuction(21);
-                // console.log('BIDDING NOW')
-                // await bidAuction(21, 1.2);
-                // await getAuction(14);
+                _a.sent();
+                return [4 /*yield*/, bidAuction(4, 1.2)];
+            case 8:
                 _a.sent();
                 return [2 /*return*/];
         }

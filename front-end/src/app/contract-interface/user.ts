@@ -6,8 +6,9 @@ export class User {
     account: Account;
     signer: ISigner;
     isLoggedIn: boolean;
-
-    constructor(acc?: Account, accSigner?: ISigner){
+    keystoreFile: string;
+    password: string;
+    constructor(acc?: Account, accSigner?: ISigner, keysotrFile?: string, password?: string){
         this.account = acc || null;
         this.id = acc?.address.toString() || null;
         this.signer = accSigner || null;
@@ -18,13 +19,13 @@ export class User {
         }
     }
 
-    static Login(keystoreFile: Buffer, password: string): User {
+    static Login(keystoreFile: string, password: string): User {
         try {
-            const accountSecret = UserWallet.decryptSecretKey(keystoreFile, password);
+            const accountSecret = UserWallet.decryptSecretKey(JSON.parse(keystoreFile), password);
             const accountAddress = new Address(accountSecret.generatePublicKey().toAddress());
             const account = new Account(accountAddress);
             const accountSigner = UserSigner.fromWallet(keystoreFile, password);
-            return new User(account, accountSigner);
+            return new User(account, accountSigner, keystoreFile, password);
         } catch (err) {
             return new User();
         }

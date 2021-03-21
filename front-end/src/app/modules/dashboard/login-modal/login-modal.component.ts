@@ -46,8 +46,7 @@ export class LoginModalComponent implements OnInit {
     const fileReader = new FileReader();
     fileReader.readAsText(this.file);
     fileReader.onload = (e) => {
-      const JSONBuffer = JSON.parse(fileReader.result.toString());
-      const user = User.Login(JSONBuffer, this.password);
+      const user = User.Login(fileReader.result.toString(), this.password);
       if (!user.isLoggedIn) {
         console.log('wrong password');
         this.password = '';

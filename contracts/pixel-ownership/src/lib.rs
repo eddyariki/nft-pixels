@@ -157,23 +157,27 @@ pub trait PixelOwnership {
 	#[endpoint(auctionPixel)]
 	fn auction_pixel(&self, canvas_id:u32, pixel_id:u64, starting_price:BigUint, ending_price:BigUint, deadline:u64)->SCResult<Auction<BigUint>>{
 
-		let last_valid_canvas_id = self.get_last_valid_canvas_id();
-		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
 
-		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
-		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id, "Pixel does not exist! ");
+		require!(pixel_id>0, "Pixel does not exist!");
 		
 		let caller = self.get_caller();
-		require!(caller == self.get_pixel_owner(&canvas_id, &pixel_id), "Only pixel owners can auction their pixel");
+		let pixel_owner = self.get_pixel_owner(&canvas_id, &pixel_id);
+		require!(pixel_owner == caller, "Only pixel owners can auction their pixels");
 
 		require!(starting_price<ending_price, "End Price must be smaller than Start Price");
 
-		require!(deadline>=self.get_block_timestamp(), "Deadline must be in the future, not the past");
+		require!(deadline>=600u64, "Deadline must be more than 10 minutes in the future.");
 
+		let deadline_from_now = deadline.clone() + self.get_block_timestamp();
 		let auction = Auction::new(
 			&starting_price,
 			&ending_price,
-			deadline,
+			&deadline_from_now,
 			&caller,
 		);
 		self.set_pixel_owner(&canvas_id, &pixel_id, &self.get_sc_address());
@@ -185,37 +189,51 @@ pub trait PixelOwnership {
 
 	#[endpoint(endAuction)]
 	fn end_auction(&self, canvas_id: u32, pixel_id: u64)->SCResult<()>{
-		let last_valid_canvas_id = self.get_last_valid_canvas_id();
-		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
 
-		let last_valid_pixel_id = self.get_last_valid_pixel_id(&canvas_id);
-		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+		require!(pixel_id<=last_valid_pixel_id, "Pixel does not exist! ");
+		require!(pixel_id>0, "Pixel does not exist!");
 		
 		require!(!self.is_empty_auction(&canvas_id, &pixel_id), "Auction does not exist!");
 
-		let caller = self.get_caller();
-		require!(caller == self._get_auction_pixel_owner(&canvas_id, &pixel_id), "Only auction pixel owners can auction their pixel");
-
 		let auction = self.get_auction(&canvas_id, &pixel_id);
-		let _current_winner = auction.current_winner;
+		let current_winner = auction.current_winner;
 		let current_bid = auction.current_bid;
-		let _pixel_owner = auction.pixel_owner;
+		let pixel_owner = auction.pixel_owner;
 
-		self._end_auction(canvas_id, pixel_id, _current_winner,current_bid, _pixel_owner);
-
-
-
+		let caller = self.get_caller();
+		let deadline = auction.deadline;
+		let current_timestamp = self.get_block_timestamp();
+		if caller == pixel_owner{
+			self._end_auction(canvas_id, pixel_id, current_winner,current_bid, pixel_owner);
+			return Ok(())
+		}
+		//auction ended
+		if deadline < current_timestamp {
+			require!(caller == current_winner, "Winners can only end the auction after the deadline!");
+			if current_winner == caller{
+				self._end_auction(canvas_id, pixel_id, current_winner, current_bid, pixel_owner);
+				return Ok(())
+			}
+		}
+		require!(caller == pixel_owner, "Only the pixel owner can end the auction before deadline!");
 		Ok(())
 	}
+
 	//Payable
 	#[payable("EGLD")]
 	#[endpoint]
 	fn bid(&self, canvas_id: u32, pixel_id: u64, #[payment] payment: BigUint) -> SCResult<()>{
-		let last_valid_canvas_id = self.get_last_valid_canvas_id();
-		require!(canvas_id<=last_valid_canvas_id && canvas_id>0, "Canvas Id does not exist!");
+		let last_canvas_id = self.get_last_valid_canvas_id();
+		require!(canvas_id<=last_canvas_id, "Canvas Id does not exist!");
+		require!(canvas_id>0 , "Canvas Id does not exist!");
 
 		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
-		require!(pixel_id<=last_valid_pixel_id && pixel_id>0, "Pixel does not exist! It is either not minted yet or it is beyond the supply limit.");
+		require!(pixel_id<=last_valid_pixel_id, "Pixel does not exist! ");
+		require!(pixel_id>0, "Pixel does not exist!");
 		
 		require!(!self.is_empty_auction(&canvas_id, &pixel_id), "Auction does not exist!");
 		
@@ -364,6 +382,38 @@ pub trait PixelOwnership {
 		pixels.into()
 	}
 
+	#[view(getAuctionsActive)]
+	fn get_auctions_active(
+		&self,
+		canvas_id: &u32,
+		from:&u64,
+		up_to: &u64
+	)->MultiResultVec<u64>{
+		
+		// let total_pixels = self.get_total_pixel_supply_of_canvas(&canvas_id);
+		let last_valid_pixel_id = self._get_last_valid_pixel_id(&canvas_id);
+		let mut end = last_valid_pixel_id.clone();
+		if up_to < &last_valid_pixel_id{
+			end = up_to.clone();
+		}
+		let mut pixel_id = from.clone();
+
+		let mut pixels = Vec::new();
+
+		while &pixel_id <= &end {
+			if !self.is_empty_auction(&canvas_id, &pixel_id){
+				let auction = self.get_auction(&canvas_id, &pixel_id);
+				if auction.deadline>=self.get_block_timestamp(){
+					pixels.push(pixel_id);
+				}
+				
+			}
+			pixel_id +=1u64;
+		}
+		pixels.into()
+	}
+	
+
 	#[view(getOwnedPixels)]
 	fn get_owned_pixels(
 		&self,
@@ -443,6 +493,61 @@ pub trait PixelOwnership {
 		pixels.into()
 	}
 
+	#[view(getAuctionStartingPrice)]
+	fn get_auction_starting_price(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.starting_price
+	}
+	#[view(getAuctionEndingPrice)]
+	fn get_auction_ending_price(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.ending_price
+	}	
+	#[view(getAuctionDeadline)]
+	fn get_auction_deadline(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->u64{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.deadline
+	}	
+	#[view(getAuctionOwner)]
+	fn get_auction_owner(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->Address{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.pixel_owner
+	}
+	#[view(getAuctionCurrentBid)]
+	fn get_auction_current_bid(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->BigUint{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.current_bid
+	}		
+
+	#[view(getAuctionCurrentWinner)]
+	fn get_auction_current_winner(
+		&self,
+		canvas_id: &u32,
+		pixel_id: &u64
+	)->Address{
+		let auction = self.get_auction(&canvas_id, &pixel_id);
+		auction.current_winner
+	}				
 
 	#[view(getCanvasDimensionsTopEncoded)]
 	fn get_canvas_dimensions_topencoded(&self, canvas_id:u32)->MultiResultVec<u32>{

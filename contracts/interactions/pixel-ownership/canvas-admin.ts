@@ -401,7 +401,7 @@ const admin = async () => {
                 Argument.fromNumber(pixelId),
                 Argument.fromBigInt(new BigNumber(1*(10**18))),
                 Argument.fromBigInt(new BigNumber(2*(10**18))),
-                Argument.fromNumber(600),
+                Argument.fromNumber(72000),
             ],
             gasLimit: new GasLimit(50000000)
         });
@@ -631,24 +631,24 @@ const admin = async () => {
             console.log(e);
         }
     }
-    // await createCanvas(5, 5);
+    await createCanvas(5, 5);
     // // await getCanvasDimensions();
     // // await getCanvasTotalSupply();
-    // // // await getLastValidPixelId();
-    // await mintPixels(1, 25);
+    // await getLastValidPixelId();
+    await mintPixels(1, 25);
     // for (let i = 0; i < 10; i++) {
     //     await mintPixels(5, 200); //100pixels
     //     await getLastValidPixelId();
     // }
-    // await getLastValidPixelId();
-    // await createAuction(1,3);
-    // await createAuction(1,4);
-    // await bidAuction(4, 1.2);
-    console.log("Pixels owned by bob: ");
-    await getOwnedPixelsBob();
-    await endAuctionBob(1,4);
-    console.log("Pixels owned by bob: ");
-    await getOwnedPixelsBob();
+    await getLastValidPixelId();
+    await createAuction(1,3);
+    await createAuction(1,4);
+    await bidAuction(4, 1.2);
+    // console.log("Pixels owned by bob: ");
+    // await getOwnedPixelsBob();
+    // await endAuctionBob(1,4);
+    // console.log("Pixels owned by bob: ");
+    // await getOwnedPixelsBob();
     // console.log('STARTING PRICE');
     // await getAuctionStartingPrice(4);
     // console.log('ENDING PRICE');
@@ -666,14 +666,14 @@ const admin = async () => {
 
     // await createAuction(1,21);
     // await getAuctionStartingPrice(15);
-    console.log('Active Auction Count: ')
-    await getAuctions();
+    // console.log('Active Auction Count: ')
+    // await getAuctions();
     // await getOwnedPixels();
     // await getAuction(21);
     // console.log('BIDDING NOW')
     // await bidAuction(21, 1.2);
     // await getAuction(14);
-    await getOwnedPixelsBob();
+    // await getOwnedPixelsBob();
     
     // await getOwnedPixelsBob();
     // await getAuctions();

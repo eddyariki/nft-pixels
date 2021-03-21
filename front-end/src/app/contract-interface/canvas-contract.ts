@@ -137,7 +137,7 @@ export default class CanvasContract {
         amount: number): Promise<Transaction>{
         try{
             const callTransaction = await this._createCallTransaction(
-                '',
+                'bid',
                 [
                     Argument.fromNumber(canvasId),
                     Argument.fromNumber(pixelId)

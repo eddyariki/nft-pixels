@@ -1,6 +1,7 @@
 import { ReadVarExpr } from '@angular/compiler';
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { User } from 'src/app/contract-interface/user';
+// import { User } from 'src/app/contract-interface/user';
 
 @Component({
   selector: 'app-login-modal',

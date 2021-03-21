@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, pixel_ids, rs, gs, bs;
+    var proxyProvider, smartContractAddress, smartContract, aliceJSON, aliceSecret, aliceWallet, aliceAddress, alice, aliceSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, i, pixel_ids, rs, gs, bs;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -286,12 +286,17 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         switch (_a.label) {
                             case 0:
                                 func = new erdjs_1.ContractFunction("getOwnedPixels");
+                                console.log(alice);
+                                console.log(alice.address);
                                 _a.label = 1;
                             case 1:
                                 _a.trys.push([1, 3, , 4]);
                                 return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
                                         func: func,
-                                        args: [erdjs_1.Argument.fromPubkey(alice.address), erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(1), erdjs_1.Argument.fromNumber(10000)]
+                                        args: [erdjs_1.Argument.fromPubkey(alice.address),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(10000)]
                                     })];
                             case 2:
                                 qResponse = _a.sent();
@@ -301,6 +306,35 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                             case 3:
                                 e_1 = _a.sent();
                                 console.log(e_1);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); };
+                getOwnedPixelsColor = function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var func, qResponse, e_2;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                func = new erdjs_1.ContractFunction("getOwnedPixelsColor");
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [erdjs_1.Argument.fromPubkey(alice.address),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(1000)]
+                                    })];
+                            case 2:
+                                qResponse = _a.sent();
+                                qResponse.assertSuccess();
+                                console.log("Size: ", qResponse.returnData.length);
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_2 = _a.sent();
+                                console.log(e_2);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
@@ -449,50 +483,41 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                // await createCanvas(100, 100);
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
-                // await getLastValidPixelId();
-                // // const stream =async()=>{
-                //     // for(let i=0;i<10;i++){
-                // await getCanvas(1,10000, false);
-                //     // }
-                // // } 
-                // // await stream();
-                // await getOwnedPixels(); // worked
-                return [4 /*yield*/, getCanvas(1, 10, true)];
+                return [4 /*yield*/, createCanvas(100, 100)];
             case 3:
-                // await createCanvas(100, 100);
-                // await getCanvasDimensions();
-                // await getCanvasTotalSupply();
-                // // await getLastValidPixelId();
-                // for (let i = 0; i < 10; i++) {
-                //     await mintPixels(5, 200); //100pixels
-                //     await getLastValidPixelId();
-                // }
+                _a.sent();
+                i = 0;
+                _a.label = 4;
+            case 4:
+                if (!(i < 10)) return [3 /*break*/, 8];
+                return [4 /*yield*/, mintPixels(5, 200)];
+            case 5:
+                _a.sent(); //100pixels
+                return [4 /*yield*/, getLastValidPixelId()];
+            case 6:
+                _a.sent();
+                _a.label = 7;
+            case 7:
+                i++;
+                return [3 /*break*/, 4];
+            case 8: 
+            // await getLastValidPixelId();
+            // // // const stream =async()=>{
+            // //     // for(let i=0;i<10;i++){
+            // // await getCanvas(1,10000, false);
+            return [4 /*yield*/, getOwnedPixelsColor()];
+            case 9:
                 // await getLastValidPixelId();
-                // // const stream =async()=>{
-                //     // for(let i=0;i<10;i++){
-                // await getCanvas(1,10000, false);
-                //     // }
-                // // } 
-                // // await stream();
-                // await getOwnedPixels(); // worked
+                // // // const stream =async()=>{
+                // //     // for(let i=0;i<10;i++){
+                // // await getCanvas(1,10000, false);
                 _a.sent();
                 pixel_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                rs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
+                rs = [255, 255, 255, 255, 200, 200, 226, 226, 226, 226];
                 gs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
                 bs = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
                 return [4 /*yield*/, changeBatchPixelColor(1, pixel_ids, rs, gs, bs, 1)];
-            case 4:
-                _a.sent();
-                return [4 /*yield*/, getCanvas(1, 10, true)];
-            case 5:
+            case 10:
                 _a.sent();
                 return [2 /*return*/];
         }

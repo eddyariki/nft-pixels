@@ -127,17 +127,6 @@ export class HomeComponent implements OnInit {
                 this.store$.dispatch(loginVisibleActions.loginVisible({ LoginModalIsVisible: true }));
             }
         });
-
-        // this.store$.select(getUserAddress).subscribe(
-        //     id => {
-        //         if (id) {
-        //             this.url = Navigator.goAuction(id);
-        //         } else {
-        //             this.url = '';
-        //         }
-        //     }
-        // );
-        // this.router.navigate([this.url]);
         this.store$.dispatch(pathActions.path({ path: 'auction' }));
     }
 
@@ -147,21 +136,10 @@ export class HomeComponent implements OnInit {
                 this.store$.dispatch(loginVisibleActions.loginVisible({ LoginModalIsVisible: true }));
             }
         });
-
-        // this.store$.select(getUserAddress).subscribe(
-        //     id => {
-        //         if (id){
-        //             this.url = Navigator.goChangeColor(id);
-        //         } else {
-        //             this.url = '';
-        //         }
-        //     }
-        // );
-        // this.router.navigate([this.url]);
         this.store$.dispatch(pathActions.path({ path: 'changeColor' }));
     }
 
-    onHome() {
+    onHome(): void {
         this.store$.dispatch(pathActions.path({ path: 'home' }));
     }
 

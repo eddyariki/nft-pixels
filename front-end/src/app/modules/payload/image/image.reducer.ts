@@ -3,10 +3,12 @@ import { actions, Images } from './image.actions';
 import { SafeUrl } from '@angular/platform-browser';
 
 export interface State {
+    id: string;
     homeImage: SafeUrl;
 }
 
 export const initialState = {
+    id: 'hack',
     homeImage: null,
 };
 

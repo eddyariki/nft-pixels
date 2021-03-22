@@ -9,10 +9,14 @@
                     </div>
                 </div>
             </div>
+            <!-- <div *ngIf="getPath === 'home' ">
+                <app-home-child></app-home-child>
+            </div> -->
             <div *ngIf="getPath === 'auction' ">
+                <app-auction></app-auction>
             </div>
             <div *ngIf="getPath === 'changeColor' ">
-
+                <app-change-color></app-change-color>
             </div>
         </div>
     </div>

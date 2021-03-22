@@ -233,7 +233,7 @@ export default class CanvasContract {
     }
 
     public async getAuctionCurrentBid(canvasId: number, pixelId: number): Promise<number>{
-        const currentBid = await this._getAuctioCurrentBid(canvasId, pixelId);
+        const currentBid = await this._getAuctionCurrentBid(canvasId, pixelId);
         return currentBid;
     }
 
@@ -333,7 +333,12 @@ export default class CanvasContract {
                 Argument.fromNumber(pixelId),
             ]);
             const returnData = qResponse.returnData;
-            return returnData[0].asNumber;
+            if (returnData.length > 0){
+                return returnData[0].asNumber;
+            }else{
+                return 0;
+            }
+
     }
     private async _getAuctionEndingPrice(
         canvasId: number,
@@ -354,7 +359,11 @@ export default class CanvasContract {
                 Argument.fromNumber(pixelId),
             ]);
             const returnData = qResponse.returnData;
-            return returnData[0].asNumber;
+            if (returnData.length > 0){
+                return returnData[0].asNumber;
+            }else{
+                return 0;
+            }
     }
 
     private async _getAuctionOwner(
@@ -365,10 +374,14 @@ export default class CanvasContract {
                 Argument.fromNumber(pixelId),
             ]);
             const returnData = qResponse.returnData;
-            return Address.fromHex(returnData[0].asHex);
+            if (returnData.length > 0){
+                return Address.fromHex(returnData[0].asHex);
+            }else{
+                return null;
+            }
     }
 
-    private async _getAuctioCurrentBid(
+    private async _getAuctionCurrentBid(
         canvasId: number,
         pixelId: number): Promise<number>{
             const qResponse = await this._runQuery('getAuctionCurrentBid', [
@@ -376,7 +389,11 @@ export default class CanvasContract {
                 Argument.fromNumber(pixelId),
             ]);
             const returnData = qResponse.returnData;
-            return returnData[0].asNumber;
+            if (returnData.length > 0){
+                return returnData[0].asNumber;
+            }else{
+                return 0;
+            }
     }
     private async _getAuctionCurrentWinner(
         canvasId: number,
@@ -386,7 +403,13 @@ export default class CanvasContract {
                 Argument.fromNumber(pixelId),
             ]);
             const returnData = qResponse.returnData;
-            return Address.fromHex(returnData[0].asHex);
+            console.log('CURRENT WINNER', qResponse.returnData);
+            const isZero = qResponse.returnData[0].asNumber === 0;
+            if (returnData.length > 0 && !isZero){
+                return Address.fromHex(returnData[0].asHex);
+            }else{
+                return null;
+            }
     }
 
 

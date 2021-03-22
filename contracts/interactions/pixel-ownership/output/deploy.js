@@ -55,6 +55,7 @@ var deploy = function () { return __awaiter(void 0, void 0, void 0, function () 
             case 2:
                 aliceAddressInfo = _a.sent();
                 dataTestWasm = fs_1.readFileSync("../../pixel-ownership/output/pixel-ownership.wasm");
+                console.log(aliceAddressInfo.address);
                 return [4 /*yield*/, elrondjs_1.Contract.deploy(dataTestWasm, {
                         upgradeable: true,
                         readable: true

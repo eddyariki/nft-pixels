@@ -123,7 +123,6 @@ export class ChangeColorChildComponent implements OnInit {
     console.log(this.ownedPixelRGB.length);
     this.loadingStateMessage = '';
   }
-
   async changeColorTransaction(): Promise<void> {
     if (this.updatedPixelsSum > 0) {
 

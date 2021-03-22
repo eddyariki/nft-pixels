@@ -401,18 +401,22 @@ const admin = async () => {
                 Argument.fromNumber(pixelId),
                 Argument.fromBigInt(new BigNumber(1*(10**18))),
                 Argument.fromBigInt(new BigNumber(2*(10**18))),
-                Argument.fromNumber(72000),
+                Argument.fromNumber(92000),
             ],
             gasLimit: new GasLimit(50000000)
         });
-        await alice.sync(proxyProvider);
-        callTransaction.setNonce(alice.nonce);
-        aliceSigner.sign(callTransaction);
-        alice.incrementNonce();
-        let hash = await callTransaction.send(proxyProvider);
-        await callTransaction.awaitExecuted(proxyProvider);
-        const executed = await proxyProvider.getTransactionStatus(hash);
-        console.log(executed);
+        try{
+            await alice.sync(proxyProvider);
+            callTransaction.setNonce(alice.nonce);
+            await aliceSigner.sign(callTransaction);
+            alice.incrementNonce();
+            let hash = await callTransaction.send(proxyProvider);
+            await callTransaction.awaitExecuted(proxyProvider);
+            const executed = await proxyProvider.getTransactionStatus(hash);
+            console.log(executed);
+        }catch (e){
+            console.log(e);
+        }
     }
     const endAuction = async(canvasId:number, pixelId:number) => {
         let callTransaction = smartContract.call({
@@ -467,7 +471,7 @@ const admin = async () => {
                     args: [
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1), 
-                        Argument.fromNumber(25)]
+                        Argument.fromNumber(10000)]
                 });
             qResponse.assertSuccess();
             console.log("Size: ", qResponse.returnData.length);
@@ -631,19 +635,22 @@ const admin = async () => {
             console.log(e);
         }
     }
-    await createCanvas(5, 5);
-    // // await getCanvasDimensions();
-    // // await getCanvasTotalSupply();
-    // await getLastValidPixelId();
-    await mintPixels(1, 25);
+    // await createCanvas(100, 100);
+    // // // await getCanvasDimensions();
+    // // // await getCanvasTotalSupply();
+    // // await getLastValidPixelId();
+    // // await mintPixels(1, 25);
     // for (let i = 0; i < 10; i++) {
     //     await mintPixels(5, 200); //100pixels
     //     await getLastValidPixelId();
     // }
-    await getLastValidPixelId();
-    await createAuction(1,3);
-    await createAuction(1,4);
-    await bidAuction(4, 1.2);
+    // await getLastValidPixelId();
+    // for (let i=0; i< 2000; i++){
+    //     await createAuction(1,Math.floor(Math.random()*10000));
+    // }
+    // await createAuction(1,3);
+    // await createAuction(1,4);
+    // await bidAuction(4, 1.2);
     // console.log("Pixels owned by bob: ");
     // await getOwnedPixelsBob();
     // await endAuctionBob(1,4);
@@ -666,9 +673,9 @@ const admin = async () => {
 
     // await createAuction(1,21);
     // await getAuctionStartingPrice(15);
-    // console.log('Active Auction Count: ')
-    // await getAuctions();
-    // await getOwnedPixels();
+    console.log('Active Auction Count: ')
+    await getAuctions();
+    await getOwnedPixels();
     // await getAuction(21);
     // console.log('BIDDING NOW')
     // await bidAuction(21, 1.2);

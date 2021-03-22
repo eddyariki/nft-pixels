@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
 exports.SMART_CONTRACT_ADDRESS = exports.LOCAL_PROXY = void 0;
-exports.LOCAL_PROXY = 'http://localhost:7950';
-// export const LOCAL_PROXY = 'https://devnet-api.elrond.com'
-exports.SMART_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqfzydqmdw7m2vazsp6u5p95yxz76t2p9rd8ss0zp9ts';
+// export const LOCAL_PROXY = 'http://localhost:7950'
+exports.LOCAL_PROXY = 'https://devnet-api.elrond.com';
+exports.SMART_CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqak8zt22wl2ph4tswtyc39namqx6ysa2sd8ss4xmlj3';

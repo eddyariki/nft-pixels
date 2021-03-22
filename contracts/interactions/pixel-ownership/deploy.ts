@@ -24,7 +24,7 @@ const deploy = async () => {
     const aliceWallet = BasicWallet.fromPemFileString(alicePEM);
     const aliceAddressInfo = await provider.getAddress(aliceWallet.address());
     const dataTestWasm = readFileSync("../../pixel-ownership/output/pixel-ownership.wasm");
-
+    console.log(aliceAddressInfo.address)
     const { contract } = await Contract.deploy(
         dataTestWasm,
         {

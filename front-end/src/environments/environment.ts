@@ -5,8 +5,8 @@
 export const environment = {
   production: false,
   development: true,
-  contractAddress: 'erd1qqqqqqqqqqqqqpgqfzydqmdw7m2vazsp6u5p95yxz76t2p9rd8ss0zp9ts',
-  proxyProviderEndpoint: 'http://localhost:7950' // 'https://devnet-api.elrond.com' // 'http://localhost:7950'
+  contractAddress: 'erd1qqqqqqqqqqqqqpgqak8zt22wl2ph4tswtyc39namqx6ysa2sd8ss4xmlj3',
+  proxyProviderEndpoint: 'https://devnet-api.elrond.com'// 'https://devnet-api.elrond.com' // 'http://localhost:7950'
 };
 
 /*

@@ -3,13 +3,16 @@
     <div class="blockchain-image">
         <div [@pathSelect]="getPath">
             <div *ngIf="getPath === 'home' ">
-                <img *ngIf="!gettingCanvas" [src]="image" alt="">
-                <div *ngIf="gettingCanvas">Getting Canvas From Blockchain...</div>
-                <div *ngIf="!foundContract">Could not get image. Showing mock image.</div>
-                <div *ngIf="foundContract && !gettingCanvas">Showing Image from Smart Contract</div>
+                <div class="sketch-container">
+                    <div id="sketch-holder">
+                        <div class="status" *ngIf="loadingStateMessage && loadingStateMessage !==''">{{loadingStateMessage}}</div>
+                    </div>
+                </div>
             </div>
             <div *ngIf="getPath === 'auction' ">
-                <app-auction></app-auction>
+            </div>
+            <div *ngIf="getPath === 'changeColor' ">
+
             </div>
         </div>
     </div>

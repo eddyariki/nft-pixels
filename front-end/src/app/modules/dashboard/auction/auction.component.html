@@ -7,10 +7,6 @@
     </div>
 
     <button (click)="showLoginModal(true)">login</button>
-
-    <div *ngFor="let pixelId of activeAuctions">
-        <button (click)="selectPixel(pixelId)">{{pixelId}}</button>
-    </div>
     <div *ngIf="currentAuction" class="auction-info">
         <div *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()">You own this auction</div>
         <div>Pixel Id: {{currentAuction.pixelId}}</div>
@@ -18,6 +14,7 @@
         <div>Ending Price: {{currentAuction.endingPrice}} XeGLD</div>
         <div>Current Bid: {{currentAuction.currentBid}} XeGLD</div>
         <div>Deadline: {{currentAuction.deadlineString}}</div>
+        <div *ngIf="currentAuction.currentWinnerAddress">Current Winner: {{currentAuction.currentWinnerAddress}}</div>
     </div>
 
     <form class="auction-form" (submit)="$event.preventDefault()">

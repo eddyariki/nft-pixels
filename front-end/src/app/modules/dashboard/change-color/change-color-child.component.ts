@@ -99,8 +99,9 @@ export class ChangeColorChildComponent implements OnInit {
           // id is owned, so show it as such
           this.ownedPixelRGB.push([r, g, b]);
           this.canvasRGB .push([r, g, b]);
-        }
+        }else{
         this.canvasRGB .push([r, g, b]);
+        }
         ownedPixelId++;
       }
       console.log(this.ownedPixelRGB.length);
@@ -118,7 +119,7 @@ export class ChangeColorChildComponent implements OnInit {
     console.log(this.ownedPixels.length);
     console.log('total pixels owned: ', this.ownedPixels.length);
     this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
-    this.renderCanvas(700, 700, 0.5);
+    this.renderCanvas(500, 500, 0.5);
     this.updatedPixels = this.ownedPixels.map(() => false);
     console.log(this.ownedPixelRGB.length);
     this.loadingStateMessage = '';
@@ -126,7 +127,7 @@ export class ChangeColorChildComponent implements OnInit {
   async changeColorTransaction(): Promise<void> {
     if (this.updatedPixelsSum > 0) {
 
-
+        
       const updatedPixelArray = this.ownedPixels.filter((el, idx) => {
         return this.updatedPixels[idx] === true;
       });
@@ -225,7 +226,7 @@ export class ChangeColorChildComponent implements OnInit {
             }
           } else {
             const rgb = this.canvasRGB[i - 1];
-            pGraphic.noFill(rgb[0], rgb[1], rgb[2], 20);
+            pGraphic.fill(rgb[0], rgb[1], rgb[2], 120);
             pGraphic.stroke(0, 0, 0, 10);
             pGraphic.strokeWeight(strokeWeight);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);

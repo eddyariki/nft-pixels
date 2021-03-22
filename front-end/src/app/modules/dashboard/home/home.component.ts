@@ -13,9 +13,11 @@ import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
 import { actions as pathActions } from '../../payload/path/path.actions';
+import { actions as imageActions } from '../../payload/image/image.actions';
 import * as userActions from 'src/app/model/store/user/actions';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
+import { getHomeImage } from 'src/app/modules/payload/image/image.selectors';
 import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
@@ -39,12 +41,13 @@ export class HomeComponent implements OnInit {
     public path$ = this.store$.select(getPath);
     public path = 'home';
     public image: SafeUrl;
+    public image$: Observable<any> = this.store$.select(getHomeImage);
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
     public gettingCanvas: boolean;
     public foundContract: boolean;
     public url: string;
-    
+
 
     async ngOnInit(): Promise<void> {
         this.store$.dispatch(pathActions.path({path: 'home'}));
@@ -76,6 +79,7 @@ export class HomeComponent implements OnInit {
         const rgbArray = await canvasContract.getCanvas(1);
         this.gettingCanvas = false;
         this.image = this.sanitizer.bypassSecurityTrustUrl(rgbArray.dataURL);
+        this.store$.dispatch(imageActions.imageAdd({homeImage: this.image}));
 
     }
 

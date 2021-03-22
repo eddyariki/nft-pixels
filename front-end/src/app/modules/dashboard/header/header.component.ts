@@ -59,6 +59,12 @@ export class HeaderComponent implements OnInit, OnChanges {
         this.logout.emit();
     }
 
+    get shortUserId(): string {
+        const a = this.user.id.slice(0, 5);
+        const b = this.user.id.slice(-5, -1);
+        return 'ID: ' + a + '.....' + b;
+    }
+
     constructor(private actions$: Actions, private store$: Store<any>) {}
 
 }

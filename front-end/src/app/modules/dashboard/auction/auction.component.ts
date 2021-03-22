@@ -10,22 +10,11 @@ import CanvasContract from 'src/app/contract-interface/canvas-contract';
 import { User } from 'src/app/contract-interface/user';
 import { environment } from 'src/environments/environment';
 import { actions as pathActions } from '../../payload/path/path.actions';
+import { Auction } from 'src/app/model/entity';
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 
-interface Auction {
-  pixelId: number;
-  startingPrice: number;
-  endingPrice: number;
-  deadline: number;
-  deadlineString: string;
-  owner: Address;
-  ownerAddress: string;
-  currentBid: number;
-  currentWinner: Address;
-  currentWinnerAddress: string;
-}
 @Component({
   selector: 'app-auction',
   templateUrl: './auction.component.html',

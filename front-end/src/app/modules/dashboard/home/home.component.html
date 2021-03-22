@@ -3,7 +3,7 @@
     <div class="blockchain-image">
         <div [@pathSelect]="getPath">
             <div *ngIf="getPath === 'home' ">
-                <img *ngIf="!gettingCanvas" [src]="image" alt="">
+                <img *ngIf="!gettingCanvas" [src]="image$ | async" alt="">
                 <div *ngIf="gettingCanvas">Getting Canvas From Blockchain...</div>
                 <div *ngIf="!foundContract">Could not get image. Showing mock image.</div>
                 <div *ngIf="foundContract && !gettingCanvas">Showing Image from Smart Contract</div>

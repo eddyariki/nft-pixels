@@ -59,9 +59,10 @@ export class AuctionComponent implements OnInit {
       this.image = image;
     });
     this.store$.select(getUser).subscribe(user => {
+      console.log(user);
       this.user = User.Login(user.keystoreFile, user.password);
+      console.log(this.user);
     });
-    console.log(this.user.account.address.bech32());
     this.store$.dispatch(pathActions.path({ path: 'auction' }));
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
     this.loadingStateMessage = 'Connecting to Proxy...';
@@ -101,12 +102,14 @@ export class AuctionComponent implements OnInit {
     if (this.activeAuctions.length === 0){
       this.loadingStateMessage = 'No Active Auctions';
     }
-    this.ownedPixels = await this.canvasContract.getOwnedPixels(
-      this.user.account.address,
-      1,
-      1,
-      10000
-    );
+    if (this.user.account){
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(
+        this.user.account.address,
+        1,
+        1,
+        10000
+      );
+    }
     console.log(this.ownedPixels.length);
   }
 

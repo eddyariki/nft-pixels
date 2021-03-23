@@ -22,12 +22,12 @@
             <div *ngIf="currentAuction" class="auction-info">
                 <div *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()">You own this auction
                 </div>
-                <div>Pixel Id: {{currentAuction.pixelId}}</div>
-                <div>Starting Price: {{currentAuction.startingPrice}} XeGLD</div>
-                <div>Ending Price: {{currentAuction.endingPrice}} XeGLD</div>
-                <div>Current Bid: {{currentAuction.currentBid}} XeGLD</div>
-                <div>Deadline: {{currentAuction.deadlineString}}</div>
-                <div *ngIf="currentAuction.currentWinnerAddress">Current Winner: {{currentAuction.currentWinnerAddress}}
+                <div class="auction-spec">Pixel Id: <div class="auction-val">{{currentAuction.pixelId}}</div></div>
+                <div class="auction-spec">Starting Price: <div class="auction-val">{{currentAuction.startingPrice}} XeGLD</div></div>
+                <div class="auction-spec">Ending Price: <div class="auction-val">{{currentAuction.endingPrice}} XeGLD</div></div>
+                <div class="auction-spec">Current Bid: <div class="auction-val">{{currentAuction.currentBid}} XeGLD</div></div>
+                <div class="auction-spec">Deadline: <div class="auction-val">{{currentAuction.deadlineString}}</div></div>
+                <div class="auction-spec" *ngIf="currentAuction.currentWinnerAddress">Current Winner: {{currentAuction.currentWinnerAddress}}
                 </div>
                 <form class="auction-form" (submit)="$event.preventDefault()">
                     <div class="bid-amount-container">
@@ -65,7 +65,13 @@
         </div>
 
         <div *ngIf="transactionModalIsVisible">
-            <app-transaction-modal (cancelEmitter)="showTransactionModal(false)" (confirmEmitter)="confirmTransaction()"
-                [transactionStatus]="loadingStateMessage" [transactionInfo] = "transactionInfo"></app-transaction-modal>
+            <app-transaction-modal 
+            (cancelEmitter)="showTransactionModal(false)" 
+            (confirmEmitter)="confirmTransaction()"
+                [transactionStatus]="loadingStateMessage" 
+                [transactionInfo] = "transactionInfo"
+                [isTransacting] = "transacting"
+                [complete] = "complete"
+                ></app-transaction-modal>
         </div>
     </div>

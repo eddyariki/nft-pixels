@@ -52,6 +52,8 @@ export class AuctionComponent implements OnInit {
   public pCanvas: any;
   public redraw: boolean;
   public transactionInfo: TransactionInfo;
+  public transacting = false;
+  public complete = false;
   async ngOnInit(): Promise<void> {
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
@@ -127,6 +129,11 @@ export class AuctionComponent implements OnInit {
           this.bidAmount
         );
         console.log('Successful transaction created.');
+        this.transactionInfo = {
+          callFunction: 'auctionPixel',
+          value: this.bidAmount,
+        };
+        this.loadingStateMessage = 'Pending Confirmation';
         this.transactionModalIsVisible = true;
       } catch (e) {
         this.transactionModalIsVisible = false;
@@ -150,7 +157,8 @@ export class AuctionComponent implements OnInit {
         );
         console.log('Successful transaction created.');
         this.transactionInfo = {
-          callFunction: 'createAuction'
+          callFunction: 'auctionPixel',
+          value: 0,
         };
         this.loadingStateMessage = 'Pending Confirmation';
         this.transactionModalIsVisible = true;
@@ -187,7 +195,18 @@ export class AuctionComponent implements OnInit {
   }
 
   async confirmTransaction(): Promise<void> {
-    const selection = this.currentAuction.pixelId;
+    let selection;
+    if (this.transacting){
+      return;
+    }else{
+      this.transacting = true;
+      this.complete = false;
+    }
+    if (!this.isSelling){
+      selection = this.currentAuction.pixelId;
+    }else{
+      selection = this.sellId;
+    }
     console.log('Sending transaction');
     this.loadingStateMessage = 'preparing transaction...';
     await NetworkConfig.getDefault().sync(this.proxyProvider);
@@ -208,15 +227,34 @@ export class AuctionComponent implements OnInit {
 
     const executed = await this.proxyProvider.getTransactionStatus(hash);
     this.loadingStateMessage = 'finished!';
+    this.transacting = false;
+    this.complete = true;
     if (executed.isSuccessful()) {
+      this.loadingStateMessage = 'refreshing...';
       this.currentAuction = await this.getAuctionInfo(selection);
+      this.loadingStateMessage = 'getting auction info...';
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(
+        this.user.account.address,
+        1,
+        1,
+        10000
+      );
+      this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       this.loadingStateMessage = '';
     } else {
       this.currentAuction = await this.getAuctionInfo(selection);
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(
+        this.user.account.address,
+        1,
+        1,
+        10000
+      );
+      this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       this.loadingStateMessage = '';
       console.log('done');
     }
-
+    this.transactionModalIsVisible = false;
+    this.redraw = true;
   }
 
   async userLoggedIn(user: User): Promise<void> {
@@ -226,11 +264,17 @@ export class AuctionComponent implements OnInit {
   // dirty solution to codec problem;
   async getAuctionInfo(id: number): Promise<Auction> {
     try {
+      this.loadingStateMessage = 'getting starting price...';
       let startingPrice = await this.canvasContract.getAuctionStartingPrice(1, id);
+      this.loadingStateMessage = 'getting ending price...';
       let endingPrice = await this.canvasContract.getAuctionEndingPrice(1, id);
+      this.loadingStateMessage = 'getting deadline...';
       const deadline = await this.canvasContract.getAuctionDeadline(1, id);
+      this.loadingStateMessage = 'getting owner...';
       const owner: Address = await this.canvasContract.getAuctionOwner(1, id);
+      this.loadingStateMessage = 'getting current bids...';
       let currentBid = await this.canvasContract.getAuctionCurrentBid(1, id);
+      this.loadingStateMessage = 'getting current winner...';
       const currentWinner = await this.canvasContract.getAuctionCurrentWinner(1, id);
       let currentWinnerAddress;
       if (currentWinner) {
@@ -241,7 +285,7 @@ export class AuctionComponent implements OnInit {
       startingPrice /= 10 ** 18;
       endingPrice /= 10 ** 18;
       currentBid /= 10 ** 18;
-      const deadlineString = new Date(deadline * 1000).toString();
+      const deadlineString = new Date(deadline * 1000).toLocaleString();
       const ownerAddress = owner.bech32();
       console.log(ownerAddress);
       const selectedAuctionInfo: Auction = {

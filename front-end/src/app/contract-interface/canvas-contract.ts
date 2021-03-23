@@ -106,7 +106,7 @@ export default class CanvasContract {
                     Argument.fromBigInt(new BigNumber(endingPrice * (10 ** 18))),
                     Argument.fromNumber(endsIn),
                 ],
-                new GasLimit(10000000) // bad approach (hardcoded)
+                new GasLimit(100000000) // bad approach (hardcoded)
             );
             return callTransaction;
             }catch (e){

@@ -6,7 +6,7 @@ const actionCreator = actionCreatorFactory();
 
 export interface Images {
     id: string;
-    homeImage: number[][];
+    homeImage?: number[][];
 }
 
 export const actions = {

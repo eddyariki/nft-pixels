@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit {
                 }
             }
         });
-        this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack', homeImage: ''}));
+        this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack'}));
     }
 
 

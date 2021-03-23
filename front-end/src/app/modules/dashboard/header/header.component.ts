@@ -47,7 +47,6 @@ export class HeaderComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {}
 
     onLogin(): void {
-        console.log(this._loggedIn)
         if (this._loggedIn === true) {
             this.logout.emit();
         }

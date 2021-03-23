@@ -13,11 +13,12 @@ import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
 import { actions as pathActions } from '../../payload/path/path.actions';
-import { actions as imageActions } from '../../payload/image/image.actions';
+import { actions as imagePayloadActions } from '../../payload/image/image.actions';
+import * as imageAction from 'src/app/model/store/image/actions';
 import * as userActions from 'src/app/model/store/user/actions';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
-import { getHomeImage } from 'src/app/modules/payload/image/image.selectors';
+import { getHomeImage, getImage } from 'src/app/modules/payload/image/image.selectors';
 import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
@@ -59,6 +60,7 @@ export class HomeComponent implements OnInit {
     public loadingStateMessage: string;
     public ownedPixels: number[];
     public canvasRGB: number[][];
+    public canvasRGB$: Observable<number[][]> = this.store$.select(getImage);
     public ownedPixelRGB: number[][];
     public canvasDimensions: number[];
     public pCanvas: any;
@@ -110,6 +112,7 @@ export class HomeComponent implements OnInit {
         this.loadingStateMessage = 'Rendering canvas...';
         this.renderCanvas(500, 500, 0.5);
         this.loadingStateMessage = '';
+        this.store$.dispatch(imageAction.add({image: {id: 'hack', homeImage: this.canvasRGB}}));
     }
 
     get getPath(): string {

@@ -15,6 +15,7 @@ import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
+import { actions as imagePayloadActions } from '../payload/image/image.actions';
 import * as userActions from 'src/app/model/store/user/actions';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../payload';
@@ -49,6 +50,7 @@ export class DashboardComponent implements OnInit {
                 }
             }
         });
+        this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack', homeImage: ''}));
     }
 
 

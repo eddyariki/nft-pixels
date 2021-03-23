@@ -2,6 +2,6 @@ import { Auction } from './auction';
 
 export interface Image {
     id: string;
-    homeImage?: any;
+    homeImage?: number[][];
     auctionImage?: Auction;
 }

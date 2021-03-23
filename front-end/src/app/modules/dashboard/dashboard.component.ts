@@ -97,7 +97,7 @@ export class DashboardComponent implements OnInit {
         private actions$: Actions,
         private store$: Store<any>,
         private sanitizer: DomSanitizer,
-        private router: Router,
+        private router: Router
         ) { }
 
 }

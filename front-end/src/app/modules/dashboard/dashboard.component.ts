@@ -24,7 +24,7 @@ import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { Account, UserSigner } from '@elrondnetwork/erdjs';
-
+import crypto from 'crypto-js';
 
 @Component({
     selector: 'app-dashboard',
@@ -43,7 +43,10 @@ export class DashboardComponent implements OnInit {
                 if (!localStorage.getItem('user')) {
                 } else {
                     console.log('hello');
-                    this.userFromStorage = JSON.parse(localStorage.getItem('user'));
+                    const decryptedUser = localStorage.getItem('user');
+                    this.userFromStorage =   JSON.parse(
+                        crypto.AES.decrypt(decryptedUser, 'we love inaba sensei').toString(crypto.enc.Utf8));
+                    console.log(this.userFromStorage);
                     this.store$.dispatch(userActions.add({user: this.userFromStorage}));
                     this.store$.dispatch(payloadActions.payload({
                         userAddress: this.userFromStorage.id, isLoggedIn: true, key: this.userFromStorage.password}));
@@ -80,6 +83,7 @@ export class DashboardComponent implements OnInit {
         // user.keystoreFile 
         console.log(user.password);
         const jsonSigner = JSON.stringify(user.signer);
+        console.log(user.keystoreFile)
         this.store$.dispatch(userActions.add(
             {user: {id: user.id,
                     loggedIn: true,
@@ -94,7 +98,9 @@ export class DashboardComponent implements OnInit {
         this.store$.select(getUser).subscribe(user =>
             {
                 const userJson = JSON.stringify(user);
-                localStorage.setItem('user', userJson);
+                const RSAkey = 'we love inaba sensei';
+                const encryptedJson = crypto.AES.encrypt(userJson, RSAkey).toString();
+                localStorage.setItem('user', encryptedJson);
             });
     }
 

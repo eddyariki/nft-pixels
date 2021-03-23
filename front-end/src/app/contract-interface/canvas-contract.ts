@@ -104,7 +104,7 @@ export default class CanvasContract {
                     Argument.fromNumber(pixelId),
                     Argument.fromBigInt(new BigNumber(startingPrice * (10 ** 18))),
                     Argument.fromBigInt(new BigNumber(endingPrice * (10 ** 18))),
-                    Argument.fromNumber(600),
+                    Argument.fromNumber(endsIn),
                 ],
                 new GasLimit(10000000) // bad approach (hardcoded)
             );

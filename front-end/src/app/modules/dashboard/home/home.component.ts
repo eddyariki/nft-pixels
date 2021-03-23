@@ -117,11 +117,10 @@ export class HomeComponent implements OnInit {
             }
         }
         console.log(this.canvasRGB.length);
-        this.store$.dispatch(imagePayloadActions.imageAdd({ id: 'hack', homeImage: this.canvasRGB }));
         this.loadingStateMessage = 'Rendering canvas...';
         this.renderCanvas(500, 500, 0.5);
         this.loadingStateMessage = '';
-        this.store$.dispatch(imageAction.add({image: {id: 'hack', homeImage: this.canvasRGB}}));
+        this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack', homeImage: this.canvasRGB}));
     }
 
     get getPath(): string {

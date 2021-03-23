@@ -13,6 +13,7 @@ import { Auction } from 'src/app/model/entity';
 import { getHomeImage } from '../../payload/image/image.selectors';
 import { getUser } from '../../payload';
 import { User } from 'src/app/contract-interface/user';
+import { TransactionInfo } from '../transaction-modal/transaction-modal.component';
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 
@@ -36,15 +37,21 @@ export class AuctionComponent implements OnInit {
   private networkConfig: NetworkConfig;
   public activeAuctions: number[];
   public bidAmount = 0;
+  public startingPrice = 0;
+  public endingPrice = 0;
+  public deadlineH = 0;
   public user: User;
+  public isSelling = false;
+  public sellId: number;
   private currentSelection: number;
   // p5js sketch
-  public ownedPixels: number[];
+  public ownedPixels: number[] = [];
   public auctionRGB: number[][];
   public ownedPixelRGB: number[][];
   public canvasDimensions: number[];
   public pCanvas: any;
   public redraw: boolean;
+  public transactionInfo: TransactionInfo;
   async ngOnInit(): Promise<void> {
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
@@ -89,11 +96,23 @@ export class AuctionComponent implements OnInit {
     this.loadingStateMessage = 'Rendering Canvas';
     this.renderCanvas(500, 500, 0.5);
     this.loadingStateMessage = '';
+    if (this.activeAuctions.length === 0){
+      this.loadingStateMessage = 'No Active Auctions';
+    }
+    this.ownedPixels = await this.canvasContract.getOwnedPixels(
+      this.user.account.address,
+      1,
+      1,
+      10000
+    );
+    console.log(this.ownedPixels.length);
   }
 
   constructor(private actions$: Actions, private store$: Store<any>) {
   }
-
+  showTransactionModal(show: boolean): void{
+    this.transactionModalIsVisible = show;
+  }
   showLoginModal(show: boolean): void {
     this.loginModalIsVisible = show;
   }
@@ -117,8 +136,54 @@ export class AuctionComponent implements OnInit {
     }
 
   }
+  async createSellAuctionTransaction(): Promise<void>{
+    if (!this.user) {
+      this.loginModalIsVisible = true;
+    } else {
+      try {
+        this.transactionCallBack = await this.canvasContract.createAuction(
+          1,
+          this.sellId,
+          this.startingPrice,
+          this.endingPrice,
+          this.deadlineH * 60 * 60,
+        );
+        console.log('Successful transaction created.');
+        this.transactionInfo = {
+          callFunction: 'createAuction'
+        };
+        this.loadingStateMessage = 'Pending Confirmation';
+        this.transactionModalIsVisible = true;
+      } catch (e) {
+        this.transactionModalIsVisible = false;
+        console.log('Failed at transacion creation');
+        console.log(e);
+      }
+    }
+  }
+
+  changeMode($event: any): void{
+    if ($event === 'sell' && this.ownedPixels.length > 0){
+      this.isSelling = true;
+      this.redraw = true;
+      this.loadingStateMessage = '';
+    }else{
+      this.isSelling = false;
+      this.redraw = true;
+    }
+  }
   onKey($event: any): void {
-    this.bidAmount = $event.target.value;
+    if (!this.isSelling){
+      this.bidAmount = $event.target.value;
+    }else{
+      if ($event.target.name === 'starting-price'){
+        this.startingPrice = $event.target.value;
+      }else if ($event.target.name === 'ending-price'){
+        this.endingPrice = $event.target.value;
+      }else if ($event.target.name === 'deadline'){
+        this.deadlineH = $event.target.value;
+      }
+    }
   }
 
   async confirmTransaction(): Promise<void> {
@@ -198,22 +263,28 @@ export class AuctionComponent implements OnInit {
   }
 
   async selectPixel(id: number): Promise<void> {
-    if (this.user) {
-      console.log(this.user.account.address.bech32());
-    }
-    try {
-      if (this.activeAuctions.includes(id)) {
-        this.currentSelection = id;
-        this.loadingStateMessage = 'fetching auction information...';
-        this.currentAuction = await this.getAuctionInfo(id);
-        this.loadingStateMessage = '';
+    if (this.isSelling){
+      if (this.ownedPixels.includes(id)){
+        this.sellId = id;
         this.redraw = true;
-      } else {
-        console.log('Pixel not on auction');
+      }else{
+        console.log('You do not own this pixel');
       }
-    } catch (e) {
-      console.log(id);
-      console.log(e);
+    }else{
+      try {
+        if (this.activeAuctions.includes(id)) {
+          this.currentSelection = id;
+          this.loadingStateMessage = 'fetching auction information...';
+          this.currentAuction = await this.getAuctionInfo(id);
+          this.loadingStateMessage = '';
+          this.redraw = true;
+        } else {
+          console.log('Pixel not on auction');
+        }
+      } catch (e) {
+        console.log(id);
+        console.log(e);
+      }
     }
   }
 
@@ -230,35 +301,58 @@ export class AuctionComponent implements OnInit {
         let selectedX;
         let selectedY;
         pGraphic.clear();
-        for (let i = 1; i <= totalPixels; i++) {
-          const rgb = this.auctionRGB[i - 1];
-          pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
-          pGraphic.stroke(0, 0, 0, 10);
-          pGraphic.strokeWeight(strokeWeight);
-          if (this.currentAuction && this.currentAuction.pixelId === i) {
-            console.log('redrew');
+        if (this.isSelling){
+          for (let i = 1; i <= totalPixels; i++){
+            if (this.ownedPixels && this.ownedPixels.includes(i)){
+              const rgb = this.image[i - 1];
+              pGraphic.fill(rgb[0], rgb[1], rgb[2]);
+              pGraphic.stroke(0, 0, 0, 20);
+              pGraphic.strokeWeight(strokeWeight);
+              if (this.sellId && this.sellId === i){
+                pGraphic.stroke(255, 89, 0);
+                pGraphic.strokeWeight(3);
+              }
+            }else{
+              pGraphic.fill(89, 96, 117, 50);
+            }
+            pGraphic.rect(
+              (i - 1) % canvasW * wRatio,
+              Math.floor((i - 1) / canvasW) * hRatio,
+              wRatio,
+              hRatio
+            );
+          }
+        }else{
+          for (let i = 1; i <= totalPixels; i++) {
+            const rgb = this.auctionRGB[i - 1];
+            pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
+            pGraphic.stroke(0, 0, 0, 10);
+            pGraphic.strokeWeight(strokeWeight);
+            if (this.currentAuction && this.currentAuction.pixelId === i) {
+              console.log('redrew');
+              pGraphic.stroke(255, 89, 0);
+              pGraphic.strokeWeight(3);
+              selectedX = (i - 1) % canvasW * wRatio;
+              selectedY = Math.floor((i - 1) / canvasW) * hRatio;
+              selected = true;
+            }
+            pGraphic.rect(
+              (i - 1) % canvasW * wRatio,
+              Math.floor((i - 1) / canvasW) * hRatio,
+              wRatio,
+              hRatio
+            );
+          }
+          if (selected) {
             pGraphic.stroke(255, 89, 0);
             pGraphic.strokeWeight(3);
-            selectedX = (i - 1) % canvasW * wRatio;
-            selectedY = Math.floor((i - 1) / canvasW) * hRatio;
-            selected = true;
+            pGraphic.rect(
+              selectedX,
+              selectedY,
+              wRatio * 1.1,
+              hRatio * 1.1
+            );
           }
-          pGraphic.rect(
-            (i - 1) % canvasW * wRatio,
-            Math.floor((i - 1) / canvasW) * hRatio,
-            wRatio,
-            hRatio
-          );
-        }
-        if (selected) {
-          pGraphic.stroke(255, 89, 0);
-          pGraphic.strokeWeight(3);
-          pGraphic.rect(
-            selectedX,
-            selectedY,
-            wRatio * 1.1,
-            hRatio * 1.1
-          );
         }
       };
 

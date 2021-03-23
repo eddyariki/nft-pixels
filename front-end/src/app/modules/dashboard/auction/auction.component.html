@@ -9,7 +9,14 @@
 
 
     <div class="auction-info-container">
-        <div><button *ngIf="isSelling" (click)="changeMode('buy')">Buy</button><button *ngIf="!isSelling" (click)="changeMode('sell')">Sell</button></div>
+        <div class="sell-buy">
+            <button class="option buy" *ngIf="isSelling" (click)="changeMode('buy')">Buy</button>
+            <button class="option buy-inactive" *ngIf="!isSelling" disabled>Buy</button>
+
+            <button class="option sell-inactive" *ngIf="ownedPixels.length===0" disabled>Can't Sell</button>
+            <button class="option sell" *ngIf="!isSelling && ownedPixels.length!==0" (click)="changeMode('sell')">Sell</button>
+            <button class="option sell-inactive" *ngIf="isSelling" disabled>Sell</button>
+        </div>
 
         <div *ngIf="!isSelling">
             <div *ngIf="currentAuction" class="auction-info">
@@ -31,28 +38,34 @@
                     </div>
                 </form>
             </div>
-            <div *ngIf="isSelling">
-                <div *ngIf="selectedPixel" class="auction-info">
-                    <div>Pixel Id: {{currentAuction.pixelId}}</div>
-                    <form>
-                        <label for="starting-price">Starting Price</label>
-                        <input type="text" name="starting-price" (keyup)="onKey($event)" [(value)]="startingPrice">
-                        
-                        <label for="ending-price">Ending Price</label>
-                        <input type="text" name="ending-price" (keyup)="onKey($event)" [(value)]="endingPrice">
-
-                        <label for="deadline">Deadline (Hours)</label>
-                        <input type="text" name="deadline" (keyup)="onKey($event)" [(value)]="deadlineH">
-                    </form>
-                </div>
+            <div *ngIf="!currentAuction" class="auction-info">
+                Select an active auction.
             </div>
         </div>
 
+        <div *ngIf="isSelling">
+            <div *ngIf="sellId" class="auction-info">
+                <div>Pixel Id: {{sellId}}</div>
+                <form class='sell-form' (submit)="$event.preventDefault()">
+                    <label for="starting-price">Starting Price</label>
+                    <input type="text" name="starting-price" (keyup)="onKey($event)" [(value)]="startingPrice">
+                    
+                    <label for="ending-price">Ending Price</label>
+                    <input type="text" name="ending-price" (keyup)="onKey($event)" [(value)]="endingPrice">
 
+                    <label for="deadline">Deadline (Hours)</label>
+                    <input type="text" name="deadline" (keyup)="onKey($event)" [(value)]="deadlineH">
 
+                    <button type="submit" class="bid-button" (click)="createSellAuctionTransaction()">Place Auction</button>
+                </form>
+            </div>
+        </div>
+        <div class="owned-pixel">
+            所有ピクセル数: {{ownedPixels.length}}
+        </div>
 
         <div *ngIf="transactionModalIsVisible">
             <app-transaction-modal (cancelEmitter)="showTransactionModal(false)" (confirmEmitter)="confirmTransaction()"
-                [transactionStatus]="loadingStateMessage"></app-transaction-modal>
+                [transactionStatus]="loadingStateMessage" [transactionInfo] = "transactionInfo"></app-transaction-modal>
         </div>
     </div>

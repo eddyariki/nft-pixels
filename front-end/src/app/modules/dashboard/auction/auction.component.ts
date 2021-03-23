@@ -13,6 +13,7 @@ import { Auction } from 'src/app/model/entity';
 import { getHomeImage } from '../../payload/image/image.selectors';
 import { getUser } from '../../payload';
 import { User } from 'src/app/contract-interface/user';
+import { TransactionInfo } from '../transaction-modal/transaction-modal.component';
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 
@@ -36,20 +37,21 @@ export class AuctionComponent implements OnInit {
   private networkConfig: NetworkConfig;
   public activeAuctions: number[];
   public bidAmount = 0;
-  public startingPrice;
-  public endingPrice;
-  public deadlineH;
+  public startingPrice = 0;
+  public endingPrice = 0;
+  public deadlineH = 0;
   public user: User;
   public isSelling = false;
   public sellId: number;
   private currentSelection: number;
   // p5js sketch
-  public ownedPixels: number[];
+  public ownedPixels: number[] = [];
   public auctionRGB: number[][];
   public ownedPixelRGB: number[][];
   public canvasDimensions: number[];
   public pCanvas: any;
   public redraw: boolean;
+  public transactionInfo: TransactionInfo;
   async ngOnInit(): Promise<void> {
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
@@ -103,6 +105,7 @@ export class AuctionComponent implements OnInit {
       1,
       10000
     );
+    console.log(this.ownedPixels.length);
   }
 
   constructor(private actions$: Actions, private store$: Store<any>) {
@@ -133,11 +136,40 @@ export class AuctionComponent implements OnInit {
     }
 
   }
+  async createSellAuctionTransaction(): Promise<void>{
+    if (!this.user) {
+      this.loginModalIsVisible = true;
+    } else {
+      try {
+        this.transactionCallBack = await this.canvasContract.createAuction(
+          1,
+          this.sellId,
+          this.startingPrice,
+          this.endingPrice,
+          this.deadlineH * 60 * 60,
+        );
+        console.log('Successful transaction created.');
+        this.transactionInfo = {
+          callFunction: 'createAuction'
+        };
+        this.loadingStateMessage = 'Pending Confirmation';
+        this.transactionModalIsVisible = true;
+      } catch (e) {
+        this.transactionModalIsVisible = false;
+        console.log('Failed at transacion creation');
+        console.log(e);
+      }
+    }
+  }
+
   changeMode($event: any): void{
-    if ($event === 'sell'){
+    if ($event === 'sell' && this.ownedPixels.length > 0){
       this.isSelling = true;
+      this.redraw = true;
+      this.loadingStateMessage = '';
     }else{
       this.isSelling = false;
+      this.redraw = true;
     }
   }
   onKey($event: any): void {
@@ -234,6 +266,7 @@ export class AuctionComponent implements OnInit {
     if (this.isSelling){
       if (this.ownedPixels.includes(id)){
         this.sellId = id;
+        this.redraw = true;
       }else{
         console.log('You do not own this pixel');
       }
@@ -270,7 +303,7 @@ export class AuctionComponent implements OnInit {
         pGraphic.clear();
         if (this.isSelling){
           for (let i = 1; i <= totalPixels; i++){
-            if (this.ownedPixels.includes(i)){
+            if (this.ownedPixels && this.ownedPixels.includes(i)){
               const rgb = this.image[i - 1];
               pGraphic.fill(rgb[0], rgb[1], rgb[2]);
               pGraphic.stroke(0, 0, 0, 20);

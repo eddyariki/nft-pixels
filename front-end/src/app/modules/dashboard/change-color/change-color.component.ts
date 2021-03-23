@@ -23,12 +23,16 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 export class ChangeColorComponent implements OnInit {
 
   public image$: Observable<any> = this.store$.select(getHomeImage);
-  public user$ = this.store$.select(getUser);
+  public user$: Observable<any> = this.store$.select(getUser);
+  public user;
   public image: number[][];
   ngOnInit(): void {
     this.store$.dispatch(pathActions.path({path: 'changeColor'}));
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
+    });
+    this.store$.select(getUser).subscribe(user => {
+      this.user = User.Login(user.keystoreFile, user.password);
     });
   }
 
@@ -37,5 +41,4 @@ export class ChangeColorComponent implements OnInit {
     private store$: Store<any>
   ) { }
 }
-
 

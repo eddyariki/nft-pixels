@@ -12,6 +12,7 @@ import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 // import { User } from 'src/app/model/entity';
 import { ISigner } from '@elrondnetwork/erdjs/out/interface';
 import { BooleanValue } from '@elrondnetwork/erdjs/out/smartcontracts/typesystem';
+import { getHomeImage } from '../../payload/image/image.selectors';
 // import { User } from 'src/app/contract-interface/user';
 // let a: User
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
@@ -22,8 +23,8 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./change-color-child.component.less']
 })
 export class ChangeColorChildComponent implements OnInit {
-  @Input() image;
-  // @Input() user: User;
+  @Input() image: number[][];
+  @Input() user: User;
   public pCanvas: any;
   public foundContract: boolean;
   public ownedPixels: number[];
@@ -41,10 +42,10 @@ export class ChangeColorChildComponent implements OnInit {
   private canvasContract: CanvasContract;
   private proxyProvider: ProxyProvider;
   private networkConfig: NetworkConfig;
-  public user: User;
+
 
   async ngOnInit(): Promise<void> {
-
+    await this.loadContractCanvas();
   }
 
   constructor(
@@ -52,14 +53,14 @@ export class ChangeColorChildComponent implements OnInit {
     private store$: Store<any>
   ) { }
 
-  showLoginModal(show: boolean): void {
-    this.loginModalIsVisible = show;
-  }
-  async userLoggedIn(user: User): Promise<void> {
-    this.user = user;
-    this.loginModalIsVisible = false;
-    await this.loadContractCanvas();
-  }
+  // showLoginModal(show: boolean): void {
+  //   this.loginModalIsVisible = show;
+  // }
+  // async userLoggedIn(user: User): Promise<void> {
+  //   this.user = user;
+  //   this.loginModalIsVisible = false;
+  //   await this.loadContractCanvas();
+  // }
 
   async loadContractCanvas(): Promise<void> {
     this.updatedPixels = [];
@@ -173,6 +174,7 @@ export class ChangeColorChildComponent implements OnInit {
   }
 
   async confirmTransaction(): Promise<void> {
+    this.loadingStateMessage = 'Updating colors. This may time a while';
     console.log('Sending transaction');
 
     await NetworkConfig.getDefault().sync(this.proxyProvider);
@@ -194,6 +196,7 @@ export class ChangeColorChildComponent implements OnInit {
     }
 
     await this.transactionCallBacks[this.transactionCallBacks.length - 1].awaitExecuted(this.proxyProvider);
+    this.loadingStateMessage = 'Done! Reload canvas.';
     console.log('Done');
   }
 
@@ -225,7 +228,7 @@ export class ChangeColorChildComponent implements OnInit {
       const reDraw = () => {
         for (let i = 1; i <= totalPixels; i++) {
           if (this.ownedPixels.includes(i)) {
-            pGraphic.stroke(0, 0, 0, 120);
+            pGraphic.stroke(0, 0, 0, 60);
             pGraphic.strokeWeight(strokeWeight);
             const idx = this.ownedPixels.indexOf(i);
             try {

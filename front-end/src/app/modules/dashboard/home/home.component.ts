@@ -40,11 +40,11 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
     animations: [HomeAnimation],
 })
 export class HomeComponent implements OnInit {
-    @Output() rgbArrayEmitter = new EventEmitter<number[][]>();
     public user$ = this.store$.select(getUser);
     public path$ = this.store$.select(getPath);
     public path = 'home';
     public image$: Observable<any> = this.store$.select(getHomeImage);
+    public image: number[][];
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
     public gettingCanvas: boolean;
@@ -66,7 +66,9 @@ export class HomeComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         this.store$.dispatch(pathActions.path({ path: 'home' }));
-
+        this.store$.select(getHomeImage).subscribe(image => {
+            this.image = image;
+        });
         // Fetch canvas rgb array
         this.loadingStateMessage = 'Connecting to Proxy...';
         this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
@@ -82,21 +84,27 @@ export class HomeComponent implements OnInit {
         try {
             this.loadingStateMessage = 'Getting Canvas...';
             this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
-            const totalPixels = this.canvasDimensions[0] * this.canvasDimensions[1];
-            const pixelArray = await this.canvasContract.getCanvasRGB(1);
-            console.log(pixelArray.length);
-            this.canvasRGB = [];
-            for (let i = 0; i < totalPixels * 3; i += 3) {
-                if (pixelArray.length > i) {
-                    const r = pixelArray[i];
-                    const g = pixelArray[i + 1];
-                    const b = pixelArray[i + 2];
-                    this.canvasRGB.push([r, g, b]);
-                } else {
-                    this.canvasRGB.push([120, 120, 120]);
+            if (this.image) {
+                this.canvasRGB = this.image;
+                console.log(this.canvasRGB.slice(0, 10));
+            } else {
+                const totalPixels = this.canvasDimensions[0] * this.canvasDimensions[1];
+                const pixelArray = await this.canvasContract.getCanvasRGB(1);
+                console.log(pixelArray.length);
+                this.canvasRGB = [];
+                for (let i = 0; i < totalPixels * 3; i += 3) {
+                    if (pixelArray.length > i) {
+                        const r = pixelArray[i];
+                        const g = pixelArray[i + 1];
+                        const b = pixelArray[i + 2];
+                        this.canvasRGB.push([r, g, b]);
+                    } else {
+                        this.canvasRGB.push([120, 120, 120]);
+                    }
                 }
+                console.log(this.canvasRGB.slice(0, 10));
             }
-            console.log(this.canvasRGB.slice(0, 10));
+
         } catch (e) {
             console.log('Failed to get canvas');
             this.loadingStateMessage = 'Failed to fetch canvas.';
@@ -107,7 +115,7 @@ export class HomeComponent implements OnInit {
             }
         }
         console.log(this.canvasRGB.length);
-        this.store$.dispatch(imageActions.imageAdd({id: 'home', homeImage: this.canvasRGB}));
+        this.store$.dispatch(imageActions.imageAdd({ id: 'home', homeImage: this.canvasRGB }));
         this.loadingStateMessage = 'Rendering canvas...';
         this.renderCanvas(500, 500, 0.5);
         this.loadingStateMessage = '';
@@ -163,7 +171,7 @@ export class HomeComponent implements OnInit {
                 for (let i = 1; i <= totalPixels; i++) {
                     const rgb = this.canvasRGB[i - 1];
                     pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
-                    pGraphic.stroke(0, 0, 0, 10);
+                    pGraphic.stroke(0, 0, 0, 5);
                     pGraphic.strokeWeight(strokeWeight);
                     pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
                 }

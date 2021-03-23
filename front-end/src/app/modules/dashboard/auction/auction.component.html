@@ -13,7 +13,8 @@
             <button class="option buy" *ngIf="isSelling" (click)="changeMode('buy')">Buy</button>
             <button class="option buy-inactive" *ngIf="!isSelling" disabled>Buy</button>
 
-            <button class="option sell-inactive" *ngIf="ownedPixels.length===0" disabled>Can't Sell</button>
+            <button class="option sell-inactive" *ngIf="ownedPixels.length===0 && !fetchingOwnedPixels" disabled>You own 0</button>
+            <button class="option sell-inactive" *ngIf="fetchingOwnedPixels" disabled>Loading...</button>
             <button class="option sell" *ngIf="!isSelling && ownedPixels.length!==0" (click)="changeMode('sell')">Sell</button>
             <button class="option sell-inactive" *ngIf="isSelling" disabled>Sell</button>
         </div>
@@ -34,7 +35,9 @@
                         <label for="bid-amount">Bid: </label>
                         <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount"
                             required>
-                        <button type="submit" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
+                         <button class="bid-button-inactive" *ngIf="this.currentAuction.ownerAddress === this.user.account.address.bech32()" disabled>Your Auction</button>
+                            
+                        <button type="submit" *ngIf="this.currentAuction.ownerAddress !== this.user.account.address.bech32()" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
                     </div>
                 </form>
             </div>
@@ -60,10 +63,13 @@
                 </form>
             </div>
         </div>
-        <div class="owned-pixel">
+        <div class="owned-pixel" *ngIf="!fetchingOwnedPixels">
             所有ピクセル数: {{ownedPixels.length}}
         </div>
-
+        <div class="owned-pixel" *ngIf="fetchingOwnedPixels">
+            所有ピクセル数: loading....
+        </div>
+        
         <div *ngIf="transactionModalIsVisible">
             <app-transaction-modal 
             (cancelEmitter)="showTransactionModal(false)" 
@@ -72,6 +78,7 @@
                 [transactionInfo] = "transactionInfo"
                 [isTransacting] = "transacting"
                 [complete] = "complete"
+                [transactionLink] = "transactionLink"
                 ></app-transaction-modal>
         </div>
     </div>

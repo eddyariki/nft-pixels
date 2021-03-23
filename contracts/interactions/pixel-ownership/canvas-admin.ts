@@ -26,7 +26,7 @@ const fs = require('fs');
 const address = SMART_CONTRACT_ADDRESS
 
 const readJSON = async (file: string): Promise<Buffer> => {
-    const jsonString = await fs.readFileSync(`../users/${file}`);
+    const jsonString = await fs.readFileSync(`../keystores/${file}`);
     return JSON.parse(jsonString);
 }
 
@@ -38,17 +38,17 @@ const admin = async () => {
 
     const smartContract = new SmartContract({ address: smartContractAddress });
 
-    const aliceJSON = await readJSON("alice.json");
+    const adminJSON = await readJSON("admin.json");
 
     //Here the password will be input
-    // const aliceWallet = BasicWallet.fromJsonKeyFileString(aliceJSON.toString(), "password");
+    // const adminWallet = BasicWallet.fromJsonKeyFileString(adminJSON.toString(), "password");
 
-    // const aliceAddress = new Address(aliceWallet.address.toString());
-    const aliceSecret = UserWallet.decryptSecretKey(aliceJSON, "password");
-    const aliceWallet = new UserWallet(aliceSecret, "password");
-    const aliceAddress = new Address(aliceSecret.generatePublicKey().toAddress());
-    const alice = new Account(aliceAddress);
-    const aliceSigner = UserSigner.fromWallet(aliceJSON, "password");
+    // const adminAddress = new Address(adminWallet.address.toString());
+    const adminSecret = UserWallet.decryptSecretKey(adminJSON, 'Hackathon01!');
+    const adminWallet = new UserWallet(adminSecret, 'Hackathon01!');
+    const adminAddress = new Address(adminSecret.generatePublicKey().toAddress());
+    const admin = new Account(adminAddress);
+    const adminSigner = UserSigner.fromWallet(adminJSON, 'Hackathon01!');
 
 
     const createCanvas = async (w: number, h: number) => {
@@ -63,7 +63,7 @@ const admin = async () => {
 
         console.log(qAddress.toString());
 
-        console.log(aliceAddress.toString());
+        console.log(adminAddress.toString());
 
         let callTransaction = smartContract.call({
             func: new ContractFunction("createCanvas"),
@@ -71,19 +71,19 @@ const admin = async () => {
             gasLimit: new GasLimit(20000000)
         });
 
-        await alice.sync(proxyProvider);
+        await admin.sync(proxyProvider);
 
-        callTransaction.setNonce(alice.nonce);
+        callTransaction.setNonce(admin.nonce);
 
-        alice.incrementNonce();
+        admin.incrementNonce();
 
-        aliceSigner.sign(callTransaction);
+        adminSigner.sign(callTransaction);
 
         let hashOne = await callTransaction.send(proxyProvider);
 
         await callTransaction.awaitExecuted(proxyProvider);
 
-        await alice.sync(proxyProvider);
+        await admin.sync(proxyProvider);
 
         const txResult = await proxyProvider.getTransaction(hashOne);
         console.log(txResult);
@@ -154,12 +154,12 @@ const admin = async () => {
             callTransactions[i] = callTransaction;
         }
 
-        await alice.sync(proxyProvider);
+        await admin.sync(proxyProvider);
         const sync_then_sign = async (txs: Transaction[]) => {
             for (let i = 0; i < loop; i++) {
-                txs[i].setNonce(alice.nonce);
-                aliceSigner.sign(txs[i]);
-                alice.incrementNonce();
+                txs[i].setNonce(admin.nonce);
+                adminSigner.sign(txs[i]);
+                admin.incrementNonce();
             }
         }
 
@@ -206,14 +206,14 @@ const admin = async () => {
 
     const getOwnedPixels = async () => {
         const func = new ContractFunction("getOwnedPixels");
-        // console.log(alice);
-        // console.log(alice.address);
+        // console.log(admin);
+        // console.log(admin.address);
         try {
             const qResponse = await smartContract.runQuery(
                 proxyProvider,
                 {
                     func,
-                    args: [Argument.fromPubkey(alice.address), 
+                    args: [Argument.fromPubkey(admin.address), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(10000)]
@@ -242,8 +242,8 @@ const admin = async () => {
         const bob = new Account(bobAddress);
         const bobSigner = UserSigner.fromWallet(bobJSON, "password");
         const func = new ContractFunction("getOwnedPixels");
-        // console.log(alice);
-        // console.log(alice.address);
+        // console.log(admin);
+        // console.log(admin.address);
         try {
             const qResponse = await smartContract.runQuery(
                 proxyProvider,
@@ -277,7 +277,7 @@ const admin = async () => {
                 proxyProvider,
                 {
                     func,
-                    args: [Argument.fromPubkey(alice.address), 
+                    args: [Argument.fromPubkey(admin.address), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1), 
                         Argument.fromNumber(1000)]
@@ -317,12 +317,12 @@ const admin = async () => {
             callTransactions[i] = callTransaction;
         }
 
-        await alice.sync(proxyProvider);
+        await admin.sync(proxyProvider);
         const sync_then_sign = async (txs: Transaction[]) => {
             for (let i = 0; i < loop; i++) {
-                txs[i].setNonce(alice.nonce);
-                aliceSigner.sign(txs[i]);
-                alice.incrementNonce();
+                txs[i].setNonce(admin.nonce);
+                adminSigner.sign(txs[i]);
+                admin.incrementNonce();
             }
         }
 
@@ -383,10 +383,10 @@ const admin = async () => {
             ],
             gasLimit: new GasLimit(Math.min(pixel_ids.length * 50000, 100000000))
         });
-        await alice.sync(proxyProvider);
-        callTransaction.setNonce(alice.nonce);
-        aliceSigner.sign(callTransaction);
-        alice.incrementNonce();
+        await admin.sync(proxyProvider);
+        callTransaction.setNonce(admin.nonce);
+        adminSigner.sign(callTransaction);
+        admin.incrementNonce();
         const hash = await callTransaction.send(proxyProvider);
         await callTransaction.awaitExecuted(proxyProvider);
         const executed = await proxyProvider.getTransactionStatus(hash);
@@ -406,10 +406,10 @@ const admin = async () => {
             gasLimit: new GasLimit(50000000)
         });
         try{
-            await alice.sync(proxyProvider);
-            callTransaction.setNonce(alice.nonce);
-            await aliceSigner.sign(callTransaction);
-            alice.incrementNonce();
+            await admin.sync(proxyProvider);
+            callTransaction.setNonce(admin.nonce);
+            await adminSigner.sign(callTransaction);
+            admin.incrementNonce();
             let hash = await callTransaction.send(proxyProvider);
             await callTransaction.awaitExecuted(proxyProvider);
             const executed = await proxyProvider.getTransactionStatus(hash);
@@ -427,10 +427,10 @@ const admin = async () => {
             ],
             gasLimit: new GasLimit(50000000)
         });
-        await alice.sync(proxyProvider);
-        callTransaction.setNonce(alice.nonce);
-        aliceSigner.sign(callTransaction);
-        alice.incrementNonce();
+        await admin.sync(proxyProvider);
+        callTransaction.setNonce(admin.nonce);
+        adminSigner.sign(callTransaction);
+        admin.incrementNonce();
         let hash = await callTransaction.send(proxyProvider);
         await callTransaction.awaitExecuted(proxyProvider);
         const executed = await proxyProvider.getTransactionStatus(hash);
@@ -635,16 +635,16 @@ const admin = async () => {
             console.log(e);
         }
     }
-    // await createCanvas(100, 100);
+    await createCanvas(100, 100);
     // // // await getCanvasDimensions();
     // // // await getCanvasTotalSupply();
     // // await getLastValidPixelId();
     // // await mintPixels(1, 25);
-    // for (let i = 0; i < 10; i++) {
-    //     await mintPixels(5, 200); //100pixels
-    //     await getLastValidPixelId();
-    // }
-    // await getLastValidPixelId();
+    for (let i = 0; i < 10; i++) {
+        await mintPixels(5, 200); //100pixels
+        await getLastValidPixelId();
+    }
+    await getLastValidPixelId();
     // for (let i=0; i< 2000; i++){
     //     await createAuction(1,Math.floor(Math.random()*10000));
     // }

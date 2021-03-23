@@ -40,7 +40,7 @@ var elrondjs_1 = require("elrondjs");
 var fs_1 = require("fs");
 var config_1 = require("./config");
 var deploy = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var provider, config, alicePEM, aliceWallet, aliceAddressInfo, dataTestWasm, contract, deployedContract;
+    var provider, config, alicePEM, meJSON, password, aliceWallet, meWallet, aliceAddressInfo, dataTestWasm, contract, deployedContract;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -50,7 +50,10 @@ var deploy = function () { return __awaiter(void 0, void 0, void 0, function () 
                 config = _a.sent();
                 console.log(config);
                 alicePEM = fs_1.readFileSync("../users/alice.pem", 'utf8');
+                meJSON = fs_1.readFileSync('../keystores/admin.json');
+                password = 'BBsssI1-_(2mmci.';
                 aliceWallet = elrondjs_1.BasicWallet.fromPemFileString(alicePEM);
+                meWallet = elrondjs_1.BasicWallet.fromMnemonic('draw soul juice where great ladder summer again leisure artist relax debate wet gallery window walk hope maple arm silly muffin heavy that action');
                 return [4 /*yield*/, provider.getAddress(aliceWallet.address())];
             case 2:
                 aliceAddressInfo = _a.sent();
@@ -61,8 +64,8 @@ var deploy = function () { return __awaiter(void 0, void 0, void 0, function () 
                         readable: true
                     }, [], {
                         provider: provider,
-                        signer: aliceWallet,
-                        sender: aliceWallet.address(),
+                        signer: meWallet,
+                        sender: meWallet.address(),
                         // gasPrice: 80000000,
                         gasLimit: 105680618
                     })];

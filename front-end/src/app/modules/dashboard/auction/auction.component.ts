@@ -3,15 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { Address, NetworkConfig, ProxyProvider, Transaction } from '@elrondnetwork/erdjs/out';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'node:constants';
 import * as p5 from 'p5';
 import { Observable } from 'rxjs';
 import CanvasContract from 'src/app/contract-interface/canvas-contract';
-import { User } from 'src/app/contract-interface/user';
+// import { User } from 'src/app/contract-interface/user';
 import { environment } from 'src/environments/environment';
 import { actions as pathActions } from '../../payload/path/path.actions';
 import { Auction } from 'src/app/model/entity';
-
+import { getHomeImage } from '../../payload/image/image.selectors';
+import { getUser } from '../../payload';
+import { User } from 'src/app/contract-interface/user';
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 
@@ -21,6 +22,9 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./auction.component.less']
 })
 export class AuctionComponent implements OnInit {
+  public image$: Observable<any> = this.store$.select(getHomeImage);
+  public user$: Observable<any> = this.store$.select(getUser);
+  public image: number[][];
   public transactionModalIsVisible: boolean;
   public sendingTransaction: boolean;
   public loginModalIsVisible: boolean;
@@ -36,12 +40,19 @@ export class AuctionComponent implements OnInit {
   private currentSelection: number;
   // p5js sketch
   public ownedPixels: number[];
-  public canvasRGB: number[][];
+  public auctionRGB: number[][];
   public ownedPixelRGB: number[][];
   public canvasDimensions: number[];
   public pCanvas: any;
   public redraw: boolean;
   async ngOnInit(): Promise<void> {
+    this.store$.select(getHomeImage).subscribe(image => {
+      this.image = image;
+    });
+    this.store$.select(getUser).subscribe(user => {
+      this.user = User.Login(user.keystoreFile, user.password);
+    });
+    console.log(this.user.account.address.bech32());
     this.store$.dispatch(pathActions.path({ path: 'auction' }));
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
     this.loadingStateMessage = 'Connecting to Proxy...';
@@ -55,21 +66,27 @@ export class AuctionComponent implements OnInit {
       this.networkConfig
     );
     try {
+      this.loadingStateMessage = 'Getting Active Auctions';
       this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       console.log('Active auctions', this.activeAuctions);
+      if (this.activeAuctions.length === 0){
+        this.loadingStateMessage = 'No Active Auctions';
+      }
+      this.loadingStateMessage = '';
       // this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
       this.canvasDimensions = [100, 100];
-      this.canvasRGB = [];
+      this.auctionRGB = [];
       for (let i = 1; i <= this.canvasDimensions[0] * this.canvasDimensions[1]; i++) {
         if (this.activeAuctions.includes(i)) {
-          this.canvasRGB.push([0, 255, 47]);
+          this.auctionRGB.push([117, 250, 255]);
         } else {
-          this.canvasRGB.push([192, 196, 196]);
+          this.auctionRGB.push([89, 96, 117, 50]);
         }
       }
     } catch (e) {
       console.log(e);
     }
+    this.loadingStateMessage = 'Rendering Canvas';
     this.renderCanvas(500, 500, 0.5);
     this.loadingStateMessage = '';
   }
@@ -214,7 +231,7 @@ export class AuctionComponent implements OnInit {
         let selectedY;
         pGraphic.clear();
         for (let i = 1; i <= totalPixels; i++) {
-          const rgb = this.canvasRGB[i - 1];
+          const rgb = this.auctionRGB[i - 1];
           pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
           pGraphic.stroke(0, 0, 0, 10);
           pGraphic.strokeWeight(strokeWeight);

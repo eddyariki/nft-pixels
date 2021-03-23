@@ -21,7 +21,10 @@ const deploy = async () => {
     const config = await provider?.getNetworkConfig();
     console.log(config);
     const alicePEM = readFileSync("../users/alice.pem", 'utf8');
+    const meJSON = readFileSync('../keystores/admin.json');
+    const password = 'BBsssI1-_(2mmci.';
     const aliceWallet = BasicWallet.fromPemFileString(alicePEM);
+    const meWallet = BasicWallet.fromMnemonic('draw soul juice where great ladder summer again leisure artist relax debate wet gallery window walk hope maple arm silly muffin heavy that action');
     const aliceAddressInfo = await provider.getAddress(aliceWallet.address());
     const dataTestWasm = readFileSync("../../pixel-ownership/output/pixel-ownership.wasm");
     console.log(aliceAddressInfo.address)
@@ -34,8 +37,8 @@ const deploy = async () => {
         [],
         {
             provider,
-            signer: aliceWallet,
-            sender: aliceWallet.address(),
+            signer: meWallet,
+            sender: meWallet.address(),
             // gasPrice: 80000000,
             gasLimit: 105680618
         })

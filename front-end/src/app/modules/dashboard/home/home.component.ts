@@ -1,8 +1,10 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    EventEmitter,
     OnDestroy,
     OnInit,
+    Output,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, mergeMap, mapTo, switchMap, tap, concat } from 'src/app/lib/rxjs';
@@ -22,8 +24,6 @@ import { getHomeImage, getImage } from 'src/app/modules/payload/image/image.sele
 import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
-import { Navigator } from '../navigator';
-import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
 import { getState as getPath } from '../../payload/path/path.selector';
 import { environment } from 'src/environments/environment';
@@ -31,9 +31,9 @@ import { HomeAnimation } from './animation';
 import * as p5 from 'p5';
 // import { User } from 'src/app/contract-interface/user';
 
-
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
+
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
@@ -44,8 +44,8 @@ export class HomeComponent implements OnInit {
     public user$ = this.store$.select(getUser);
     public path$ = this.store$.select(getPath);
     public path = 'home';
-    public image: SafeUrl;
     public image$: Observable<any> = this.store$.select(getHomeImage);
+    public image: number[][];
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
     public gettingCanvas: boolean;
@@ -68,7 +68,9 @@ export class HomeComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         this.store$.dispatch(pathActions.path({ path: 'home' }));
-
+        this.store$.select(getHomeImage).subscribe(image => {
+            this.image = image;
+        });
         // Fetch canvas rgb array
         this.loadingStateMessage = 'Connecting to Proxy...';
         this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
@@ -84,21 +86,27 @@ export class HomeComponent implements OnInit {
         try {
             this.loadingStateMessage = 'Getting Canvas...';
             this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
-            const totalPixels = this.canvasDimensions[0] * this.canvasDimensions[1];
-            const pixelArray = await this.canvasContract.getCanvasRGB(1);
-            console.log(pixelArray.length);
-            this.canvasRGB = [];
-            for (let i = 0; i < totalPixels * 3; i += 3) {
-                if (pixelArray.length > i) {
-                    const r = pixelArray[i];
-                    const g = pixelArray[i + 1];
-                    const b = pixelArray[i + 2];
-                    this.canvasRGB.push([r, g, b]);
-                } else {
-                    this.canvasRGB.push([120, 120, 120]);
+            if (this.image) {
+                this.canvasRGB = this.image;
+                console.log(this.canvasRGB.slice(0, 10));
+            } else {
+                const totalPixels = this.canvasDimensions[0] * this.canvasDimensions[1];
+                const pixelArray = await this.canvasContract.getCanvasRGB(1);
+                console.log(pixelArray.length);
+                this.canvasRGB = [];
+                for (let i = 0; i < totalPixels * 3; i += 3) {
+                    if (pixelArray.length > i) {
+                        const r = pixelArray[i];
+                        const g = pixelArray[i + 1];
+                        const b = pixelArray[i + 2];
+                        this.canvasRGB.push([r, g, b]);
+                    } else {
+                        this.canvasRGB.push([120, 120, 120]);
+                    }
                 }
+                console.log(this.canvasRGB.slice(0, 10));
             }
-            console.log(this.canvasRGB.slice(0, 10));
+
         } catch (e) {
             console.log('Failed to get canvas');
             this.loadingStateMessage = 'Failed to fetch canvas.';
@@ -109,6 +117,7 @@ export class HomeComponent implements OnInit {
             }
         }
         console.log(this.canvasRGB.length);
+        this.store$.dispatch(imageActions.imageAdd({ id: 'home', homeImage: this.canvasRGB }));
         this.loadingStateMessage = 'Rendering canvas...';
         this.renderCanvas(500, 500, 0.5);
         this.loadingStateMessage = '';
@@ -165,7 +174,7 @@ export class HomeComponent implements OnInit {
                 for (let i = 1; i <= totalPixels; i++) {
                     const rgb = this.canvasRGB[i - 1];
                     pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
-                    pGraphic.stroke(0, 0, 0, 10);
+                    pGraphic.stroke(0, 0, 0, 5);
                     pGraphic.strokeWeight(strokeWeight);
                     pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);
                 }

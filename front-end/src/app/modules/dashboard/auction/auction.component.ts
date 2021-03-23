@@ -43,6 +43,8 @@ export class AuctionComponent implements OnInit {
   public user: User;
   public isSelling = false;
   public sellId: number;
+  public transactionLink: string;
+  public fetchingOwnedPixels: boolean;
   private currentSelection: number;
   // p5js sketch
   public ownedPixels: number[] = [];
@@ -59,9 +61,10 @@ export class AuctionComponent implements OnInit {
       this.image = image;
     });
     this.store$.select(getUser).subscribe(user => {
+      // console.log(user);
       this.user = User.Login(user.keystoreFile, user.password);
+      // console.log(this.user);
     });
-    console.log(this.user.account.address.bech32());
     this.store$.dispatch(pathActions.path({ path: 'auction' }));
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
     this.loadingStateMessage = 'Connecting to Proxy...';
@@ -76,6 +79,7 @@ export class AuctionComponent implements OnInit {
     );
     try {
       this.loadingStateMessage = 'Getting Active Auctions';
+      this.fetchingOwnedPixels = true;
       this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       console.log('Active auctions', this.activeAuctions);
       if (this.activeAuctions.length === 0){
@@ -101,12 +105,15 @@ export class AuctionComponent implements OnInit {
     if (this.activeAuctions.length === 0){
       this.loadingStateMessage = 'No Active Auctions';
     }
-    this.ownedPixels = await this.canvasContract.getOwnedPixels(
-      this.user.account.address,
-      1,
-      1,
-      10000
-    );
+    if (this.user.account){
+      this.ownedPixels = await this.canvasContract.getOwnedPixels(
+        this.user.account.address,
+        1,
+        1,
+        10000
+      );
+    }
+    this.fetchingOwnedPixels = false;
     console.log(this.ownedPixels.length);
   }
 
@@ -114,11 +121,17 @@ export class AuctionComponent implements OnInit {
   }
   showTransactionModal(show: boolean): void{
     this.transactionModalIsVisible = show;
+    if (!show){
+      this.transactionInfo = null;
+      this.complete = false;
+      this.transactionLink = '';
+    }
   }
   showLoginModal(show: boolean): void {
     this.loginModalIsVisible = show;
   }
   async createAuctionTransaction(): Promise<void> {
+    this.transactionLink = '';
     if (!this.user) {
       this.loginModalIsVisible = true;
     } else {
@@ -144,6 +157,7 @@ export class AuctionComponent implements OnInit {
 
   }
   async createSellAuctionTransaction(): Promise<void>{
+    this.transactionLink = '';
     if (!this.user) {
       this.loginModalIsVisible = true;
     } else {
@@ -222,6 +236,7 @@ export class AuctionComponent implements OnInit {
     this.user.account.incrementNonce();
     this.loadingStateMessage = 'sending transaction...';
     const hash = await this.transactionCallBack.send(this.proxyProvider);
+    this.transactionLink = 'https://devnet-explorer.elrond.com/transactions/' + hash.toString();
     this.loadingStateMessage = 'processing transaction...';
     await this.transactionCallBack.awaitExecuted(this.proxyProvider);
 
@@ -253,7 +268,6 @@ export class AuctionComponent implements OnInit {
       this.loadingStateMessage = '';
       console.log('done');
     }
-    this.transactionModalIsVisible = false;
     this.redraw = true;
   }
 
@@ -357,6 +371,8 @@ export class AuctionComponent implements OnInit {
                 pGraphic.strokeWeight(3);
               }
             }else{
+              pGraphic.strokeWeight(strokeWeight);
+              pGraphic.stroke(0, 0, 0, 20);
               pGraphic.fill(89, 96, 117, 50);
             }
             pGraphic.rect(

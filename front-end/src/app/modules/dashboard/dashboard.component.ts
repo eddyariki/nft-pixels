@@ -80,8 +80,8 @@ export class DashboardComponent implements OnInit {
     }
 
     userLoggedIn(user: User): void{
-        // user.keystoreFile 
-        console.log(user.password);
+        // user.keystoreFile
+        // console.log(user.password);
         const jsonSigner = JSON.stringify(user.signer);
         console.log(user.keystoreFile)
         this.store$.dispatch(userActions.add(

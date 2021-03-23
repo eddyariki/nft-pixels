@@ -5,6 +5,7 @@ import { act } from '@ngrx/effects';
 const actionCreator = actionCreatorFactory();
 
 export interface Images {
+    id: string;
     homeImage: SafeUrl | null;
 }
 

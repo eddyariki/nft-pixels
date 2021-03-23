@@ -12,8 +12,8 @@ import {
 export const HomeAnimation = trigger('pathSelect', [
     state('home', style({
         margin: 'auto',
-        height: '500px',
-        width: '70vw',
+        height: '650px',
+        width: '50vw',
         backgroundColor: 'rgb(255, 255, 255)',
         display: 'grid',
         alignItems: 'center',
@@ -43,13 +43,13 @@ export const HomeAnimation = trigger('pathSelect', [
 
     })),
     transition('home <=> auction', [
-        animate('1s')
+        animate('0.5s')
     ]),
     transition('home <=> changeColor', [
-        animate('1s')
+        animate('0.5s')
     ]),
     transition('auction <=> changeColor', [
-        animate('1s')
+        animate('0.5s')
     ])
 
 

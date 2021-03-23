@@ -11,6 +11,7 @@ import { User } from 'src/app/contract-interface/user';
 import { environment } from 'src/environments/environment';
 import { actions as pathActions } from '../../payload/path/path.actions';
 import { Auction } from 'src/app/model/entity';
+import { getHomeImage } from '../../payload/image/image.selectors';
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -21,6 +22,8 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./auction.component.less']
 })
 export class AuctionComponent implements OnInit {
+  public image$: Observable<any> = this.store$.select(getHomeImage);
+  public image: number[][];
   public transactionModalIsVisible: boolean;
   public sendingTransaction: boolean;
   public loginModalIsVisible: boolean;
@@ -36,7 +39,7 @@ export class AuctionComponent implements OnInit {
   private currentSelection: number;
   // p5js sketch
   public ownedPixels: number[];
-  public canvasRGB: number[][];
+  public auctionRGB: number[][];
   public ownedPixelRGB: number[][];
   public canvasDimensions: number[];
   public pCanvas: any;
@@ -59,12 +62,12 @@ export class AuctionComponent implements OnInit {
       console.log('Active auctions', this.activeAuctions);
       // this.canvasDimensions = await this.canvasContract.getCanvasDimensions(1);
       this.canvasDimensions = [100, 100];
-      this.canvasRGB = [];
+      this.auctionRGB = [];
       for (let i = 1; i <= this.canvasDimensions[0] * this.canvasDimensions[1]; i++) {
         if (this.activeAuctions.includes(i)) {
-          this.canvasRGB.push([0, 255, 47]);
+          this.auctionRGB.push([117, 250, 255]);
         } else {
-          this.canvasRGB.push([192, 196, 196]);
+          this.auctionRGB.push([89, 96, 117]);
         }
       }
     } catch (e) {
@@ -214,7 +217,7 @@ export class AuctionComponent implements OnInit {
         let selectedY;
         pGraphic.clear();
         for (let i = 1; i <= totalPixels; i++) {
-          const rgb = this.canvasRGB[i - 1];
+          const rgb = this.auctionRGB[i - 1];
           pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
           pGraphic.stroke(0, 0, 0, 10);
           pGraphic.strokeWeight(strokeWeight);

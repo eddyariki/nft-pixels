@@ -7,12 +7,12 @@ import CanvasContract from 'src/app/contract-interface/canvas-contract';
 import * as p5 from 'p5';
 import { timeInterval, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-// import { User } from 'src/app/contract-interface/user';
+import { User } from 'src/app/contract-interface/user';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../../payload';
 // import { User } from 'src/app/model/entity';
 import { ISigner } from '@elrondnetwork/erdjs/out/interface';
 import { BooleanValue } from '@elrondnetwork/erdjs/out/smartcontracts/typesystem';
-import { User } from 'src/app/contract-interface/user';
+// import { User } from 'src/app/contract-interface/user';
 // let a: User
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -22,6 +22,7 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./change-color-child.component.less']
 })
 export class ChangeColorChildComponent implements OnInit {
+  @Input() image;
   // @Input() user: User;
   public pCanvas: any;
   public foundContract: boolean;
@@ -43,6 +44,7 @@ export class ChangeColorChildComponent implements OnInit {
   public user: User;
 
   async ngOnInit(): Promise<void> {
+
   }
 
   constructor(
@@ -86,24 +88,35 @@ export class ChangeColorChildComponent implements OnInit {
       //   1000,
       //   this.ownedPixels.length
       // );
-      const pixelArray = await this.canvasContract.getCanvasRGB(1);
-      this.canvasRGB = [];
-      // console.log(this.ownedPixelRGB.length);
+      let pixelArray;
       this.ownedPixelRGB = [];
       let ownedPixelId = 1;
-      for (let i = 0; i < pixelArray.length; i += 3) {
-        const r = pixelArray[i];
-        const g = pixelArray[i + 1];
-        const b = pixelArray[i + 2];
-        if (this.ownedPixels.includes(ownedPixelId)){
-          // id is owned, so show it as such
-          this.ownedPixelRGB.push([r, g, b]);
-          this.canvasRGB .push([r, g, b]);
-        }else{
-        this.canvasRGB .push([r, g, b]);
+      if (this.image.length > 0) {
+        this.canvasRGB = this.image;
+        for (let i = 1; i <= this.canvasRGB.length; i++){
+          if (this.ownedPixels.includes(i)){
+            const rgb = this.canvasRGB[i - 1];
+            this.ownedPixelRGB.push([rgb[0], rgb[1], rgb[2]]);
+          }
         }
-        ownedPixelId++;
+      } else {
+        pixelArray = await this.canvasContract.getCanvasRGB(1);
+        this.canvasRGB = [];
+        for (let i = 0; i < pixelArray.length; i += 3) {
+          const r = pixelArray[i];
+          const g = pixelArray[i + 1];
+          const b = pixelArray[i + 2];
+          if (this.ownedPixels.includes(ownedPixelId)) {
+            // id is owned, so show it as such
+            this.ownedPixelRGB.push([r, g, b]);
+            this.canvasRGB.push([r, g, b]);
+          } else {
+            this.canvasRGB.push([r, g, b]);
+          }
+          ownedPixelId++;
+        }
       }
+      // console.log(this.ownedPixelRGB.length)
       console.log(this.ownedPixelRGB.length);
     } catch (e) {
       console.log(e);
@@ -142,7 +155,7 @@ export class ChangeColorChildComponent implements OnInit {
         console.log('Updated pixels: ', updatedPixelArray.length);
         const batches = Math.floor(updatedPixelArray.length / limit) + 1;
         console.log('Batches: ', batches);
-        for (let i = 0; i < batches; i++){
+        for (let i = 0; i < batches; i++) {
           this.transactionCallBacks[i] = await this.canvasContract.changeBatchPixelColor(
             1,
             updatedPixelArray.slice(i * limit, (i + 1) * limit),
@@ -167,7 +180,7 @@ export class ChangeColorChildComponent implements OnInit {
     this.sendingTransaction = true;
     await this.user.account.sync(this.proxyProvider);
 
-    for (const transactionCallBack of this.transactionCallBacks){
+    for (const transactionCallBack of this.transactionCallBacks) {
 
       transactionCallBack.setNonce(this.user.account.nonce);
 
@@ -176,7 +189,7 @@ export class ChangeColorChildComponent implements OnInit {
       this.user.account.incrementNonce();
     }
 
-    for (const transactionCallBack of this.transactionCallBacks){
+    for (const transactionCallBack of this.transactionCallBacks) {
       const hash = await transactionCallBack.send(this.proxyProvider);
     }
 

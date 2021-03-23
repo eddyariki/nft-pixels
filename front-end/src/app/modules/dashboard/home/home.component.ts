@@ -1,8 +1,10 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    EventEmitter,
     OnDestroy,
     OnInit,
+    Output,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, mergeMap, mapTo, switchMap, tap, concat } from 'src/app/lib/rxjs';
@@ -21,8 +23,6 @@ import { getHomeImage } from 'src/app/modules/payload/image/image.selectors';
 import { User } from 'src/app/model/entity';
 import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
-import { Navigator } from '../navigator';
-import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
 import { getState as getPath } from '../../payload/path/path.selector';
 import { environment } from 'src/environments/environment';
@@ -30,9 +30,9 @@ import { HomeAnimation } from './animation';
 import * as p5 from 'p5';
 // import { User } from 'src/app/contract-interface/user';
 
-
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
+
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
@@ -40,10 +40,10 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
     animations: [HomeAnimation],
 })
 export class HomeComponent implements OnInit {
+    @Output() rgbArrayEmitter = new EventEmitter<number[][]>();
     public user$ = this.store$.select(getUser);
     public path$ = this.store$.select(getPath);
     public path = 'home';
-    public image: SafeUrl;
     public image$: Observable<any> = this.store$.select(getHomeImage);
     public loggedIn$: Observable<boolean>;
     public LoginModalIsVisible: boolean;
@@ -107,6 +107,7 @@ export class HomeComponent implements OnInit {
             }
         }
         console.log(this.canvasRGB.length);
+        this.store$.dispatch(imageActions.imageAdd({id: 'home', homeImage: this.canvasRGB}));
         this.loadingStateMessage = 'Rendering canvas...';
         this.renderCanvas(500, 500, 0.5);
         this.loadingStateMessage = '';

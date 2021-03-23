@@ -89,6 +89,9 @@ export class AuctionComponent implements OnInit {
     this.loadingStateMessage = 'Rendering Canvas';
     this.renderCanvas(500, 500, 0.5);
     this.loadingStateMessage = '';
+    if (this.activeAuctions.length === 0){
+      this.loadingStateMessage = 'No Active Auctions';
+    }
   }
 
   constructor(private actions$: Actions, private store$: Store<any>) {

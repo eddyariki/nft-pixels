@@ -15,7 +15,6 @@ import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { actions as payloadActions } from 'src/app/modules/payload/payload.actions';
 import { actions as loginVisibleActions } from 'src/app/modules/payload/login/login-visible.actions';
-import { actions as imagePayloadActions } from '../payload/image/image.actions';
 import * as userActions from 'src/app/model/store/user/actions';
 import { dispatch } from 'rxjs/internal/observable/pairs';
 import { getUser, getIsUserLoggedIn, getUserAddress } from '../payload';
@@ -25,6 +24,7 @@ import { ProxyProvider } from '@elrondnetwork/erdjs/out/proxyProvider';
 import { NetworkConfig } from '@elrondnetwork/erdjs/out';
 import { getLoginModalIsVisible } from 'src/app/modules/payload/login/login-visible.selectors';
 import { Account, UserSigner } from '@elrondnetwork/erdjs';
+
 
 @Component({
     selector: 'app-dashboard',
@@ -50,7 +50,6 @@ export class DashboardComponent implements OnInit {
                 }
             }
         });
-        this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack', homeImage: ''}));
     }
 
 
@@ -78,16 +77,11 @@ export class DashboardComponent implements OnInit {
     }
 
     userLoggedIn(user: User): void{
+        //user.keystoreFile 
         console.log(user.password);
         const jsonSigner = JSON.stringify(user.signer);
         this.store$.dispatch(userActions.add(
-            {user: {id: user.id,
-                    loggedIn: true,
-                    signer: jsonSigner,
-                    account: user.account,
-                    password: user.password,
-                    keystoreFile: user.keystoreFile,
-                }}));
+            {user: {id: user.id,  loggedIn: true, signer: jsonSigner, account: user.account, password: user.password}}));
         this.store$.dispatch(payloadActions.payload({userAddress: user.id, isLoggedIn: true, key: user.password}));
         this.loggedIn$ = this.store$.select(getIsUserLoggedIn);
         this.store$.dispatch(loginVisibleActions.loginVisible({LoginModalIsVisible: false}));

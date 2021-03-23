@@ -1,6 +1,6 @@
 .transaction-container{
     position: fixed;
-    z-index: 10;
+    z-index: 102222;
     top: 0;
     left: 0;
     height: 100vh;
@@ -12,32 +12,37 @@
 }
 
 .transaction-modal{
-    z-index: 20;
-    height: 450px;
-    width:400px;
+    z-index: 2660;
+    // height: 450px;
     border-radius: 25px;
     display: grid;
     grid-template-rows: 1fr 2fr 3fr;
+    row-gap: 20px;
     grid-column: 1fr;
     margin: 25px;
     padding: 25px;
     background: white;
+    border: rgb(188, 199, 212) solid 2px;
 }
-
 
 .transaction-header{
     grid-row: 1;
     color: black;
-    font-size: large;
+    font-size: 24px;
 }
 .transaction-info{
     grid-row: 2;
+    display: grid;
+    row-gap: 5px;
 }
 .button-container{
+    align-self: center;
     grid-row: 3;
+    justify-items: center;
+    align-items: center;
 }
 .transaction-status{
-    grid-row: 1;
+    color:rgb(160, 130, 49)
 }
 .confirm-btn{
     grid-row: 2;
@@ -96,4 +101,11 @@
     background-color: rgb(100, 111, 112);
     color: rgb(255, 255, 255);
 }
-
+.processing{
+    color: rgb(29, 29, 29);
+    background-color: rgb(153, 118, 20);  
+}
+.done{
+    color: rgb(29, 29, 29);
+    background-color: rgb(112, 209, 47);  
+}

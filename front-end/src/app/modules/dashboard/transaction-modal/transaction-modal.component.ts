@@ -15,6 +15,8 @@ export interface TransactionInfo{
 export class TransactionModalComponent implements OnInit {
   @Input() transactionInfo: TransactionInfo;
   @Input() transactionStatus: string;
+  @Input() isTransacting: boolean;
+  @Input() complete: boolean;
   @Output() confirmEmitter = new EventEmitter();
   @Output() cancelEmitter = new EventEmitter();
   constructor() { }

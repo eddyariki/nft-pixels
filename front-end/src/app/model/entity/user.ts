@@ -7,4 +7,5 @@ export interface User {
     loggedIn?: boolean;
     keystoreFile?: string;
     password?: string;
+    keystoreFile?: any;
 }

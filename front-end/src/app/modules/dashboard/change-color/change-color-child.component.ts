@@ -136,7 +136,9 @@ export class ChangeColorChildComponent implements OnInit {
     this.renderCanvas(500, 500, 0.5);
     this.updatedPixels = this.ownedPixels.map(() => false);
     console.log(this.ownedPixelRGB.length);
-    this.loadingStateMessage = '';
+    if (this.ownedPixels.length === 0){
+      this.loadingStateMessage = 'You do not own any pixels';
+    }
   }
   async changeColorTransaction(): Promise<void> {
     if (this.updatedPixelsSum > 0) {

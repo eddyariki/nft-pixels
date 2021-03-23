@@ -126,8 +126,6 @@ export class ChangeColorChildComponent implements OnInit {
   }
   async changeColorTransaction(): Promise<void> {
     if (this.updatedPixelsSum > 0) {
-
-        
       const updatedPixelArray = this.ownedPixels.filter((el, idx) => {
         return this.updatedPixels[idx] === true;
       });

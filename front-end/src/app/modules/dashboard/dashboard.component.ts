@@ -46,7 +46,6 @@ export class DashboardComponent implements OnInit {
                     const decryptedUser = localStorage.getItem('user');
                     this.userFromStorage =   JSON.parse(
                         crypto.AES.decrypt(decryptedUser, 'we love inaba sensei').toString(crypto.enc.Utf8));
-                    console.log(this.userFromStorage);
                     this.store$.dispatch(userActions.add({user: this.userFromStorage}));
                     this.store$.dispatch(payloadActions.payload({
                         userAddress: this.userFromStorage.id, isLoggedIn: true, key: this.userFromStorage.password}));

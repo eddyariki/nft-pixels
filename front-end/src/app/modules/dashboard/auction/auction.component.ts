@@ -36,7 +36,12 @@ export class AuctionComponent implements OnInit {
   private networkConfig: NetworkConfig;
   public activeAuctions: number[];
   public bidAmount = 0;
+  public startingPrice;
+  public endingPrice;
+  public deadlineH;
   public user: User;
+  public isSelling = false;
+  public sellId: number;
   private currentSelection: number;
   // p5js sketch
   public ownedPixels: number[];
@@ -92,11 +97,19 @@ export class AuctionComponent implements OnInit {
     if (this.activeAuctions.length === 0){
       this.loadingStateMessage = 'No Active Auctions';
     }
+    this.ownedPixels = await this.canvasContract.getOwnedPixels(
+      this.user.account.address,
+      1,
+      1,
+      10000
+    );
   }
 
   constructor(private actions$: Actions, private store$: Store<any>) {
   }
-
+  showTransactionModal(show: boolean): void{
+    this.transactionModalIsVisible = show;
+  }
   showLoginModal(show: boolean): void {
     this.loginModalIsVisible = show;
   }
@@ -120,8 +133,25 @@ export class AuctionComponent implements OnInit {
     }
 
   }
+  changeMode($event: any): void{
+    if ($event === 'sell'){
+      this.isSelling = true;
+    }else{
+      this.isSelling = false;
+    }
+  }
   onKey($event: any): void {
-    this.bidAmount = $event.target.value;
+    if (!this.isSelling){
+      this.bidAmount = $event.target.value;
+    }else{
+      if ($event.target.name === 'starting-price'){
+        this.startingPrice = $event.target.value;
+      }else if ($event.target.name === 'ending-price'){
+        this.endingPrice = $event.target.value;
+      }else if ($event.target.name === 'deadline'){
+        this.deadlineH = $event.target.value;
+      }
+    }
   }
 
   async confirmTransaction(): Promise<void> {
@@ -201,22 +231,27 @@ export class AuctionComponent implements OnInit {
   }
 
   async selectPixel(id: number): Promise<void> {
-    if (this.user) {
-      console.log(this.user.account.address.bech32());
-    }
-    try {
-      if (this.activeAuctions.includes(id)) {
-        this.currentSelection = id;
-        this.loadingStateMessage = 'fetching auction information...';
-        this.currentAuction = await this.getAuctionInfo(id);
-        this.loadingStateMessage = '';
-        this.redraw = true;
-      } else {
-        console.log('Pixel not on auction');
+    if (this.isSelling){
+      if (this.ownedPixels.includes(id)){
+        this.sellId = id;
+      }else{
+        console.log('You do not own this pixel');
       }
-    } catch (e) {
-      console.log(id);
-      console.log(e);
+    }else{
+      try {
+        if (this.activeAuctions.includes(id)) {
+          this.currentSelection = id;
+          this.loadingStateMessage = 'fetching auction information...';
+          this.currentAuction = await this.getAuctionInfo(id);
+          this.loadingStateMessage = '';
+          this.redraw = true;
+        } else {
+          console.log('Pixel not on auction');
+        }
+      } catch (e) {
+        console.log(id);
+        console.log(e);
+      }
     }
   }
 
@@ -233,35 +268,58 @@ export class AuctionComponent implements OnInit {
         let selectedX;
         let selectedY;
         pGraphic.clear();
-        for (let i = 1; i <= totalPixels; i++) {
-          const rgb = this.auctionRGB[i - 1];
-          pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
-          pGraphic.stroke(0, 0, 0, 10);
-          pGraphic.strokeWeight(strokeWeight);
-          if (this.currentAuction && this.currentAuction.pixelId === i) {
-            console.log('redrew');
+        if (this.isSelling){
+          for (let i = 1; i <= totalPixels; i++){
+            if (this.ownedPixels.includes(i)){
+              const rgb = this.image[i - 1];
+              pGraphic.fill(rgb[0], rgb[1], rgb[2]);
+              pGraphic.stroke(0, 0, 0, 20);
+              pGraphic.strokeWeight(strokeWeight);
+              if (this.sellId && this.sellId === i){
+                pGraphic.stroke(255, 89, 0);
+                pGraphic.strokeWeight(3);
+              }
+            }else{
+              pGraphic.fill(89, 96, 117, 50);
+            }
+            pGraphic.rect(
+              (i - 1) % canvasW * wRatio,
+              Math.floor((i - 1) / canvasW) * hRatio,
+              wRatio,
+              hRatio
+            );
+          }
+        }else{
+          for (let i = 1; i <= totalPixels; i++) {
+            const rgb = this.auctionRGB[i - 1];
+            pGraphic.fill(rgb[0], rgb[1], rgb[2], 255);
+            pGraphic.stroke(0, 0, 0, 10);
+            pGraphic.strokeWeight(strokeWeight);
+            if (this.currentAuction && this.currentAuction.pixelId === i) {
+              console.log('redrew');
+              pGraphic.stroke(255, 89, 0);
+              pGraphic.strokeWeight(3);
+              selectedX = (i - 1) % canvasW * wRatio;
+              selectedY = Math.floor((i - 1) / canvasW) * hRatio;
+              selected = true;
+            }
+            pGraphic.rect(
+              (i - 1) % canvasW * wRatio,
+              Math.floor((i - 1) / canvasW) * hRatio,
+              wRatio,
+              hRatio
+            );
+          }
+          if (selected) {
             pGraphic.stroke(255, 89, 0);
             pGraphic.strokeWeight(3);
-            selectedX = (i - 1) % canvasW * wRatio;
-            selectedY = Math.floor((i - 1) / canvasW) * hRatio;
-            selected = true;
+            pGraphic.rect(
+              selectedX,
+              selectedY,
+              wRatio * 1.1,
+              hRatio * 1.1
+            );
           }
-          pGraphic.rect(
-            (i - 1) % canvasW * wRatio,
-            Math.floor((i - 1) / canvasW) * hRatio,
-            wRatio,
-            hRatio
-          );
-        }
-        if (selected) {
-          pGraphic.stroke(255, 89, 0);
-          pGraphic.strokeWeight(3);
-          pGraphic.rect(
-            selectedX,
-            selectedY,
-            wRatio * 1.1,
-            hRatio * 1.1
-          );
         }
       };
 

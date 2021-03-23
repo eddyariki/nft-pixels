@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit {
     }
 
     userLoggedIn(user: User): void{
-        //user.keystoreFile 
+        // user.keystoreFile 
         console.log(user.password);
         const jsonSigner = JSON.stringify(user.signer);
         this.store$.dispatch(userActions.add(

@@ -14,18 +14,20 @@ export interface TransactionInfo{
 })
 export class TransactionModalComponent implements OnInit {
   @Input() transactionInfo: TransactionInfo;
+  @Input() transactionStatus: string;
   @Output() confirmEmitter = new EventEmitter();
+  @Output() cancelEmitter = new EventEmitter();
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  confirm(){
+  confirm(): void{
     this.confirmEmitter.emit(true);
   }
 
-  cancel(){
-    this.confirmEmitter.emit(false);
+  cancel(): void{
+    this.cancelEmitter.emit(true);
   }
 
 }

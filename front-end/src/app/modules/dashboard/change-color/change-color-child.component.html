@@ -19,9 +19,11 @@
 </div>
 
 <div *ngIf="showTransactionModal">
-    <button (click)="confirmTransaction()">
-        Send Transaction
-    </button>
+    <app-transaction-modal 
+       (cancelEmitter)="showTransactionModal(false)"
+       (confirmEmitter)="confirmTransaction()"
+       [transactionStatus] = "loadingStateMessage" 
+       ></app-transaction-modal>
 </div>
 
 <div *ngIf="loginModalIsVisible">

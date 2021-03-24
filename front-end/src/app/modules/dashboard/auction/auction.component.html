@@ -58,7 +58,10 @@
 
                     <label for="deadline">Deadline (Hours)</label>
                     <input type="text" name="deadline" (keyup)="onKey($event)" [(value)]="deadlineH">
-
+                    <button 
+                    *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()"
+                    class="createEndTransaction"
+                    >End Auction</button>
                     <button type="submit" class="bid-button" (click)="createSellAuctionTransaction()">Place Auction</button>
                 </form>
             </div>

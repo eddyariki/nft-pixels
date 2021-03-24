@@ -158,32 +158,47 @@ export class AuctionComponent implements OnInit {
   }
   async createSellAuctionTransaction(): Promise<void>{
     this.transactionLink = '';
-    if (!this.user) {
-      this.loginModalIsVisible = true;
-    } else {
-      try {
-        this.transactionCallBack = await this.canvasContract.createAuction(
-          1,
-          this.sellId,
-          this.startingPrice,
-          this.endingPrice,
-          this.deadlineH * 60 * 60,
-        );
-        console.log('Successful transaction created.');
-        this.transactionInfo = {
-          callFunction: 'auctionPixel',
-          value: 0,
-        };
-        this.loadingStateMessage = 'Pending Confirmation';
-        this.transactionModalIsVisible = true;
-      } catch (e) {
-        this.transactionModalIsVisible = false;
-        console.log('Failed at transacion creation');
-        console.log(e);
-      }
+    try {
+      this.transactionCallBack = await this.canvasContract.createAuction(
+        1,
+        this.sellId,
+        this.startingPrice,
+        this.endingPrice,
+        this.deadlineH * 60 * 60,
+      );
+      console.log('Successful transaction created.');
+      this.transactionInfo = {
+        callFunction: 'auctionPixel',
+        value: 0,
+      };
+      this.loadingStateMessage = 'Pending Confirmation';
+      this.transactionModalIsVisible = true;
+    } catch (e) {
+      this.transactionModalIsVisible = false;
+      console.log('Failed at transacion creation');
+      console.log(e);
     }
   }
-
+  async createEndAuction(): Promise<void>{
+    this.transactionLink = '';
+    try {
+      this.transactionCallBack = await this.canvasContract.endAuction(
+        1,
+        this.sellId,
+      );
+      console.log('Successful transaction created.');
+      this.transactionInfo = {
+        callFunction: 'endAuction',
+        value: 0,
+      };
+      this.loadingStateMessage = 'Pending Confirmation';
+      this.transactionModalIsVisible = true;
+    } catch (e) {
+      this.transactionModalIsVisible = false;
+      console.log('Failed at transacion creation');
+      console.log(e);
+    }
+  }
   changeMode($event: any): void{
     if ($event === 'sell' && this.ownedPixels.length > 0){
       this.isSelling = true;

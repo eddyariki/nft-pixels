@@ -35,9 +35,21 @@
                         <label for="bid-amount">Bid: </label>
                         <input type="text" (keyup)="onKey($event)" [(value)]="bidAmount" placeholder="enter bid amount"
                             required>
-                         <button class="bid-button-inactive" *ngIf="this.currentAuction.ownerAddress === this.user.account.address.bech32()" disabled>Your Auction</button>
-                            
-                        <button type="submit" *ngIf="this.currentAuction.ownerAddress !== this.user.account.address.bech32()" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
+                         <button class="bid-button-inactive" *ngIf="currentAuction.ownerAddress === user.account.address.bech32()" disabled>Your Auction</button>
+
+                         <button 
+                         *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()"
+                         (click)="createEndTransaction()"
+                         class="bid-button-end"
+                         >End Auction</button>
+                         
+                         <button 
+                         *ngIf="user && currentAuction.currentWinnerAddress === user.account.address.bech32() && currentAuction.deadline <= timeNow"
+                         (click)="createEndTransaction()"
+                         class="bid-button-emd"
+                         >End Auction</button>
+
+                        <button type="submit" *ngIf="currentAuction.ownerAddress !== user.account.address.bech32()" class="bid-button" (click)="createAuctionTransaction()">Place Bid</button>
                     </div>
                 </form>
             </div>
@@ -58,10 +70,7 @@
 
                     <label for="deadline">Deadline (Hours)</label>
                     <input type="text" name="deadline" (keyup)="onKey($event)" [(value)]="deadlineH">
-                    <button 
-                    *ngIf="user && currentAuction.ownerAddress === user.account.address.bech32()"
-                    class="createEndTransaction"
-                    >End Auction</button>
+                    
                     <button type="submit" class="bid-button" (click)="createSellAuctionTransaction()">Place Auction</button>
                 </form>
             </div>

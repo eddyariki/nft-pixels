@@ -528,7 +528,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                         erdjs_1.Argument.fromNumber(canvasId),
                                         erdjs_1.Argument.fromNumber(pixelId),
                                         erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](1 * (Math.pow(10, 18)))),
-                                        erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](2 * (Math.pow(10, 18)))),
+                                        erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](4 * (Math.pow(10, 18)))),
                                         erdjs_1.Argument.fromNumber(92000),
                                     ],
                                     gasLimit: new erdjs_1.GasLimit(50000000)
@@ -898,61 +898,19 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
-                return [4 /*yield*/, createCanvas(100, 100)];
-            case 3:
-                _a.sent();
                 i = 0;
-                _a.label = 4;
+                _a.label = 3;
+            case 3:
+                if (!(i < 10000)) return [3 /*break*/, 6];
+                if (!(i / 100 > 30 && i % 100 > 60 && i / 100 < 70)) return [3 /*break*/, 5];
+                return [4 /*yield*/, createAuction(1, i)];
             case 4:
-                if (!(i < 10)) return [3 /*break*/, 8];
-                return [4 /*yield*/, mintPixels(5, 200)];
+                _a.sent();
+                _a.label = 5;
             case 5:
-                _a.sent(); //100pixels
-                return [4 /*yield*/, getLastValidPixelId()];
-            case 6:
-                _a.sent();
-                _a.label = 7;
-            case 7:
                 i++;
-                return [3 /*break*/, 4];
-            case 8: return [4 /*yield*/, getLastValidPixelId()];
-            case 9:
-                _a.sent();
-                // for (let i=0; i< 2000; i++){
-                //     await createAuction(1,Math.floor(Math.random()*10000));
-                // }
-                // await createAuction(1,3);
-                // await createAuction(1,4);
-                // await bidAuction(4, 1.2);
-                // console.log("Pixels owned by bob: ");
-                // await getOwnedPixelsBob();
-                // await endAuctionBob(1,4);
-                // console.log("Pixels owned by bob: ");
-                // await getOwnedPixelsBob();
-                // console.log('STARTING PRICE');
-                // await getAuctionStartingPrice(4);
-                // console.log('ENDING PRICE');
-                // await getAuctionEndingPrice(4);
-                // console.log('DEADLINE');
-                // await getAuctionDeadline(4);
-                // console.log('OWNER');
-                // await getAuctionOwner(4);
-                // console.log('CURRENT BID');
-                // await getAuctionCurrentBid(4);
-                // console.log('CURRENT WINNER');
-                // await getAuctionCurrentWinner(4);
-                // await createAuction(1,6);
-                // await createAuction(1,7);
-                // await createAuction(1,21);
-                // await getAuctionStartingPrice(15);
-                console.log('Active Auction Count: ');
-                return [4 /*yield*/, getAuctions()];
-            case 10:
-                _a.sent();
-                return [4 /*yield*/, getOwnedPixels()];
-            case 11:
-                _a.sent();
-                return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 6: return [2 /*return*/];
         }
     });
 }); };

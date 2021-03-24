@@ -400,7 +400,7 @@ const admin = async () => {
                 Argument.fromNumber(canvasId),
                 Argument.fromNumber(pixelId),
                 Argument.fromBigInt(new BigNumber(1*(10**18))),
-                Argument.fromBigInt(new BigNumber(2*(10**18))),
+                Argument.fromBigInt(new BigNumber(4*(10**18))),
                 Argument.fromNumber(92000),
             ],
             gasLimit: new GasLimit(50000000)
@@ -635,16 +635,16 @@ const admin = async () => {
             console.log(e);
         }
     }
-    await createCanvas(100, 100);
-    // // // await getCanvasDimensions();
-    // // // await getCanvasTotalSupply();
-    // // await getLastValidPixelId();
-    // // await mintPixels(1, 25);
-    for (let i = 0; i < 10; i++) {
-        await mintPixels(5, 200); //100pixels
-        await getLastValidPixelId();
-    }
-    await getLastValidPixelId();
+    // await createCanvas(100, 100);
+    // // // // await getCanvasDimensions();
+    // // // // await getCanvasTotalSupply();
+    // // // await getLastValidPixelId();
+    // // // await mintPixels(1, 25);
+    // for (let i = 0; i < 10; i++) {
+    //     await mintPixels(5, 200); //100pixels
+    //     await getLastValidPixelId();
+    // }
+    // await getLastValidPixelId();
     // for (let i=0; i< 2000; i++){
     //     await createAuction(1,Math.floor(Math.random()*10000));
     // }
@@ -669,13 +669,19 @@ const admin = async () => {
     // console.log('CURRENT WINNER');
     // await getAuctionCurrentWinner(4);
     // await createAuction(1,6);
-    // await createAuction(1,7);
+    for(let i = 0; i< 10000; i++){
+        if(i/100 > 30 && i%100>60 && i/100 < 70){
+            await createAuction(1,i);
+        }
+
+    }
+
 
     // await createAuction(1,21);
     // await getAuctionStartingPrice(15);
-    console.log('Active Auction Count: ')
-    await getAuctions();
-    await getOwnedPixels();
+    // console.log('Active Auction Count: ')
+    // await getAuctions();
+    // await getOwnedPixels();
     // await getAuction(21);
     // console.log('BIDDING NOW')
     // await bidAuction(21, 1.2);

@@ -56,6 +56,7 @@ export class AuctionComponent implements OnInit {
   public transactionInfo: TransactionInfo;
   public transacting = false;
   public complete = false;
+  public timeNow;
   async ngOnInit(): Promise<void> {
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
@@ -158,32 +159,47 @@ export class AuctionComponent implements OnInit {
   }
   async createSellAuctionTransaction(): Promise<void>{
     this.transactionLink = '';
-    if (!this.user) {
-      this.loginModalIsVisible = true;
-    } else {
-      try {
-        this.transactionCallBack = await this.canvasContract.createAuction(
-          1,
-          this.sellId,
-          this.startingPrice,
-          this.endingPrice,
-          this.deadlineH * 60 * 60,
-        );
-        console.log('Successful transaction created.');
-        this.transactionInfo = {
-          callFunction: 'auctionPixel',
-          value: 0,
-        };
-        this.loadingStateMessage = 'Pending Confirmation';
-        this.transactionModalIsVisible = true;
-      } catch (e) {
-        this.transactionModalIsVisible = false;
-        console.log('Failed at transacion creation');
-        console.log(e);
-      }
+    try {
+      this.transactionCallBack = await this.canvasContract.createAuction(
+        1,
+        this.sellId,
+        this.startingPrice,
+        this.endingPrice,
+        this.deadlineH * 60 * 60,
+      );
+      console.log('Successful transaction created.');
+      this.transactionInfo = {
+        callFunction: 'auctionPixel',
+        value: 0,
+      };
+      this.loadingStateMessage = 'Pending Confirmation';
+      this.transactionModalIsVisible = true;
+    } catch (e) {
+      this.transactionModalIsVisible = false;
+      console.log('Failed at transacion creation');
+      console.log(e);
     }
   }
-
+  async createEndTransaction(): Promise<void>{
+    this.transactionLink = '';
+    try {
+      this.transactionCallBack = await this.canvasContract.endAuction(
+        1,
+        this.currentAuction.pixelId
+      );
+      console.log('Successful transaction created.');
+      this.transactionInfo = {
+        callFunction: 'endAuction',
+        value: 0,
+      };
+      this.loadingStateMessage = 'Pending Confirmation';
+      this.transactionModalIsVisible = true;
+    } catch (e) {
+      this.transactionModalIsVisible = false;
+      console.log('Failed at transacion creation');
+      console.log(e);
+    }
+  }
   changeMode($event: any): void{
     if ($event === 'sell' && this.ownedPixels.length > 0){
       this.isSelling = true;
@@ -257,7 +273,9 @@ export class AuctionComponent implements OnInit {
       this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       this.loadingStateMessage = '';
     } else {
+      this.loadingStateMessage = 'refreshing...';
       this.currentAuction = await this.getAuctionInfo(selection);
+      this.loadingStateMessage = 'getting auction info...';
       this.ownedPixels = await this.canvasContract.getOwnedPixels(
         this.user.account.address,
         1,
@@ -266,7 +284,6 @@ export class AuctionComponent implements OnInit {
       );
       this.activeAuctions = await this.canvasContract.getAuctions(1, 1, 10000);
       this.loadingStateMessage = '';
-      console.log('done');
     }
     this.redraw = true;
   }
@@ -277,6 +294,7 @@ export class AuctionComponent implements OnInit {
   }
   // dirty solution to codec problem;
   async getAuctionInfo(id: number): Promise<Auction> {
+    this.timeNow = Date.now() / 1000;
     try {
       this.loadingStateMessage = 'getting starting price...';
       let startingPrice = await this.canvasContract.getAuctionStartingPrice(1, id);

@@ -139,6 +139,7 @@ export class ChangeColorChildComponent implements OnInit {
     if (this.ownedPixels.length === 0){
       this.loadingStateMessage = 'You do not own any pixels';
     }
+    this.loadingStateMessage = '';
   }
   async changeColorTransaction(): Promise<void> {
     if (this.updatedPixelsSum > 0) {

@@ -6,27 +6,38 @@
             <div class="page-header" *ngIf="getPath === 'auction'">Auction</div>
             <div class="page-header" *ngIf="getPath === 'changeColor'">Color</div>
             <div *ngIf="getPath === 'home' ">
-              <app-home-child></app-home-child>
+              <app-home-child (loadingEmitter) = "onLoading($event)"></app-home-child>
             </div>
             <!-- <div *ngIf="getPath === 'home' ">
                 <app-home-child></app-home-child>
             </div> -->
             <div *ngIf="getPath === 'auction' ">
-                <app-auction></app-auction>
+                <app-auction (loadingEmitter) = "onLoading($event)"></app-auction>
             </div>
             <div *ngIf="getPath === 'changeColor' ">
-                <app-change-color></app-change-color>
+                <app-change-color (loadingEmitter) = "onLoading($event)"></app-change-color>
             </div>
         </div>
     </div>
     <div class="buttons">
-        <button class="action" (click)="onAuction()" *ngIf="getPath !== 'auction' ">
+        <button class="action" (click)="onAuction()" *ngIf="getPath !== 'auction'  && !isLoading">
             ピクセルを購入する
         </button>
-        <button class="action" (click)="onHome()" *ngIf="getPath !== 'home' ">
+        <button class="action" (click)="onHome()" *ngIf="getPath !== 'home' && !isLoading">
             ホームに戻る
         </button>
-        <button class="action" (click)="onChangeColor()" *ngIf="getPath !== 'changeColor' ">
+        <button class="action" (click)="onChangeColor()" *ngIf="getPath !== 'changeColor' && !isLoading">
+            色を変更する
+        </button>
+
+
+        <button class="action loading"  *ngIf="getPath !== 'auction' && isLoading">
+            ピクセルを購入する
+        </button>
+        <button class="action loading" *ngIf="getPath !== 'home' && isLoading">
+            ホームに戻る
+        </button>
+        <button class="action loading"  *ngIf="getPath !== 'changeColor' && isLoading">
             色を変更する
         </button>
     </div>

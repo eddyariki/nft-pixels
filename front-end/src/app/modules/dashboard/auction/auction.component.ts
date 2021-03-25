@@ -1,5 +1,5 @@
 import { ThrowStmt } from '@angular/compiler';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Address, NetworkConfig, ProxyProvider, Transaction } from '@elrondnetwork/erdjs/out';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
@@ -23,6 +23,7 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./auction.component.less']
 })
 export class AuctionComponent implements OnInit {
+  @Output() loadingEmitter = new EventEmitter();
   public image$: Observable<any> = this.store$.select(getHomeImage);
   public user$: Observable<any> = this.store$.select(getUser);
   public image: number[][];
@@ -58,6 +59,7 @@ export class AuctionComponent implements OnInit {
   public complete = false;
   public timeNow;
   async ngOnInit(): Promise<void> {
+    this.loadingEmitter.emit(true);
     this.store$.select(getHomeImage).subscribe(image => {
       this.image = image;
     });
@@ -107,6 +109,7 @@ export class AuctionComponent implements OnInit {
       this.loadingStateMessage = 'No Active Auctions';
     }
     if (this.user.account){
+      this.loadingStateMessage = 'Fetching Owned Pixels...';
       this.ownedPixels = await this.canvasContract.getOwnedPixels(
         this.user.account.address,
         1,
@@ -115,7 +118,9 @@ export class AuctionComponent implements OnInit {
       );
     }
     this.fetchingOwnedPixels = false;
+    this.loadingStateMessage = '';
     console.log(this.ownedPixels.length);
+    this.loadingEmitter.emit(false);
   }
 
   constructor(private actions$: Actions, private store$: Store<any>) {

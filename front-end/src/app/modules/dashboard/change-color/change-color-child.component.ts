@@ -328,6 +328,7 @@ export class ChangeColorChildComponent implements OnInit {
         }
       };
       s.mouseClicked = () => {
+        if (this.transactionModalIsVisible) { return; }
         if (s.mouseX <= 0 || s.mouseY <= 0) { return; }
         if (img) {
           // image is setting color

@@ -54,7 +54,7 @@ var readJSON = function (file) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var proxyProvider, smartContractAddress, smartContract, adminJSON, adminSecret, adminWallet, adminAddress, admin, adminSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsBob, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, createAuction, endAuction, endAuctionBob, getAuctions, bidAuction, getAuctionStartingPrice, getAuctionEndingPrice, getAuctionDeadline, getAuctionOwner, getAuctionCurrentBid, getAuctionCurrentWinner, i;
+    var proxyProvider, smartContractAddress, smartContract, adminJSON, adminSecret, adminWallet, adminAddress, admin, adminSigner, createCanvas, getCanvasDimensions, getLastValidPixelId, getCanvasTotalSupply, mintPixels, getCanvas, getOwnedPixels, getOwnedPixelsBob, getOwnedPixelsColor, changePixelColor, createU8VectorArgument, createU32VectorArgument, createU64VectorArgument, changeBatchPixelColor, createAuction, endAuction, endAuctionBob, getAuctions, bidAuction, getAuctionStartingPrice, getAuctionEndingPrice, getAuctionDeadline, getAuctionOwner, getAuctionCurrentBid, getAuctionCurrentWinner, i, i, i;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -529,7 +529,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                         erdjs_1.Argument.fromNumber(pixelId),
                                         erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](1 * (Math.pow(10, 18)))),
                                         erdjs_1.Argument.fromBigInt(new bignumber_js_1["default"](4 * (Math.pow(10, 18)))),
-                                        erdjs_1.Argument.fromNumber(92000),
+                                        erdjs_1.Argument.fromNumber(902000),
                                     ],
                                     gasLimit: new erdjs_1.GasLimit(50000000)
                                 });
@@ -564,10 +564,11 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                     });
                 }); };
                 endAuction = function (canvasId, pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var callTransaction, hash, executed;
+                    var callTransaction, hash, executed, e_5;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
+                                _a.trys.push([0, 5, , 6]);
                                 callTransaction = smartContract.call({
                                     func: new erdjs_1.ContractFunction("endAuction"),
                                     args: [
@@ -592,7 +593,12 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                             case 4:
                                 executed = _a.sent();
                                 console.log(executed);
-                                return [2 /*return*/];
+                                return [3 /*break*/, 6];
+                            case 5:
+                                e_5 = _a.sent();
+                                console.log("failed");
+                                return [3 /*break*/, 6];
+                            case 6: return [2 /*return*/];
                         }
                     });
                 }); };
@@ -637,7 +643,7 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                     });
                 }); };
                 getAuctions = function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, e_5;
+                    var func, qResponse, i, e_6;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -662,8 +668,8 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 }
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_5 = _a.sent();
-                                console.log(e_5);
+                                e_6 = _a.sent();
+                                console.log(e_6);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
@@ -711,42 +717,11 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                     });
                 }); };
                 getAuctionStartingPrice = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, e_6;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                func = new erdjs_1.ContractFunction("getAuctionStartingPrice");
-                                _a.label = 1;
-                            case 1:
-                                _a.trys.push([1, 3, , 4]);
-                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
-                                        func: func,
-                                        args: [
-                                            erdjs_1.Argument.fromNumber(1),
-                                            erdjs_1.Argument.fromNumber(pixelId),
-                                        ]
-                                    })];
-                            case 2:
-                                qResponse = _a.sent();
-                                qResponse.assertSuccess();
-                                for (i = 0; i < qResponse.returnData.length; i++) {
-                                    console.log(qResponse.returnData[i].asNumber);
-                                }
-                                return [3 /*break*/, 4];
-                            case 3:
-                                e_6 = _a.sent();
-                                console.log(e_6);
-                                return [3 /*break*/, 4];
-                            case 4: return [2 /*return*/];
-                        }
-                    });
-                }); };
-                getAuctionEndingPrice = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
                     var func, qResponse, i, e_7;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                func = new erdjs_1.ContractFunction("getAuctionEndingPrice");
+                                func = new erdjs_1.ContractFunction("getAuctionStartingPrice");
                                 _a.label = 1;
                             case 1:
                                 _a.trys.push([1, 3, , 4]);
@@ -772,8 +747,39 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                         }
                     });
                 }); };
+                getAuctionEndingPrice = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
+                    var func, qResponse, i, e_8;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                func = new erdjs_1.ContractFunction("getAuctionEndingPrice");
+                                _a.label = 1;
+                            case 1:
+                                _a.trys.push([1, 3, , 4]);
+                                return [4 /*yield*/, smartContract.runQuery(proxyProvider, {
+                                        func: func,
+                                        args: [
+                                            erdjs_1.Argument.fromNumber(1),
+                                            erdjs_1.Argument.fromNumber(pixelId),
+                                        ]
+                                    })];
+                            case 2:
+                                qResponse = _a.sent();
+                                qResponse.assertSuccess();
+                                for (i = 0; i < qResponse.returnData.length; i++) {
+                                    console.log(qResponse.returnData[i].asNumber);
+                                }
+                                return [3 /*break*/, 4];
+                            case 3:
+                                e_8 = _a.sent();
+                                console.log(e_8);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); };
                 getAuctionDeadline = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, unix, dateTime, e_8;
+                    var func, qResponse, i, unix, dateTime, e_9;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -798,15 +804,15 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 }
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_8 = _a.sent();
-                                console.log(e_8);
+                                e_9 = _a.sent();
+                                console.log(e_9);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
                     });
                 }); };
                 getAuctionOwner = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, e_9;
+                    var func, qResponse, i, e_10;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -829,15 +835,15 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 }
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_9 = _a.sent();
-                                console.log(e_9);
+                                e_10 = _a.sent();
+                                console.log(e_10);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
                     });
                 }); };
                 getAuctionCurrentBid = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, e_10;
+                    var func, qResponse, i, e_11;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -860,15 +866,15 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 }
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_10 = _a.sent();
-                                console.log(e_10);
+                                e_11 = _a.sent();
+                                console.log(e_11);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
                     });
                 }); };
                 getAuctionCurrentWinner = function (pixelId) { return __awaiter(void 0, void 0, void 0, function () {
-                    var func, qResponse, i, e_11;
+                    var func, qResponse, i, e_12;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -891,8 +897,8 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
                                 }
                                 return [3 /*break*/, 4];
                             case 3:
-                                e_11 = _a.sent();
-                                console.log(e_11);
+                                e_12 = _a.sent();
+                                console.log(e_12);
                                 return [3 /*break*/, 4];
                             case 4: return [2 /*return*/];
                         }
@@ -903,14 +909,40 @@ var admin = function () { return __awaiter(void 0, void 0, void 0, function () {
             case 3:
                 if (!(i < 10000)) return [3 /*break*/, 6];
                 if (!(i / 100 > 30 && i % 100 > 60 && i / 100 < 70)) return [3 /*break*/, 5];
-                return [4 /*yield*/, createAuction(1, i)];
+                return [4 /*yield*/, endAuction(1, i)];
             case 4:
                 _a.sent();
                 _a.label = 5;
             case 5:
                 i++;
                 return [3 /*break*/, 3];
-            case 6: return [2 /*return*/];
+            case 6:
+                i = 0;
+                _a.label = 7;
+            case 7:
+                if (!(i < 10000)) return [3 /*break*/, 10];
+                if (!(i / 100 > 30 && i % 100 > 60 && i / 100 < 70)) return [3 /*break*/, 9];
+                return [4 /*yield*/, createAuction(1, i)];
+            case 8:
+                _a.sent();
+                _a.label = 9;
+            case 9:
+                i++;
+                return [3 /*break*/, 7];
+            case 10:
+                i = 0;
+                _a.label = 11;
+            case 11:
+                if (!(i < 10000)) return [3 /*break*/, 14];
+                if (!(i / 100 > 80 && i % 100 < 20)) return [3 /*break*/, 13];
+                return [4 /*yield*/, createAuction(1, i)];
+            case 12:
+                _a.sent();
+                _a.label = 13;
+            case 13:
+                i++;
+                return [3 /*break*/, 11];
+            case 14: return [2 /*return*/];
         }
     });
 }); };

@@ -401,7 +401,7 @@ const admin = async () => {
                 Argument.fromNumber(pixelId),
                 Argument.fromBigInt(new BigNumber(1*(10**18))),
                 Argument.fromBigInt(new BigNumber(4*(10**18))),
-                Argument.fromNumber(92000),
+                Argument.fromNumber(902000),
             ],
             gasLimit: new GasLimit(50000000)
         });
@@ -415,26 +415,31 @@ const admin = async () => {
             const executed = await proxyProvider.getTransactionStatus(hash);
             console.log(executed);
         }catch (e){
-            console.log(e);
+            console.log("failed")
         }
     }
     const endAuction = async(canvasId:number, pixelId:number) => {
-        let callTransaction = smartContract.call({
-            func: new ContractFunction("endAuction"),
-            args: [
-                Argument.fromNumber(canvasId),
-                Argument.fromNumber(pixelId),
-            ],
-            gasLimit: new GasLimit(50000000)
-        });
-        await admin.sync(proxyProvider);
-        callTransaction.setNonce(admin.nonce);
-        adminSigner.sign(callTransaction);
-        admin.incrementNonce();
-        let hash = await callTransaction.send(proxyProvider);
-        await callTransaction.awaitExecuted(proxyProvider);
-        const executed = await proxyProvider.getTransactionStatus(hash);
-        console.log(executed);
+        try{
+            let callTransaction = smartContract.call({
+                func: new ContractFunction("endAuction"),
+                args: [
+                    Argument.fromNumber(canvasId),
+                    Argument.fromNumber(pixelId),
+                ],
+                gasLimit: new GasLimit(50000000)
+            });
+            await admin.sync(proxyProvider);
+            callTransaction.setNonce(admin.nonce);
+            adminSigner.sign(callTransaction);
+            admin.incrementNonce();
+            let hash = await callTransaction.send(proxyProvider);
+            await callTransaction.awaitExecuted(proxyProvider);
+            const executed = await proxyProvider.getTransactionStatus(hash);
+            console.log(executed);
+        }catch(e){
+            console.log("failed")
+        }
+        
     }
     const endAuctionBob = async(canvasId:number, pixelId:number) => {
         const bobJSON = await readJSON("bob.json");
@@ -671,12 +676,20 @@ const admin = async () => {
     // await createAuction(1,6);
     for(let i = 0; i< 10000; i++){
         if(i/100 > 30 && i%100>60 && i/100 < 70){
+            await endAuction(1,i);
+        }
+    }
+    for(let i = 0; i< 10000; i++){
+        if(i/100 > 30 && i%100>60 && i/100 < 70){
             await createAuction(1,i);
         }
-
     }
 
-
+    for(let i = 0; i< 10000; i++){
+        if(i/100 > 80 && i%100<20){
+            await createAuction(1,i);
+        }
+    }
     // await createAuction(1,21);
     // await getAuctionStartingPrice(15);
     // console.log('Active Auction Count: ')

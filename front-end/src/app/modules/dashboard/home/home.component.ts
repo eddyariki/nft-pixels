@@ -28,8 +28,7 @@ import { actions as loginVisibleActions } from 'src/app/modules/payload/login/lo
 import { getState as getPath } from '../../payload/path/path.selector';
 import { environment } from 'src/environments/environment';
 import { HomeAnimation } from './animation';
-import * as p5 from 'p5';
-// import { User } from 'src/app/contract-interface/user';
+
 
 const CANVAS_CONTRACT_ADDRESS = environment.contractAddress;
 const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
@@ -58,6 +57,7 @@ export class HomeComponent implements OnInit {
     private networkConfig: NetworkConfig;
     // p5js sketch
 
+    public isLoading: boolean;
     ngOnInit(): void{
     }
 
@@ -91,7 +91,10 @@ export class HomeComponent implements OnInit {
     onHome(): void {
         this.store$.dispatch(pathActions.path({ path: 'home' }));
     }
-
+    onLoading(isLoading: boolean): void{
+        console.log(isLoading);
+        this.isLoading = isLoading;
+    }
     get isHome(): boolean {
         if (this.path === 'home') {
             return true;

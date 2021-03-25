@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Account, Address, NetworkConfig, ProxyProvider, Transaction, TransactionOnNetwork, UserSigner } from '@elrondnetwork/erdjs/out';
 import { Actions } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
@@ -26,6 +26,7 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
 export class ChangeColorChildComponent implements OnInit {
   @Input() image: number[][];
   @Input() user: User;
+  @Output() loadingEmitter = new EventEmitter();
   public pCanvas: any;
   public foundContract: boolean;
   public ownedPixels: number[];
@@ -60,6 +61,7 @@ export class ChangeColorChildComponent implements OnInit {
   ) { }
 
   async loadContractCanvas(): Promise<void> {
+    this.loadingEmitter.emit(true);
     this.updatedPixels = [];
     this.loadingStateMessage = 'Connecting to Proxy...';
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 100000);
@@ -129,6 +131,7 @@ export class ChangeColorChildComponent implements OnInit {
       this.loadingStateMessage = 'You do not own any pixels';
     }
     this.loadingStateMessage = '';
+    this.loadingEmitter.emit(false);
   }
   showTransactionModal($event): void{
     this.transactionModalIsVisible = $event;

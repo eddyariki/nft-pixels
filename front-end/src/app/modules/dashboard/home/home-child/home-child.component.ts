@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Store } from 'src/app/lib/ngrx';
 import { Observable } from 'src/app/lib/rxjs';
 import { getState as getPath } from 'src/app/modules/payload/path/path.selector';
@@ -19,7 +19,8 @@ const PROXY_PROVIDER_ENDPOINT = environment.proxyProviderEndpoint;
   styleUrls: ['./home-child.component.less']
 })
 export class HomeChildComponent implements OnInit {
-  public user$ = this.store$.select(getUser);
+    @Output() loadingEmitter = new EventEmitter();
+    public user$ = this.store$.select(getUser);
     public path$ = this.store$.select(getPath);
     public path = 'home';
     public image$: Observable<any> = this.store$.select(getHomeImage);
@@ -49,6 +50,7 @@ export class HomeChildComponent implements OnInit {
     ) { }
 
     async ngOnInit(): Promise<void> {
+      this.loadingEmitter.emit(true);
       this.store$.dispatch(pathActions.path({ path: 'home' }));
       this.store$.select(getHomeImage).subscribe(image => {
           this.image = image;
@@ -103,6 +105,7 @@ export class HomeChildComponent implements OnInit {
       this.renderCanvas(500, 500, 0.5);
       this.loadingStateMessage = '';
       this.store$.dispatch(imagePayloadActions.imageAdd({id: 'hack', homeImage: this.canvasRGB}));
+      this.loadingEmitter.emit(false);
   }
   renderCanvas(width: number, height: number, strokeWeight: number): void {
     const sketch = s => {

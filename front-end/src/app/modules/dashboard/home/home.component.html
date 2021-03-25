@@ -2,6 +2,9 @@
 <div class="home">
     <div class="blockchain-image">
         <div [@pathSelect]="getPath">
+            <div class="page-header" *ngIf="getPath === 'home'">Home</div>
+            <div class="page-header" *ngIf="getPath === 'auction'">Auction</div>
+            <div class="page-header" *ngIf="getPath === 'changeColor'">Color</div>
             <div *ngIf="getPath === 'home' ">
               <app-home-child></app-home-child>
             </div>

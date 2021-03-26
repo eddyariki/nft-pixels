@@ -256,7 +256,7 @@ export class ChangeColorChildComponent implements OnInit {
         pGraphic.clear();
         for (let i = 1; i <= totalPixels; i++) {
           if (this.ownedPixels.includes(i)) {
-            pGraphic.stroke(0, 0, 0, 60);
+            pGraphic.stroke(0, 0, 0, 90);
             pGraphic.strokeWeight(strokeWeight);
             const idx = this.ownedPixels.indexOf(i);
             try {
@@ -268,7 +268,7 @@ export class ChangeColorChildComponent implements OnInit {
             }
           } else {
             const rgb = this.canvasRGB[i - 1];
-            pGraphic.fill(rgb[0], rgb[1], rgb[2], 120);
+            pGraphic.fill(rgb[0], rgb[1], rgb[2], 20);
             pGraphic.stroke(0, 0, 0, 10);
             pGraphic.strokeWeight(strokeWeight);
             pGraphic.rect((i - 1) % canvasW * wRatio, Math.floor((i - 1) / canvasW) * hRatio, wRatio, hRatio);

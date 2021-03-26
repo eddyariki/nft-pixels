@@ -46,6 +46,7 @@ export class AuctionComponent implements OnInit {
   public sellId: number;
   public transactionLink: string;
   public fetchingOwnedPixels: boolean;
+  public userBalance: number;
   private currentSelection: number;
   // p5js sketch
   public ownedPixels: number[] = [];
@@ -72,6 +73,7 @@ export class AuctionComponent implements OnInit {
     this.proxyProvider = new ProxyProvider(PROXY_PROVIDER_ENDPOINT, 1000000);
     this.loadingStateMessage = 'Connecting to Proxy...';
     await NetworkConfig.getDefault().sync(this.proxyProvider);
+    await this.updateBalance();
     this.loadingStateMessage = 'Syncing network...';
     this.loadingStateMessage = 'Getting Contract...';
     this.canvasContract = new CanvasContract(
@@ -135,6 +137,10 @@ export class AuctionComponent implements OnInit {
   }
   showLoginModal(show: boolean): void {
     this.loginModalIsVisible = show;
+  }
+  async updateBalance(): Promise<void>{
+    await this.user.account.sync(this.proxyProvider);
+    this.userBalance = Math.round(parseFloat(this.user.account.balance.toDenominated())*1000)/1000;
   }
   async createAuctionTransaction(): Promise<void> {
     this.transactionLink = '';
@@ -263,6 +269,7 @@ export class AuctionComponent implements OnInit {
 
     const executed = await this.proxyProvider.getTransactionStatus(hash);
     this.loadingStateMessage = 'finished!';
+    await this.updateBalance();
     this.transacting = false;
     this.complete = true;
     if (executed.isSuccessful()) {

@@ -84,6 +84,9 @@
         <div class="owned-pixel" *ngIf="!fetchingOwnedPixels">
             所有ピクセル数: {{ownedPixels.length}}
         </div>
+        <div class="balance" *ngIf="userBalance">
+            バランス: {{userBalance}} XeGLD
+        </div>
         <div class="owned-pixel" *ngIf="fetchingOwnedPixels">
             所有ピクセル数: loading....
         </div>
